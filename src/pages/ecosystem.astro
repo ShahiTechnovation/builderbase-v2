@@ -1,0 +1,38 @@
+---
+/**
+ * /ecosystem — the network Builder Base distributes through.
+ *
+ * Organisations come only from stated, public, verified relationships (see
+ * src/data/ecosystem.ts). With nothing verified the page says so plainly and
+ * stays out of search; it never falls back to a list of names.
+ */
+import EcosystemInteractions from '../components/ecosystem/EcosystemInteractions.astro';
+import EcosystemRecords from '../components/ecosystem/EcosystemRecords.astro';
+import EcosystemStage from '../components/ecosystem/EcosystemStage.astro';
+import PartnerInvitation from '../components/ecosystem/PartnerInvitation.astro';
+import { getEcosystemContent } from '../data/content';
+import { ecosystemPage } from '../data/ecosystem-page';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { organizations, artifacts, years, fixture } = await getEcosystemContent();
+const { seo, invitation } = ecosystemPage;
+const hasOrganizations = organizations.length > 0;
+---
+
+<BaseLayout title={seo.title} description={seo.description} surface="dark" noindex={fixture || !hasOrganizations}>
+	<EcosystemStage organizations={organizations} artifacts={artifacts} years={years} fixture={fixture} />
+	{
+		hasOrganizations && (
+			<>
+				<EcosystemRecords organizations={organizations} fixture={fixture} />
+				<EcosystemInteractions />
+			</>
+		)
+	}
+	<PartnerInvitation
+		marker={invitation.marker}
+		quote={invitation.quote}
+		answer={invitation.answer}
+		action={invitation.action}
+	/>
+</BaseLayout>

@@ -18,6 +18,7 @@ export const site = {
 		'Builder Base is the distribution layer for builders in India — connecting builders with the products, technology ecosystems and opportunities worth building on.',
 	locale: 'en_IN',
 	themeColor: '#f4f2ed',
+	themeColorDark: '#0e0f13',
 } as const;
 
 /**

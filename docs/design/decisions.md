@@ -62,6 +62,26 @@ Round 2 Option B → Round 2 Stitch project → original references → old repo
   note says "Rooms we're hosting, supporting, and watching." (approved copy).
   Showing only Builder Base–managed events would need the Luma API (Luma Plus).
 
+## Ecosystem (2026-10-07, awaiting review)
+
+- New route `/ecosystem`; full rule and architecture in
+  [ecosystem.md](./ecosystem.md). Homepage untouched (byte-identical build).
+- Eligibility goes through the truth gate: an organisation appears only via a
+  Public + Verified + recognised relationship whose linked work (if any) is a
+  public activation. Venue is contextual — credited in the work, never placed
+  in the sphere on its own.
+- CSS 3D transforms + rAF + pointer events; no Three.js/GSAP/Lenis. Desktop
+  sphere, mobile orbit, static composition under reduced motion.
+- Refinement: organisations are physical planes (real per-plane perspective,
+  outward-facing with a stable lean, edge-on at the rim, shaded by depth and
+  angle, proportions from the name). No connector lines or sphere geometry.
+  Renderer takes *artifacts*, so verified imagery can add planes later; only
+  identity artifacts exist now.
+- Development data only through `ECOSYSTEM_FIXTURE=1` under `astro dev`
+  (fictional organisations, badged on the page).
+- ESLint: explicit `role="list"` is now allowed on `ol` as well as `ul`, for
+  the same VoiceOver reason.
+
 ## Content architecture
 
 - Components receive props; pages call `src/data/content.ts`; adapters live in

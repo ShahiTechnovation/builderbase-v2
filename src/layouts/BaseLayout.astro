@@ -13,9 +13,11 @@ interface Props {
 	noindex?: boolean;
 	/** Social card photo. Defaults to the curated hero photograph. */
 	ogPhoto?: ResolvedPhoto;
+	/** Page-wide surface. `dark` puts the header and page on near-black (e.g. /ecosystem). */
+	surface?: 'dark';
 }
 
-const { title, description, noindex } = Astro.props;
+const { title, description, noindex, surface } = Astro.props;
 const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 ---
 
@@ -35,12 +37,12 @@ const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 		<Font cssVariable="--font-schibsted-grotesk" preload />
 		<Font cssVariable="--font-fragment-mono" />
 		<SeoHead title={title} description={description} noindex={noindex} ogPhoto={ogPhoto} />
-		<meta name="theme-color" content={site.themeColor} />
+		<meta name="theme-color" content={surface === 'dark' ? site.themeColorDark : site.themeColor} />
 		<meta name="color-scheme" content="light" />
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="sitemap" href="/sitemap-index.xml" />
 	</head>
-	<body>
+	<body class:list={{ 'surface-dark': surface === 'dark' }}>
 		<a class="skip-link" href="#main">Skip to content</a>
 		<SiteHeader />
 		<main id="main" tabindex="-1">

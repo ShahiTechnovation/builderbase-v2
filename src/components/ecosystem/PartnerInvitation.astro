@@ -1,0 +1,127 @@
+---
+/**
+ * "WE WANT TO GROW IN INDIA." — the conclusion of the ecosystem: you've seen
+ * the network; now enter it. A change of pace back onto paper.
+ *
+ * Motion (existing system only):
+ *  - HANDOFF (≥640px): following the near-black stage, a paper sheet opens
+ *    from inset to full width as the section enters (same as Next rooms).
+ *  - REVEAL: the quote rises out of its mask; the answer and action settle.
+ * Reduced motion / no JS: the static paper section.
+ */
+import type { NavLink } from '../../data/site';
+import ActionLink from '../ActionLink.astro';
+
+interface Props {
+	marker: string;
+	quote: string;
+	answer: string;
+	action: NavLink;
+}
+
+const { marker, quote, answer, action } = Astro.props;
+---
+
+<section class="eco-invite" aria-labelledby="eco-invite-title" data-scroll="enter">
+	<div class="eco-invite__inner page-width">
+		<p class="eco-invite__marker meta" data-reveal="meta">{marker}</p>
+		<h2 class="eco-invite__quote" id="eco-invite-title" data-reveal="mask">
+			<span class="reveal-mask"><span class="reveal-mask__line">“{quote}”</span></span>
+		</h2>
+		<p class="eco-invite__answer" data-reveal="meta" style="--i: 2">{answer}</p>
+		<div class="eco-invite__action" data-reveal="meta" style="--i: 3">
+			<ActionLink link={action} variant="primary" />
+		</div>
+	</div>
+</section>
+
+<style>
+	.eco-invite {
+		--color-bg: var(--paper);
+		--color-text: var(--ink);
+		--color-text-muted: var(--grey-600);
+		--color-rule: var(--paper-300);
+		--color-focus: var(--builder-indigo);
+
+		position: relative;
+		isolation: isolate;
+		padding-block: var(--section-space) clamp(5rem, 3rem + 8vw, 10rem);
+		background-color: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	.eco-invite__inner {
+		padding-inline: var(--gutter);
+	}
+
+	.eco-invite__marker {
+		color: var(--color-text-muted);
+	}
+
+	.eco-invite__quote {
+		max-width: 12ch;
+		margin-top: var(--space-5);
+		margin-inline-start: -0.06em; /* optical: hang the opening quote */
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+		text-wrap: balance;
+	}
+
+	.eco-invite__answer {
+		margin-top: var(--space-6);
+		font-size: var(--text-lead);
+		font-weight: var(--weight-semibold);
+		letter-spacing: var(--tracking-lead);
+		line-height: var(--leading-tight);
+	}
+
+	.eco-invite__action {
+		margin-top: var(--space-7);
+	}
+
+	@media (min-width: 64rem) {
+		.eco-invite__inner {
+			display: grid;
+			grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+			column-gap: var(--space-9);
+			align-items: end;
+		}
+
+		.eco-invite__marker,
+		.eco-invite__quote {
+			grid-column: 1 / -1;
+		}
+
+		.eco-invite__answer {
+			grid-column: 1;
+		}
+
+		.eco-invite__action {
+			grid-column: 2;
+			justify-self: end;
+			margin-top: 0;
+		}
+	}
+
+	/* ── HANDOFF from the near-black stage (≥640px, motion only) ───── */
+	@media (min-width: 40rem) {
+		:global(:root.motion) .eco-invite {
+			background-color: var(--near-black);
+		}
+
+		:global(:root.motion) .eco-invite::before {
+			--shut: calc(1 - var(--scroll-enter));
+			--corner: calc(var(--radius-frame) * var(--shut));
+
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			background-color: var(--paper);
+			clip-path: inset(0 calc(var(--gutter-photo) * var(--shut)) 0 round var(--corner) var(--corner) 0 0);
+		}
+	}
+</style>

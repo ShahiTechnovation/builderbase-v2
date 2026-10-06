@@ -1,0 +1,487 @@
+---
+/**
+ * One record per organisation: who they are, how they relate to Builder Base
+ * (the exact relationship kinds — never flattened to "Partner") and the
+ * verified work behind it, each piece crediting everyone stated on it.
+ *
+ * Rendered inside a <dialog>. With JavaScript it is the focused detail plate
+ * (one record at a time; see src/scripts/ecosystem-detail.ts). Without it the
+ * dialog is shown in the page as an archive the index links jump to.
+ */
+import { Image } from 'astro:assets';
+import type { ResolvedEcosystemOrganization } from '../../data/content';
+import { activationCountLabel } from '../../data/ecosystem';
+import { ecosystemPage } from '../../data/ecosystem-page';
+
+interface Props {
+	organizations: ResolvedEcosystemOrganization[];
+	fixture: boolean;
+}
+
+const { organizations, fixture } = Astro.props;
+const copy = ecosystemPage.detail;
+const pad = (value: number) => String(value).padStart(2, '0');
+---
+
+<dialog class="eco-detail" aria-label={copy.dialogLabel} data-eco-detail>
+	<div class="eco-detail__panel" data-eco-panel>
+		<div class="eco-detail__bar" data-eco-bar>
+			{fixture && <p class="eco-detail__fixture meta">{ecosystemPage.stage.fixtureNotice}</p>}
+			<button class="eco-detail__close meta" type="button" data-eco-close>
+				{copy.close}<span class="eco-detail__close-mark" aria-hidden="true"></span>
+			</button>
+		</div>
+
+		<div class="eco-detail__body" data-eco-body>
+			{
+				organizations.map((organization) => {
+					const extra = organization.works.length - copy.initialWorks;
+					return (
+						<article
+							class="eco-record"
+							id={`org-${organization.slug}`}
+							data-eco-record
+							data-slug={organization.slug}
+							aria-labelledby={`org-${organization.slug}-name`}
+						>
+							<header class="eco-record__header">
+								<p class="eco-record__kicker meta">
+									<span>{pad(organization.number)}</span>
+									{organization.typeName && <span>{organization.typeName}</span>}
+								</p>
+								{organization.logoImage && (
+									<Image
+										class="eco-record__logo"
+										src={organization.logoImage.src}
+										width={organization.logoImage.width}
+										height={organization.logoImage.height}
+										widths={[240, 480]}
+										sizes="15rem"
+										alt=""
+									/>
+								)}
+								<h2 class="eco-record__name" id={`org-${organization.slug}-name`}>
+									{organization.name}
+								</h2>
+								<p class="eco-record__relation meta">
+									<span class="eco-record__roles">{organization.roles.join(' · ')}</span>
+									{organization.activationCount > 0 && (
+										<span>{activationCountLabel(organization.activationCount)}</span>
+									)}
+								</p>
+								{organization.url && (
+									<a class="eco-record__site" href={organization.url}>
+										<span class="visually-hidden">{copy.website}: </span>
+										{organization.urlLabel ?? organization.url}
+										<span aria-hidden="true">↗</span>
+									</a>
+								)}
+							</header>
+
+							{organization.works.length > 0 && (
+								<section class="eco-record__work" aria-labelledby={`org-${organization.slug}-work`}>
+									<h3 class="eco-record__work-title meta" id={`org-${organization.slug}-work`}>
+										{copy.workTitle}
+									</h3>
+									<ol class="eco-works" role="list">
+										{organization.works.map((work, index) => (
+											<li
+												class:list={['eco-work', { 'eco-work--more': index >= copy.initialWorks }]}
+												tabindex={index === copy.initialWorks ? -1 : undefined}
+												data-eco-more-first={index === copy.initialWorks ? '' : undefined}
+											>
+												<p class="eco-work__when meta">
+													<time datetime={work.date}>{work.dateLabel}</time>
+													{work.city && <span>{work.city}</span>}
+												</p>
+												<div class="eco-work__body">
+													<h4 class="eco-work__title">{work.title}</h4>
+													{work.summary && <p class="eco-work__summary">{work.summary}</p>}
+													{work.credits.length > 0 && (
+														<dl class="eco-work__credits">
+															{work.credits.map((credit) => (
+																<div class="eco-work__credit">
+																	<dt class="meta">{credit.label}</dt>
+																	<dd>{credit.organizations.join(', ')}</dd>
+																</div>
+															))}
+														</dl>
+													)}
+													{work.url && (
+														<a class="eco-work__link" href={work.url}>
+															{copy.eventLink}
+															<span class="visually-hidden">: {work.title}</span>
+															<span aria-hidden="true">↗</span>
+														</a>
+													)}
+												</div>
+											</li>
+										))}
+									</ol>
+									{extra > 0 && (
+										<button class="eco-record__more" type="button" aria-expanded="false" data-eco-more>
+											{copy.moreWorks}
+											<span class="meta">+{extra}</span>
+										</button>
+									)}
+								</section>
+							)}
+						</article>
+					);
+				})
+			}
+		</div>
+	</div>
+</dialog>
+
+<style>
+	/* The page holds still behind an open plate. The removed scrollbar's width
+	   (measured on open) is padded back, so nothing shifts. */
+	:global(html:has(.eco-detail[open])) {
+		overflow: hidden;
+		padding-inline-end: var(--eco-scrollbar, 0px);
+	}
+
+	/* ── Dialog: a full-viewport layer; the plate is centred in it ─── */
+	.eco-detail {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		max-width: 100%;
+		height: 100%;
+		max-height: 100%;
+		margin: 0;
+		padding: var(--gutter);
+		border: 0;
+		background: transparent;
+		color: var(--ink);
+		overflow: hidden;
+	}
+
+	.eco-detail[open] {
+		display: grid;
+		place-items: center;
+	}
+
+	.eco-detail::backdrop {
+		background-color: rgb(14 15 19 / 0.66);
+		animation: eco-fade-in var(--duration-shift) var(--ease-editorial) both;
+	}
+
+	.eco-detail.is-closing::backdrop {
+		animation: eco-fade-out var(--duration-shift) var(--ease-editorial) both;
+	}
+
+	@keyframes eco-fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes eco-fade-out {
+		to {
+			opacity: 0;
+		}
+	}
+
+	/* ── The plate (paper surface) ─────────────────────────────────── */
+	.eco-detail__panel {
+		--color-text: var(--ink);
+		--color-text-muted: var(--grey-600);
+		--color-rule: var(--paper-300);
+		--color-focus: var(--builder-indigo);
+
+		position: relative;
+		width: min(46rem, 100%);
+		max-height: 100%;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		background-color: var(--paper);
+		color: var(--color-text);
+		border-radius: var(--radius-sm);
+		transform-origin: 0 0;
+	}
+
+	.eco-detail__bar {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-4);
+		padding: var(--space-3) var(--space-3) 0;
+		background-color: var(--paper);
+	}
+
+	.eco-detail__fixture {
+		margin-inline-end: auto;
+		padding-inline-start: var(--space-3);
+		color: var(--grey-600);
+	}
+
+	.eco-detail__close {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: 2.75rem;
+		padding-inline: var(--space-3);
+		color: var(--ink);
+	}
+
+	/* A drawn ×: two hairlines. */
+	.eco-detail__close-mark {
+		position: relative;
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	.eco-detail__close-mark::before,
+	.eco-detail__close-mark::after {
+		content: '';
+		position: absolute;
+		inset: 50% 0 auto;
+		height: 1.5px;
+		background-color: currentColor;
+		rotate: 45deg;
+		transition: rotate var(--duration-base) var(--ease-editorial);
+	}
+
+	.eco-detail__close-mark::after {
+		rotate: -45deg;
+	}
+
+	.eco-detail__close:hover .eco-detail__close-mark::before {
+		rotate: 135deg;
+	}
+
+	.eco-detail__close:hover .eco-detail__close-mark::after {
+		rotate: 45deg;
+	}
+
+	.eco-detail__body {
+		padding: var(--space-2) clamp(1.25rem, 0.5rem + 3vw, 2.75rem) clamp(1.75rem, 1rem + 3vw, 3rem);
+	}
+
+	/* ── Record ────────────────────────────────────────────────────── */
+	.eco-record__kicker {
+		display: flex;
+		gap: var(--space-4);
+		color: var(--color-text-muted);
+	}
+
+	.eco-record__logo {
+		width: auto;
+		max-width: 15rem;
+		height: 2.75rem;
+		margin-top: var(--space-5);
+		object-fit: contain;
+		object-position: left center; /* the permitted artwork as supplied, on paper */
+	}
+
+	.eco-record__name {
+		margin-top: var(--space-4);
+		font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+		text-wrap: balance;
+		overflow-wrap: anywhere;
+	}
+
+	.eco-record__relation {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-5);
+		margin-top: var(--space-5);
+	}
+
+	/* The relationship itself carries the one indigo marker. */
+	.eco-record__roles {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.eco-record__roles::before {
+		content: '';
+		width: 6px;
+		height: 6px;
+		background-color: var(--builder-indigo);
+	}
+
+	.eco-record__site {
+		display: inline-flex;
+		gap: 0.35em;
+		margin-top: var(--space-3);
+		font-size: var(--text-action);
+		font-weight: var(--weight-medium);
+		background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1px;
+		padding-block: 0.3em;
+		transition: background-size var(--duration-base) var(--ease-editorial);
+	}
+
+	.eco-record__site:hover {
+		background-size: 100% 1px;
+	}
+
+	.eco-record__work {
+		margin-top: var(--space-7);
+	}
+
+	.eco-record__work-title {
+		padding-bottom: var(--space-3);
+		border-bottom: 1px solid var(--ink);
+	}
+
+	.eco-work {
+		display: grid;
+		gap: var(--space-2);
+		padding-block: var(--space-5);
+		border-bottom: 1px solid var(--color-rule);
+	}
+
+	.eco-work:focus-visible {
+		outline-offset: -2px;
+	}
+
+	.eco-work__when {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-4);
+		color: var(--color-text-muted);
+	}
+
+	.eco-work__title {
+		font-size: 1.375rem;
+		font-weight: var(--weight-semibold);
+		letter-spacing: -0.02em;
+		line-height: 1.15;
+	}
+
+	.eco-work__summary {
+		max-width: 52ch;
+		margin-top: var(--space-2);
+		font-size: var(--text-action);
+		line-height: 1.5;
+		color: var(--color-text-muted);
+	}
+
+	.eco-work__credits {
+		display: grid;
+		gap: var(--space-1);
+		margin-top: var(--space-3);
+	}
+
+	.eco-work__credit {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0 var(--space-3);
+		font-size: var(--text-action);
+	}
+
+	.eco-work__credit dt {
+		min-width: 9.5rem;
+		color: var(--color-text-muted);
+	}
+
+	.eco-work__credit dd {
+		margin: 0;
+		font-weight: var(--weight-medium);
+	}
+
+	.eco-work__link {
+		display: inline-flex;
+		gap: 0.35em;
+		margin-top: var(--space-3);
+		font-size: var(--text-action);
+		font-weight: var(--weight-medium);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.3em;
+	}
+
+	.eco-record__more {
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--space-3);
+		min-height: 2.75rem;
+		margin-top: var(--space-4);
+		font-size: var(--text-action);
+		font-weight: var(--weight-medium);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.3em;
+	}
+
+	/* Collapsed until "View the work" (JavaScript only — without it, everything shows). */
+	:global(html.js) .eco-work--more {
+		display: none;
+	}
+
+	:global(html.js) [data-expanded] .eco-work--more {
+		display: grid;
+	}
+
+	[data-expanded] .eco-record__more,
+	:global(html:not(.js)) .eco-record__more {
+		display: none;
+	}
+
+	@media (min-width: 40rem) {
+		.eco-work {
+			grid-template-columns: 9.5rem minmax(0, 1fr);
+			column-gap: var(--space-5);
+		}
+
+		.eco-work__when {
+			flex-direction: column;
+			padding-top: 0.35rem;
+		}
+	}
+
+	/* Mobile: the plate is a near-full-screen sheet. */
+	@media (max-width: 39.99rem) {
+		.eco-detail {
+			padding: var(--space-2);
+		}
+
+		.eco-detail[open] {
+			place-items: end center;
+		}
+
+		.eco-detail__panel {
+			max-height: calc(100% - var(--space-6));
+		}
+	}
+
+	/* ── No JavaScript: the records are an in-page archive ─────────── */
+	:global(html:not(.js)) .eco-detail {
+		position: static;
+		display: block;
+		height: auto;
+		max-height: none;
+		padding: 0;
+		overflow: visible;
+	}
+
+	:global(html:not(.js)) .eco-detail__panel {
+		width: 100%;
+		max-height: none;
+		overflow: visible;
+		border-radius: 0;
+	}
+
+	:global(html:not(.js)) .eco-detail__bar {
+		display: none;
+	}
+
+	:global(html:not(.js)) .eco-record + .eco-record {
+		border-top: 1px solid var(--ink);
+		margin-top: var(--space-9);
+		padding-top: var(--space-6);
+	}
+</style>

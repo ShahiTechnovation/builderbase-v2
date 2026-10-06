@@ -1,0 +1,74 @@
+---
+/**
+ * Behaviour for /ecosystem: the world, the detail plate and the index links.
+ * A separate component so the script ships only when there is an ecosystem to
+ * show (the empty state needs none).
+ */
+---
+
+<script>
+	import { initEcosystemDetail } from '../../scripts/ecosystem-detail';
+	import { initEcosystemWorld } from '../../scripts/ecosystem-world';
+
+	// The site's one contextual cursor (src/scripts/media-cursor.ts), imported
+	// under its own module id so it is bundled into this page's script. A plain
+	// import would turn it into a chunk shared with the homepage gallery, and
+	// the homepage's inline script into an extra request.
+	const [{ initMediaCursor }] = Object.values(
+		import.meta.glob<typeof import('../../scripts/media-cursor')>('../../scripts/media-cursor.ts', {
+			eager: true,
+			query: '?ecosystem',
+		}),
+	);
+
+	const stage = document.querySelector<HTMLElement>('[data-eco-stage]');
+	const dialog = document.querySelector<HTMLDialogElement>('[data-eco-detail]');
+	const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-eco-link]')];
+
+	// The world opens plates through `detail`, which needs the world to animate from.
+	const world = stage ? initEcosystemWorld(stage, (slug) => detail?.open(slug)) : undefined;
+	const detail = dialog ? initEcosystemDetail(dialog, world) : undefined;
+
+	if (detail) {
+		// Index links open the plate in place (they stay real links without JS).
+		links.forEach((link, index) => {
+			link.setAttribute('role', 'button');
+			link.setAttribute('aria-haspopup', 'dialog');
+
+			link.addEventListener('click', (event) => {
+				event.preventDefault();
+				if (link.dataset.slug) detail?.open(link.dataset.slug);
+			});
+
+			link.addEventListener('keydown', (event) => {
+				let to: number | undefined;
+				switch (event.key) {
+					case ' ':
+						event.preventDefault();
+						if (link.dataset.slug) detail?.open(link.dataset.slug);
+						return;
+					case 'ArrowDown':
+					case 'ArrowRight':
+						to = Math.min(index + 1, links.length - 1);
+						break;
+					case 'ArrowUp':
+					case 'ArrowLeft':
+						to = Math.max(index - 1, 0);
+						break;
+					case 'Home':
+						to = 0;
+						break;
+					case 'End':
+						to = links.length - 1;
+						break;
+					default:
+						return;
+				}
+				event.preventDefault();
+				links[to]?.focus();
+			});
+		});
+	}
+
+	initMediaCursor();
+</script>

@@ -11,7 +11,7 @@ export default defineConfig(
 	{
 		rules: {
 			// Safari/VoiceOver drops list semantics from unstyled lists unless role="list" is explicit.
-			'astro/jsx-a11y/no-redundant-roles': ['error', { ul: ['list'] }],
+			'astro/jsx-a11y/no-redundant-roles': ['error', { ul: ['list'], ol: ['list'] }],
 		},
 	},
 	{

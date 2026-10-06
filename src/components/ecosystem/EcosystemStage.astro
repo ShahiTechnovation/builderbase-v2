@@ -1,0 +1,679 @@
+---
+/**
+ * The spatial ecosystem — the first (and main) surface of /ecosystem.
+ *
+ * Every organisation is a physical plane in a real 3D volume: its identity
+ * (a permitted logo, otherwise its name set in type, so each plane's
+ * proportions come from the name itself). Planes sit on a sphere — the
+ * distribution mechanism, never drawn — facing outward, so they turn edge-on
+ * at the silhouette and open toward the viewer as the world rotates. The
+ * screen-aligned title lives inside the volume: nearer planes pass in front
+ * of it, farther ones behind.
+ *
+ * Accessibility architecture: the INDEX is the one semantic representation of
+ * the organisations (an ordered list of links that open the detail plate; an
+ * in-page archive without JavaScript). The planes are a pointer-only mirror
+ * of it, hidden from assistive tech, so nothing is announced twice. Keyboard
+ * focus in the index turns the world to face that organisation.
+ *
+ * ≥1024px: full-bleed volume; the index is a credit band along its foot.
+ * <1024px: title → orbit of planes → readout → index.
+ * No organisations (nothing verified yet): the title and an honest note only.
+ *
+ * Behaviour: src/scripts/ecosystem-world.ts. Positions and leans are computed
+ * on the server, so the composition is the same on every load.
+ */
+import { Image } from 'astro:assets';
+import type { ResolvedEcosystemArtifact, ResolvedEcosystemOrganization } from '../../data/content';
+import { activationCountLabel } from '../../data/ecosystem';
+import { ecosystemPage } from '../../data/ecosystem-page';
+import type { PhotoImage } from '../../data/model';
+
+interface Props {
+	organizations: ResolvedEcosystemOrganization[];
+	artifacts: ResolvedEcosystemArtifact[];
+	years?: { from: number; to: number };
+	fixture: boolean;
+}
+
+const { organizations, artifacts, years, fixture } = Astro.props;
+const copy = ecosystemPage.stage;
+const pad = (value: number) => String(value).padStart(2, '0');
+const hasWorld = organizations.length > 0 && artifacts.length > 0;
+const yearSpan = years && (years.from === years.to ? String(years.from) : `${years.from}—${years.to}`);
+const bySlug = new Map(organizations.map((organization) => [organization.slug, organization]));
+const about = (organization: ResolvedEcosystemOrganization) =>
+	[organization.roles.join(' · '), organization.activationCount > 0 && activationCountLabel(organization.activationCount)]
+		.filter(Boolean)
+		.join(' — ');
+// Local masters carry their own metadata; remote assets need explicit dimensions.
+const imageSource = (picture: PhotoImage) =>
+	'format' in picture ? { src: picture } : { src: picture.src, width: picture.width, height: picture.height };
+// Fewer planes, more presence each: a small ecosystem should not look sparse and timid.
+const presence = artifacts.length <= 6 ? 1.45 : artifacts.length <= 10 ? 1.2 : 1;
+// More verified work, a slightly larger plane: scale that comes from the record.
+const weight = (organization: ResolvedEcosystemOrganization) => 1 + 0.07 * Math.min(organization.activationCount, 5);
+---
+
+<section
+	class:list={['eco-stage', { 'eco-stage--empty': !hasWorld }]}
+	aria-labelledby="eco-title"
+	data-eco-stage
+>
+	{fixture && <p class="eco-fixture meta">{copy.fixtureNotice}</p>}
+
+	<p class="eco-marker meta" data-entrance="meta" style="--i: 1">
+		<span>{copy.marker}</span>
+		{yearSpan && <span>{yearSpan}</span>}
+	</p>
+
+	<div class="eco-heading">
+		<h1 class="eco-title" id="eco-title">
+			<span class="eco-title__lead reveal-mask" data-entrance="mask" style="--i: 0"
+				><span class="reveal-mask__line">{copy.lead}</span></span
+			>{' '}
+			<span class="eco-title__anchor reveal-mask" data-entrance="mask" style="--i: 1"
+				><span class="reveal-mask__line">{copy.anchor}</span></span
+			>
+		</h1>
+		{!hasWorld && <p class="eco-heading__empty" data-entrance="meta" style="--i: 3">{copy.empty}</p>}
+	</div>
+
+	{
+		hasWorld && (
+			<div class="eco-world" data-eco-world style={`--presence: ${presence}`}>
+				{artifacts.map((artifact) => {
+					const organization = bySlug.get(artifact.organizationSlug)!;
+					const logo = artifact.kind === 'identity' ? organization.logoImage : undefined;
+					return (
+						<div
+							class:list={[
+								'eco-plane',
+								`eco-plane--${artifact.kind}`,
+								artifact.kind === 'identity' && (logo ? 'eco-plane--logo' : `eco-plane--${organization.tone}`),
+							]}
+							aria-hidden="true"
+							data-eco-node
+							data-slug={organization.slug}
+							data-kind={artifact.kind}
+							data-x={artifact.position.x}
+							data-y={artifact.position.y}
+							data-z={artifact.position.z}
+							data-lean={`${artifact.lean.x} ${artifact.lean.y} ${artifact.lean.z}`}
+							data-about={about(organization)}
+							data-cursor-label={copy.cursorLabel}
+							style={`--weight: ${weight(organization)}`}
+						>
+							{artifact.kind === 'image' && artifact.picture ? (
+								<Image
+									class="eco-plane__image"
+									{...imageSource(artifact.picture)}
+									widths={[320, 640]}
+									sizes="20rem"
+									alt=""
+									draggable="false"
+								/>
+							) : logo ? (
+								<Image
+									class="eco-plane__logo"
+									src={logo.src}
+									width={logo.width}
+									height={logo.height}
+									widths={[240, 480]}
+									sizes="14rem"
+									alt=""
+									draggable="false"
+								/>
+							) : (
+								<>
+									<span class="eco-plane__number meta">{pad(organization.number)}</span>
+									<span class="eco-plane__name">
+										{organization.identityLines.map((line) => (
+											<span>{line}</span>
+										))}
+									</span>
+								</>
+							)}
+						</div>
+					);
+				})}
+				<p class="eco-caption meta" aria-hidden="true" data-eco-caption />
+			</div>
+		)
+	}
+
+	{
+		hasWorld && (
+			<p class="eco-readout meta" aria-hidden="true">
+				<span class="eco-readout__count">
+					<span data-eco-current>01</span> / {pad(organizations.length)}
+				</span>
+				<span class="eco-readout__about" data-eco-about />
+				<span class="eco-readout__hint eco-readout__hint--pointer">{copy.hintPointer}</span>
+				<span class="eco-readout__hint eco-readout__hint--touch">{copy.hintTouch}</span>
+			</p>
+		)
+	}
+
+	{
+		hasWorld && (
+			<div class="eco-index" data-eco-index>
+				<h2 class="eco-index__title meta" id="eco-index-title">
+					<span class="visually-hidden">Ecosystem </span>
+					{copy.indexTitle}
+				</h2>
+				<ol class="eco-index__list" role="list" aria-labelledby="eco-index-title">
+					{organizations.map((organization) => (
+						<li>
+							<a
+								class="eco-index__link"
+								href={`#org-${organization.slug}`}
+								data-eco-link
+								data-slug={organization.slug}
+							>
+								<span class="eco-index__number meta" aria-hidden="true">
+									{pad(organization.number)}
+								</span>
+								<span class="eco-index__name">{organization.name}</span>
+								<span class="eco-index__about meta">
+									<span class="visually-hidden">— </span>
+									<span class="eco-index__roles">{organization.roles.join(' · ')}</span>
+									{organization.activationCount > 0 && (
+										<span class="eco-index__count">
+											<span class="visually-hidden">, </span>
+											{activationCountLabel(organization.activationCount)}
+										</span>
+									)}
+								</span>
+							</a>
+						</li>
+					))}
+				</ol>
+			</div>
+		)
+	}
+</section>
+
+<style>
+	/* ── Stage ─────────────────────────────────────────────────────────
+	   Mobile first: title → orbit → readout → index, in flow. */
+	.eco-stage {
+		--world-h: clamp(20rem, 50vw + 8rem, 28rem);
+
+		position: relative;
+		isolation: isolate;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas: 'fixture' 'marker' 'heading' 'world' 'readout' 'index';
+		padding: var(--space-6) var(--gutter) var(--section-space);
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		overflow-x: clip;
+	}
+
+	.eco-stage--empty {
+		grid-template-areas: 'fixture' 'marker' 'heading';
+		min-height: max(32rem, calc(100svh - 3.5rem));
+		align-content: center;
+	}
+
+	.eco-fixture {
+		grid-area: fixture;
+		justify-self: start;
+		margin-bottom: var(--space-5);
+		padding: 0.3rem 0.5rem;
+		border: 1px solid var(--paper);
+		color: var(--paper);
+		z-index: 200;
+		pointer-events: none;
+	}
+
+	.eco-marker {
+		grid-area: marker;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: var(--space-1) var(--space-4);
+		margin-bottom: var(--space-4);
+		color: var(--color-text-muted);
+		z-index: 50;
+		pointer-events: none;
+	}
+
+	/* ── Heading: screen-aligned, inside the volume ────────────────── */
+	.eco-heading {
+		grid-area: heading;
+		z-index: 50; /* planes nearer than the centre stack above it (see the world script) */
+		justify-self: start;
+		display: flex;
+		flex-direction: column;
+		pointer-events: none;
+		transition: opacity var(--duration-shift) var(--ease-editorial);
+	}
+
+	.eco-title {
+		display: flex;
+		flex-direction: column;
+		font-weight: var(--weight-semibold);
+	}
+
+	.eco-title__lead {
+		font-size: var(--text-lead);
+		letter-spacing: var(--tracking-lead);
+		line-height: var(--leading-tight);
+	}
+
+	.eco-title__anchor {
+		margin-inline-start: -0.04em; /* optical: the E's side bearing sits on the measure */
+		font-size: clamp(3.4rem, 0.6rem + 12.4vw, 7rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-anchor);
+		line-height: var(--leading-anchor);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.eco-title__anchor.reveal-mask {
+		margin-block: calc(0.06em - 0.14em) calc(0.05em - 0.14em);
+	}
+
+	.eco-heading__empty {
+		max-width: 28ch;
+		margin-top: var(--space-6);
+		font-size: var(--text-body);
+		color: var(--color-text-muted);
+	}
+
+	/* ── World: the volume (positions are written by the script) ────── */
+	.eco-world {
+		grid-area: world;
+		position: relative;
+		height: var(--world-h);
+		margin-inline: calc(-1 * var(--gutter));
+		touch-action: pan-y; /* vertical swipes still scroll the page */
+		user-select: none;
+		-webkit-user-select: none;
+		transition: opacity var(--duration-shift) var(--ease-editorial);
+	}
+
+	/* Planes appear only once the script has placed them; no JS → the index is the page. */
+	.eco-world:not([data-ready]) {
+		visibility: hidden;
+	}
+
+	:global(html:not(.js)) .eco-world,
+	:global(html:not(.js)) .eco-readout {
+		display: none;
+	}
+
+	/* ── Planes ─────────────────────────────────────────────────────── */
+	.eco-plane {
+		--type: clamp(1.75rem, 1.2rem + 1.4vw, 2.5rem);
+
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform-origin: 0 0; /* the script centres the plane at the end of its transform */
+		width: max-content;
+		padding: 0.55em 0.6em 0.6em;
+		/* Ink plane: a lifted dark surface with a firm edge, readable against the void. */
+		border: 1px solid rgb(244 242 237 / 0.3);
+		border-radius: 3px;
+		background-color: #202128;
+		color: var(--paper);
+		font-size: calc(var(--type) * var(--weight, 1) * var(--presence, 1));
+		cursor: pointer;
+		will-change: transform;
+	}
+
+	/* Light falls off with distance and with the angle to the viewer. */
+	.eco-plane::after {
+		content: '';
+		position: absolute;
+		inset: -1px;
+		border-radius: inherit;
+		background-color: var(--near-black);
+		opacity: var(--shade, 0);
+		pointer-events: none;
+	}
+
+	.eco-plane--paper {
+		border-color: transparent;
+		background-color: var(--paper);
+		color: var(--ink);
+	}
+
+	.eco-plane--logo {
+		padding: 0.8em 0.9em;
+		border-color: transparent;
+		background-color: var(--paper);
+	}
+
+	.eco-plane--image {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.eco-plane[data-highlighted] {
+		border-color: var(--paper);
+	}
+
+	.eco-plane--paper[data-highlighted],
+	.eco-plane--logo[data-highlighted] {
+		outline: 1px solid var(--paper);
+		outline-offset: 0.3em;
+	}
+
+	/* Seen from behind, a plane is its blank reverse. */
+	.eco-plane[data-back] > * {
+		visibility: hidden;
+	}
+
+	.eco-plane__number {
+		display: block;
+		margin-bottom: 1.1em;
+		font-size: max(0.5rem, calc(var(--type) * 0.3));
+		line-height: 1;
+		opacity: 0.6;
+	}
+
+	.eco-plane__name {
+		display: flex;
+		flex-direction: column;
+		font-weight: var(--weight-display);
+		letter-spacing: -0.05em;
+		line-height: 0.86;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.eco-plane__logo {
+		display: block;
+		width: auto;
+		max-width: 12em;
+		height: 2.2em;
+		object-fit: contain;
+	}
+
+	.eco-plane__image {
+		display: block;
+		width: 9em;
+		height: auto;
+	}
+
+	/* Relationship + verified count of the organisation pointed at: one
+	   screen-aligned caption placed under its plane by the script. */
+	.eco-caption {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 160;
+		max-width: 26rem;
+		padding: 0.25rem 0.4rem;
+		background-color: var(--near-black);
+		color: var(--paper);
+		opacity: 0;
+		transition: opacity var(--duration-base) var(--ease-standard);
+		pointer-events: none;
+	}
+
+	.eco-caption[data-visible] {
+		opacity: 1;
+	}
+
+	/* ── Readout: position in the orbit, the front organisation, how to move ── */
+	.eco-readout {
+		grid-area: readout;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: var(--space-2) var(--space-4);
+		padding-block: var(--space-4) var(--space-3);
+		color: var(--color-text-muted);
+	}
+
+	.eco-readout__about {
+		order: 3;
+		flex-basis: 100%;
+		min-height: 2.8em; /* room for two lines: changing organisation never moves the page */
+		color: var(--color-text);
+	}
+
+	.eco-readout__hint--pointer {
+		display: none;
+	}
+
+	/* ── Index: the semantic list ──────────────────────────────────── */
+	.eco-index {
+		grid-area: index;
+		position: relative;
+		z-index: 150;
+		margin-top: var(--space-8);
+	}
+
+	.eco-index__title {
+		color: var(--color-text-muted);
+	}
+
+	.eco-index__list {
+		margin-top: var(--space-3);
+		border-top: 1px solid var(--color-rule);
+	}
+
+	.eco-index__link {
+		display: grid;
+		grid-template-columns: 2.5rem minmax(0, 1fr);
+		column-gap: var(--space-2);
+		row-gap: var(--space-1);
+		padding-block: var(--space-4);
+		border-bottom: 1px solid var(--color-rule);
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.eco-index__number {
+		grid-row: 1 / span 2;
+		padding-top: 0.45rem;
+		color: var(--color-text-muted);
+	}
+
+	.eco-index__name {
+		font-size: 1.375rem;
+		font-weight: var(--weight-semibold);
+		letter-spacing: -0.02em;
+		line-height: 1.15;
+	}
+
+	.eco-index__about {
+		display: flex;
+		flex-wrap: wrap;
+		column-gap: var(--space-4);
+		color: var(--color-text-muted);
+	}
+
+	.eco-index__link:focus-visible {
+		outline-offset: -2px;
+	}
+
+	/* ── Tablet ────────────────────────────────────────────────────── */
+	@media (min-width: 40rem) {
+		.eco-marker {
+			justify-content: flex-start;
+		}
+
+		.eco-index__list {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: var(--space-6);
+		}
+	}
+
+	/* ── Desktop: a full-bleed volume; the index is its credit band ── */
+	@media (min-width: 64rem) {
+		.eco-stage {
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-rows: minmax(0, 1fr) auto;
+			grid-template-areas:
+				'world world'
+				'index readout';
+			column-gap: 0;
+			height: max(40rem, calc(100svh - 4.5rem));
+			padding-block: 0;
+			overflow: clip;
+		}
+
+		.eco-stage--empty {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-rows: auto;
+			grid-template-areas: 'heading';
+		}
+
+		.eco-fixture,
+		.eco-marker {
+			position: absolute;
+			top: var(--space-5);
+			margin: 0;
+		}
+
+		.eco-fixture {
+			right: var(--gutter);
+		}
+
+		.eco-marker {
+			left: var(--gutter);
+			flex-direction: column;
+		}
+
+		/* The title sits at the centre of the volume it anchors. */
+		.eco-heading {
+			grid-area: world;
+			align-self: center;
+			justify-self: center;
+		}
+
+		.eco-stage--empty .eco-heading {
+			grid-area: heading;
+		}
+
+		.eco-title__anchor {
+			font-size: clamp(5rem, 0.8rem + 7.4vw, 10rem);
+		}
+
+		.eco-world {
+			height: auto;
+			cursor: grab;
+		}
+
+		.eco-stage[data-dragging] .eco-world {
+			cursor: grabbing;
+		}
+
+		/* The band is solid: planes pass behind it as they would past a frame. */
+		.eco-index,
+		.eco-readout {
+			align-self: stretch;
+			margin: 0;
+			padding-block: var(--space-4) var(--space-5);
+			border-top: 1px solid var(--color-rule);
+			background-color: var(--color-bg);
+		}
+
+		.eco-index {
+			display: flex;
+			align-items: baseline;
+			gap: var(--space-6);
+			margin-inline-start: calc(-1 * var(--gutter));
+			padding-inline-start: var(--gutter);
+		}
+
+		.eco-readout {
+			z-index: 150;
+			align-items: baseline;
+			margin-inline-end: calc(-1 * var(--gutter));
+			padding-inline: var(--space-6) var(--gutter);
+		}
+
+		.eco-readout__count,
+		.eco-readout__about {
+			display: none;
+		}
+
+		.eco-index__title {
+			flex-shrink: 0;
+		}
+
+		.eco-index__list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--space-2) var(--space-6);
+			margin: 0;
+			border: 0;
+		}
+
+		.eco-index__link {
+			grid-template-columns: auto auto;
+			column-gap: var(--space-3);
+			row-gap: 0.1rem;
+			padding: 0.15rem 0;
+			border: 0;
+			color: var(--color-text-muted);
+		}
+
+		.eco-index__number {
+			padding-top: 0.2rem;
+		}
+
+		.eco-index__name {
+			font-size: var(--text-ui);
+			font-weight: var(--weight-medium);
+			letter-spacing: var(--tracking-ui);
+		}
+
+		/* The count is read with the entry and shown on the plane's caption. */
+		.eco-index__count {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
+
+		.eco-index__link:hover,
+		.eco-index__link:focus-visible,
+		.eco-index__link[data-highlighted] {
+			color: var(--color-text);
+		}
+
+		.eco-index__link:focus-visible {
+			outline-offset: 2px;
+		}
+	}
+
+	/* Fine pointers drag; touch swipes. */
+	@media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+		.eco-readout__hint--pointer {
+			display: inline;
+		}
+
+		.eco-readout__hint--touch {
+			display: none;
+		}
+	}
+
+	/* Reduced motion: a static composition — nothing to drag. */
+	@media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
+		.eco-world {
+			cursor: default;
+		}
+
+		.eco-readout__hint {
+			display: none !important;
+		}
+	}
+
+	/* Focus mode: the world stays present but recedes behind the plate. */
+	.eco-stage[data-focus] .eco-world,
+	.eco-stage[data-focus] .eco-heading {
+		opacity: 0.22;
+	}
+</style>

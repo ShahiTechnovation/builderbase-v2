@@ -13,12 +13,23 @@
  */
 import { loadBaserowContent } from '../lib/baserow/repository';
 import { baserowConfig, contentSource, contentStrict, lumaConfig } from '../lib/env';
+import { resolveLogo } from '../lib/logo-assets';
 import { fetchUpcomingEvents, type UpcomingEvents } from '../lib/luma/events';
-import { resolvePhoto } from '../lib/photo-assets';
+import { resolvePhoto, resolvePhotoAsset } from '../lib/photo-assets';
 import { cultureCandidates, heroCandidates } from './curation';
+import { buildEcosystem, type Ecosystem, type EcosystemArtifact, type EcosystemOrganization } from './ecosystem';
 import { home } from './home';
 import { loadLocalContent } from './local';
-import type { Activation, Builder, City, ContentSnapshot, Project, ResolvedPhoto, TeamMember } from './model';
+import type {
+	Activation,
+	Builder,
+	City,
+	ContentSnapshot,
+	PhotoImage,
+	Project,
+	ResolvedPhoto,
+	TeamMember,
+} from './model';
 import {
 	canClaimNationalPresence,
 	citiesWithVerifiedActivity,
@@ -122,6 +133,48 @@ export async function getActiveCities(): Promise<City[]> {
 			(a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity) ||
 			a.name.localeCompare(b.name),
 	);
+}
+
+// ── Ecosystem ──────────────────────────────────────────────────────────
+
+export type ResolvedEcosystemOrganization = EcosystemOrganization & { logoImage?: PhotoImage };
+/** Image artifacts carry their delivery-ready image; unresolvable ones are dropped. */
+export type ResolvedEcosystemArtifact = EcosystemArtifact & { picture?: PhotoImage };
+
+export interface EcosystemContent {
+	organizations: ResolvedEcosystemOrganization[];
+	artifacts: ResolvedEcosystemArtifact[];
+	years?: { from: number; to: number };
+	/** True only under `astro dev` with ECOSYSTEM_FIXTURE=1: fictional data, labelled on the page. */
+	fixture: boolean;
+}
+
+/** Organisations with a stated, public, verified relationship (see src/data/ecosystem.ts). */
+export async function getEcosystemContent(): Promise<EcosystemContent> {
+	// Development only: production builds drop this branch and never import the fixture.
+	if (import.meta.env.DEV && process.env.ECOSYSTEM_FIXTURE === '1') {
+		const { ecosystemFixture } = await import('./fixtures/ecosystem.fixture');
+		return { ...resolveEcosystem(buildEcosystem(ecosystemFixture)), fixture: true };
+	}
+	return { ...resolveEcosystem(buildEcosystem(await getContent())), fixture: false };
+}
+
+function resolveEcosystem(ecosystem: Ecosystem): Omit<EcosystemContent, 'fixture'> {
+	return {
+		years: ecosystem.years,
+		organizations: ecosystem.organizations.map((organization) => ({
+			...organization,
+			logoImage: resolveLogo(organization.logo, organization.name),
+		})),
+		artifacts: ecosystem.artifacts.flatMap((artifact): ResolvedEcosystemArtifact[] => {
+			if (artifact.kind === 'identity') return [artifact];
+			const picture =
+				artifact.image.kind === 'local'
+					? resolvePhotoAsset(artifact.image)
+					: resolveLogo(artifact.image, artifact.organizationSlug);
+			return picture ? [{ ...artifact, picture }] : [];
+		}),
+	};
 }
 
 /** Upcoming Builder Base–managed events from Luma (empty when unconfigured or failing). */

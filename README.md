@@ -41,7 +41,7 @@ Run one engine with `npx playwright test --project=chromium` (or `unit`).
 
 ```
 src/
-  pages/            routes — `/` is designed; the rest are noindex placeholders
+  pages/            routes — `/` and `/ecosystem` are designed; the rest are noindex placeholders
   layouts/          BaseLayout (head, fonts, motion gate), PlaceholderPage
   components/       SiteHeader, Hero, CultureGallery, PhotoFrame, ActionLink, SeoHead
   data/             model.ts (domain), content.ts (app API), public.ts (truth gate),
@@ -67,6 +67,8 @@ docs/
 - "Building across India" renders only with verified public activity in two or
   more Indian cities.
 - People are published only with their consent.
+- `/ecosystem` lists an organisation only through a stated relationship (see
+  `docs/design/ecosystem.md`); venues are credited inside the work.
 
 ## Photography
 
