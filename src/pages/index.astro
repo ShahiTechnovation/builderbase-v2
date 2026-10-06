@@ -1,11 +1,14 @@
 ---
 import CultureGallery from '../components/CultureGallery.astro';
 import Hero from '../components/Hero.astro';
+import NextRooms from '../components/NextRooms.astro';
 import { getHomepageContent } from '../data/content';
 import { home } from '../data/home';
+import { actions, destinations } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const content = await getHomepageContent();
+const hasCulture = content.culturePhotos.length > 0;
 ---
 
 <BaseLayout ogPhoto={content.heroPhoto}>
@@ -15,7 +18,7 @@ const content = await getHomepageContent();
 		photo={content.heroPhoto}
 	/>
 	{
-		content.culturePhotos.length > 0 && (
+		hasCulture && (
 			<CultureGallery
 				title={home.culture.title}
 				galleryLabel={home.culture.galleryLabel}
@@ -23,4 +26,16 @@ const content = await getHomepageContent();
 			/>
 		)
 	}
+	<NextRooms
+		marker={home.nextRooms.marker}
+		title={home.nextRooms.title}
+		note={home.nextRooms.note}
+		action={actions.fullCalendar}
+		calendar={{
+			src: destinations.lumaCalendarEmbed,
+			title: home.nextRooms.calendarTitle,
+			loadingLabel: home.nextRooms.loadingLabel,
+		}}
+		handoff={hasCulture ? 'from-dark' : undefined}
+	/>
 </BaseLayout>

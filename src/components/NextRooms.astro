@@ -1,0 +1,162 @@
+---
+/**
+ * "NEXT ROOMS" — Builder Base is happening again soon.
+ *
+ * Paper surface. Mobile/tablet: marker → heading → note + calendar link →
+ * calendar. Desktop: the heading column anchors the left; the Luma calendar is
+ * the editorial surface on the right (Luma centres its content at ~690px, so
+ * a full-width frame would be mostly empty grey).
+ *
+ * Motion (existing system only):
+ *  - REVEAL: heading rises out of its masks; marker and note settle.
+ *  - FOCUS:  the calendar frame settles from ~94% to full width, once.
+ *  - HANDOFF (opt-in, `handoff="from-dark"`, ≥640px): when following a dark
+ *    section, paper starts inset with near-black at its edges and opens to
+ *    full width as the section enters — paper reclaiming the viewport.
+ * The section has no dependency on what precedes it, so it can move later.
+ */
+import type { NavLink } from '../data/site';
+import ActionLink from './ActionLink.astro';
+import LumaCalendar from './LumaCalendar.astro';
+
+interface Props {
+	marker: string;
+	title: readonly string[];
+	note?: string;
+	action: NavLink;
+	calendar: { src: string; title: string; loadingLabel: string };
+	/** Visual handoff from a preceding dark section. */
+	handoff?: 'from-dark';
+}
+
+const { marker, title, note, action, calendar, handoff } = Astro.props;
+---
+
+<section
+	class:list={['next-rooms', { 'next-rooms--from-dark': handoff === 'from-dark' }]}
+	aria-labelledby="next-rooms-title"
+	data-scroll={handoff ? 'enter' : undefined}
+>
+	<div class="next-rooms__inner page-width">
+		<header class="next-rooms__header">
+			<p class="next-rooms__marker meta" data-reveal="meta">{marker}</p>
+			<h2 class="next-rooms__title" id="next-rooms-title" data-reveal="mask">
+				{
+					title.map((line, index) => (
+						<>
+							{index > 0 && ' '}
+							<span class="next-rooms__title-line reveal-mask" style={`--i: ${index}`}>
+								<span class="reveal-mask__line">{line}</span>
+							</span>
+						</>
+					))
+				}
+			</h2>
+			<div class="next-rooms__aside" data-reveal="meta" style="--i: 2">
+				{note && <p class="next-rooms__note">{note}</p>}
+				<ActionLink link={action} class="next-rooms__action" />
+			</div>
+		</header>
+
+		<div class="next-rooms__calendar" data-reveal="focus">
+			<LumaCalendar src={calendar.src} title={calendar.title} loadingLabel={calendar.loadingLabel} />
+		</div>
+	</div>
+</section>
+
+<style>
+	.next-rooms {
+		position: relative;
+		isolation: isolate;
+		padding-block: var(--section-space) clamp(5rem, 3rem + 6vw, 8rem);
+		background-color: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	.next-rooms__inner {
+		padding-inline: var(--gutter);
+	}
+
+	.next-rooms__header {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.next-rooms__marker {
+		color: var(--color-text-muted);
+	}
+
+	.next-rooms__title {
+		margin-top: var(--space-4);
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+	}
+
+	.next-rooms__title-line {
+		display: block;
+	}
+
+	.next-rooms__aside {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-3);
+		margin-top: var(--space-5);
+	}
+
+	.next-rooms__note {
+		max-width: 30ch;
+		text-wrap: balance;
+		font-size: var(--text-action);
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.next-rooms__calendar {
+		margin-top: var(--space-7);
+	}
+
+	/* ── Desktop: heading column + calendar surface ────────────────── */
+	@media (min-width: 64rem) {
+		.next-rooms__inner {
+			display: grid;
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+			column-gap: var(--space-9);
+			align-items: stretch;
+		}
+
+		.next-rooms__aside {
+			margin-top: auto; /* note + link sit at the foot of the calendar */
+			padding-top: var(--space-6);
+		}
+
+		.next-rooms__calendar {
+			margin-top: 0;
+		}
+	}
+
+	/* ── HANDOFF from a dark section (≥640px, motion only) ─────────────
+	   The section's own background is near-black; a paper sheet behind the
+	   content starts inset with rounded top corners and opens to full width
+	   as the section enters (--scroll-enter). Clip only; content never moves. */
+	@media (min-width: 40rem) {
+		:global(:root.motion) .next-rooms--from-dark {
+			background-color: var(--near-black);
+		}
+
+		:global(:root.motion) .next-rooms--from-dark::before {
+			--shut: calc(1 - var(--scroll-enter));
+			--corner: calc(var(--radius-frame) * var(--shut));
+
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			background-color: var(--paper);
+			clip-path: inset(0 calc(var(--gutter-photo) * var(--shut)) 0 round var(--corner) var(--corner) 0 0);
+		}
+	}
+</style>

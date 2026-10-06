@@ -3,7 +3,7 @@
  *
  *  - Reveals: one IntersectionObserver marks `[data-reveal]` elements as
  *    revealed once; CSS (src/styles/motion.css) does the animating.
- *  - Scroll progress: `[data-scroll~="start"|"through"]` elements receive
+ *  - Scroll progress: `[data-scroll~="start"|"enter"|"through"]` elements receive
  *    0→1 custom properties from a single passive, rAF-throttled listener,
  *    active only while the element is near the viewport.
  *
@@ -50,13 +50,16 @@ function initReveals(): void {
 
 // ── Scroll progress ────────────────────────────────────────────────────
 
+type ScrollMode = 'start' | 'enter' | 'through';
+
 interface Tracked {
 	element: HTMLElement;
 	start: boolean;
+	enter: boolean;
 	through: boolean;
 	/** Document offset of the element's top, re-measured on resize. */
 	top: number;
-	last: { start?: number; through?: number };
+	last: Partial<Record<ScrollMode, number>>;
 }
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
@@ -64,7 +67,14 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 function initScrollProgress(): void {
 	const tracked: Tracked[] = [...document.querySelectorAll<HTMLElement>('[data-scroll]')].map((element) => {
 		const modes = (element.dataset.scroll ?? '').split(/\s+/);
-		return { element, start: modes.includes('start'), through: modes.includes('through'), top: 0, last: {} };
+		return {
+			element,
+			start: modes.includes('start'),
+			enter: modes.includes('enter'),
+			through: modes.includes('through'),
+			top: 0,
+			last: {},
+		};
 	});
 	if (tracked.length === 0) return;
 
@@ -77,7 +87,7 @@ function initScrollProgress(): void {
 		measured = true;
 	};
 
-	const write = (item: Tracked, key: 'start' | 'through', value: number) => {
+	const write = (item: Tracked, key: ScrollMode, value: number) => {
 		const rounded = Math.round(value * 1000) / 1000;
 		if (item.last[key] === rounded) return;
 		item.last[key] = rounded;
@@ -91,10 +101,12 @@ function initScrollProgress(): void {
 		for (const item of near) {
 			// start: 0 at page top → 1 when the element's top reaches the viewport top.
 			if (item.start) write(item, 'start', item.top <= 0 ? 1 : clamp01(window.scrollY / item.top));
-			// through: 0 as the element enters at the bottom → 1 as it leaves at the top.
-			if (item.through) {
+			if (item.enter || item.through) {
 				const { top, height } = item.element.getBoundingClientRect();
-				write(item, 'through', clamp01((viewportHeight - top) / (viewportHeight + height)));
+				// enter: 0 as the element's top appears at the bottom → 1 once it has travelled 60% of the viewport.
+				if (item.enter) write(item, 'enter', clamp01((viewportHeight - top) / (viewportHeight * 0.6)));
+				// through: 0 as the element enters at the bottom → 1 as it leaves at the top.
+				if (item.through) write(item, 'through', clamp01((viewportHeight - top) / (viewportHeight + height)));
 			}
 		}
 	};

@@ -3,8 +3,10 @@
 export interface NavLink {
 	label: string;
 	href: string;
-	/** Renders the ↗ marker used for partner-facing links. */
+	/** Renders the ↗ marker used for partner-facing and external links. */
 	arrow?: boolean;
+	/** Extra words for assistive tech only, e.g. "on Luma" for an external destination. */
+	hint?: string;
 }
 
 export const site = {
@@ -28,6 +30,8 @@ export const destinations = {
 	partner: '/partners',
 	// Public Builder Base calendar on Luma (verified 2026-10-06).
 	lumaCalendar: 'https://luma.com/Builderbase',
+	// Official Luma calendar embed (supplied by Builder Base). No extra parameters.
+	lumaCalendarEmbed: 'https://luma.com/embed/calendar/cal-Rmfu84P0S7JWiHl/events',
 } as const;
 
 export const primaryNav: NavLink[] = [
@@ -43,4 +47,5 @@ export const actions = {
 	join: { label: 'Join the base', href: destinations.join },
 	partner: { label: 'Partner with us', href: destinations.partner, arrow: true },
 	lumaCalendar: { label: 'See the calendar on Luma', href: destinations.lumaCalendar, arrow: true },
+	fullCalendar: { label: 'View full calendar', href: destinations.lumaCalendar, arrow: true, hint: 'on Luma' },
 } satisfies Record<string, NavLink>;

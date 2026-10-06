@@ -1,0 +1,104 @@
+---
+/**
+ * The official Builder Base Luma calendar, inside a Builder Base frame.
+ *
+ * - Uses the supplied embed URL as-is: no tracking parameters, no CSS or DOM
+ *   manipulation across the iframe boundary.
+ * - The frame reserves its height before anything loads (no layout shift).
+ * - The iframe mounts late (see src/scripts/deferred-embed.ts); until Luma
+ *   paints, a quiet loading surface shows through the transparent iframe.
+ *   No failure detection: the section's "View full calendar" link is the
+ *   reliable fallback.
+ * - Never aria-hidden: the calendar is meaningful interactive content.
+ */
+interface Props {
+	src: string;
+	/** Accessible name of the iframe. */
+	title: string;
+	loadingLabel: string;
+	class?: string;
+}
+
+const { src, title, loadingLabel, class: className } = Astro.props;
+---
+
+<div class:list={['luma-calendar', className]} data-deferred-embed>
+	<div class="luma-calendar__loading meta" aria-hidden="true">
+		<span>Upcoming rooms</span>
+		<span class="luma-calendar__loading-label">{loadingLabel}</span>
+	</div>
+	<template>
+		<iframe
+			class="luma-calendar__frame"
+			src={src}
+			title={title}
+			loading="lazy"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen></iframe>
+	</template>
+	<noscript>
+		<iframe
+			class="luma-calendar__frame"
+			src={src}
+			title={title}
+			loading="lazy"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen></iframe>
+	</noscript>
+</div>
+
+<script>
+	import { initDeferredEmbeds } from '../scripts/deferred-embed';
+
+	initDeferredEmbeds();
+</script>
+
+<style>
+	.luma-calendar {
+		position: relative;
+		width: 100%;
+		/* Mobile: tall enough to browse, short enough to always leave page to scroll on. */
+		height: clamp(28rem, 72vh, 38rem);
+		height: clamp(28rem, 72svh, 38rem);
+		overflow: hidden;
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		background-color: var(--color-well);
+	}
+
+	.luma-calendar__loading {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		padding: var(--space-5);
+		color: var(--color-text);
+	}
+
+	.luma-calendar__loading-label {
+		color: var(--color-text-muted);
+	}
+
+	.luma-calendar__frame {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		/* Matches the parent page, so Luma renders its light theme. */
+		color-scheme: light;
+	}
+
+	@media (min-width: 40rem) {
+		.luma-calendar {
+			height: clamp(32rem, 70vh, 44rem);
+		}
+	}
+
+	@media (min-width: 64rem) {
+		.luma-calendar {
+			height: clamp(36rem, 78vh, 48rem);
+		}
+	}
+</style>

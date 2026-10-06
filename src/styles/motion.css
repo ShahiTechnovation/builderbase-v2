@@ -7,7 +7,9 @@
  *   SHIFT   — focus moves from one thing to the next (the culture gallery).
  *   EXPAND  — a photograph takes over as attention reaches it (hero handoff).
  *   DEPTH   — the photo sits slightly behind its frame (2–4% travel, no more).
- *   HANDOFF — one section passes the viewport to the next (expand + shade).
+ *   HANDOFF — one section passes the viewport to the next (hero: photo opens
+ *             into near-black; Next rooms: paper reclaims the viewport).
+ *   FOCUS   — a surface settles from ~94% to full width, once (Next rooms calendar).
  *
  * Gating (set on <html>):
  *   .motion        JS is running and reduced motion is NOT requested.
@@ -16,10 +18,16 @@
  * and no-JS visitors get the static composition, never hidden content.
  *
  * Scroll-linked values are written by motion.ts as unitless 0→1 custom
- * properties: --scroll-start, --scroll-through.
+ * properties: --scroll-start, --scroll-enter, --scroll-through.
  */
 
 @property --scroll-start {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 0;
+}
+
+@property --scroll-enter {
 	syntax: '<number>';
 	inherits: true;
 	initial-value: 0;
@@ -59,6 +67,17 @@
 
 :root.motion.motion-ready [data-reveal='photo']:not([data-revealed]) .photo-frame {
 	scale: 1.08;
+}
+
+/* FOCUS: a surface settles from ~94% of its width to full, once. Clip only —
+   the content inside (e.g. an iframe) is never scaled. */
+:root.motion.motion-ready [data-reveal='focus']:not([data-revealed]) {
+	clip-path: inset(0 3% round var(--radius-sm));
+}
+
+:root.motion [data-reveal='focus'][data-revealed] {
+	clip-path: inset(-1rem);
+	transition: clip-path calc(var(--duration-slow) * 1.4) var(--ease-editorial);
 }
 
 :root.motion.motion-ready [data-reveal='meta']:not([data-revealed]) {

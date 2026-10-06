@@ -46,6 +46,22 @@ Round 2 Option B → Round 2 Stitch project → original references → old repo
 - Setup used a temporary admin account; the website uses a read-only database
   token only.
 
+## Next rooms (2026-10-07)
+
+- Official Luma calendar embed, framed by Builder Base (`NextRooms` +
+  `LumaCalendar`). Placed after "You had to be there." for now; the section has
+  no dependency on its neighbour and the dark→paper handoff is opt-in.
+- Desktop is two columns because Luma centres its content at ~690 px — a
+  full-width frame would be mostly empty grey.
+- Deferred mount (template + IntersectionObserver after load/idle): zero Luma
+  requests on initial load; ~1 MB and two ~100 ms Luma long tasks once mounted.
+- Motion: HANDOFF (paper sheet opens from inset to full width as the section
+  enters, ≥640px) and FOCUS (calendar frame settles from ~94% width, once).
+  The iframe itself is never scaled or animated.
+- Truth: the calendar includes events other organisers run, so the section
+  note says "Rooms we're hosting, supporting, and watching." (approved copy).
+  Showing only Builder Base–managed events would need the Luma API (Luma Plus).
+
 ## Content architecture
 
 - Components receive props; pages call `src/data/content.ts`; adapters live in

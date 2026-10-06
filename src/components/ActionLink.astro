@@ -15,7 +15,9 @@ const { link, variant = 'quiet', class: className } = Astro.props;
 ---
 
 <a href={link.href} class:list={['action', `action--${variant}`, className]}>
-	<span class="action__label">{link.label}</span>{link.arrow && <span class="action__arrow" aria-hidden="true">↗</span>}
+	<span class="action__label">{link.label}</span>{link.hint && <span class="visually-hidden"> {link.hint}</span>}{
+		link.arrow && <span class="action__arrow" aria-hidden="true">↗</span>
+	}
 </a>
 
 <style>

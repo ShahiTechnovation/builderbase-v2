@@ -52,7 +52,12 @@ export function initMediaCursor(): void {
 	if (initialised) return;
 	initialised = true;
 	document.addEventListener('pointermove', onPointerMove, { passive: true });
+	// Entering an iframe (e.g. the Luma calendar) stops pointermove in this
+	// document; `pointerover` still fires on the iframe element itself, and
+	// focus moving into it blurs the window. Both hide the label.
+	document.addEventListener('pointerover', onPointerMove, { passive: true });
 	document.addEventListener('pointerleave', hide);
+	window.addEventListener('blur', hide);
 	window.addEventListener('scroll', hide, { passive: true });
 	document.addEventListener('keydown', hide);
 	document.addEventListener('pointerdown', (event) => {
