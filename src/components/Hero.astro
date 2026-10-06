@@ -7,46 +7,82 @@
  *
  * The <h1> always reads "The distribution layer for builders." The anchor
  * word is uppercased with CSS so assistive tech reads it as a normal word.
+ *
+ * Motion (only with `:root.motion`, see src/styles/motion.css):
+ *  - ENTRANCE: lines rise out of their masks in reading order; actions settle.
+ *  - EXPAND + HANDOFF (≥640px): the photo frame is full-bleed in layout but
+ *    clipped to the Option B inset; scrolling opens it to the edges and down
+ *    to the culture section while a near-black shade rises to meet it.
+ *  - DEPTH (≥640px): the photo drifts ±2% inside its frame.
+ * Without motion the static Option B composition is shown, unchanged.
  */
-import { hero } from '../data/home';
+import type { ResolvedPhoto } from '../data/model';
 import { actions } from '../data/site';
 import ActionLink from './ActionLink.astro';
 import PhotoFrame from './PhotoFrame.astro';
 
-const { statement, meta, photo } = hero;
+interface Props {
+	statement: { lead: string; anchor: string; tail: string };
+	/** Small factual metadata beside "The". Only passed when the truth gate allows it. */
+	meta?: string;
+	photo?: ResolvedPhoto;
+}
+
+const { statement, meta, photo } = Astro.props;
 ---
 
-<section class="hero" aria-labelledby="hero-title">
+<section class:list={['hero', { 'hero--no-photo': !photo }]} aria-labelledby="hero-title">
 	<div class="hero__statement page-width">
 		<h1 class="statement" id="hero-title">
-			<span class="statement__lead" style="--stagger: 0">{statement.lead}</span>{' '}
-			<span class="statement__anchor" style="--stagger: 1">{statement.anchor}</span>{' '}
-			<span class="statement__tail" style="--stagger: 2">{statement.tail}</span>
+			<span class="statement__lead reveal-mask" data-entrance="mask" style="--i: 0"
+				><span class="reveal-mask__line">{statement.lead}</span></span
+			>{' '}
+			<span class="statement__anchor reveal-mask" data-entrance="mask" style="--i: 1"
+				><span class="reveal-mask__line">{statement.anchor}</span></span
+			>{' '}
+			<span class="statement__tail reveal-mask" data-entrance="mask" style="--i: 2"
+				><span class="reveal-mask__line">{statement.tail}</span></span
+			>
 		</h1>
-		{meta && <p class="hero__meta meta" style="--stagger: 1">{meta}</p>}
-		<div class="hero__actions" style="--stagger: 3">
+		{
+			meta && (
+				<p class="hero__meta meta" data-entrance="meta" style="--i: 2">
+					{meta}
+				</p>
+			)
+		}
+		<div class="hero__actions" data-entrance="meta" style="--i: 3">
 			<ActionLink link={actions.join} variant="primary" class="hero__join" />
 			<ActionLink link={actions.partner} />
 		</div>
 	</div>
 
-	<div class="hero__photo page-width">
-		<div class="hero__frame">
-			<PhotoFrame
-				photo={photo}
-				priority
-				widths={[640, 960, 1280, 1600, 2000]}
-				sizes="(min-width: 105rem) 104rem, (min-width: 40rem) calc(100vw - 2rem), 100vw"
-			/>
-		</div>
-	</div>
+	{
+		photo && (
+			<div class="hero__photo page-width">
+				<div class="hero__frame" data-scroll="start through">
+					<div class="hero__image" data-entrance="photo" style="--i: 1">
+						<PhotoFrame
+							photo={photo}
+							priority
+							widths={[640, 960, 1280, 1600, 2000]}
+							sizes="(min-width: 105rem) 104rem, (min-width: 40rem) 100vw, 100vw"
+						/>
+					</div>
+				</div>
+			</div>
+		)
+	}
 </section>
 
 <style>
 	.hero {
+		--hero-gap: clamp(3.5rem, 2.8rem + 2vw, 4rem); /* paper between photo and culture */
+		--frame-ratio: 1.6;
+
 		display: flex;
 		flex-direction: column;
-		padding-bottom: clamp(3.5rem, 2.8rem + 2vw, 4rem);
+		padding-bottom: var(--hero-gap);
 	}
 
 	/* ── Statement ─────────────────────────────────────────────────── */
@@ -85,9 +121,7 @@ const { statement, meta, photo } = hero;
 	.statement__anchor {
 		grid-row: 2;
 		grid-column: 1 / -1;
-		display: block;
 		margin-inline-start: -0.035em; /* optical: pull the D's side bearing onto the gutter */
-		margin-block: 0.06em 0.05em;
 		font-size: 12.5vw;
 		font-size: calc(100cqi / 7.27); /* Schibsted Grotesk 800 @ -0.055em: "DISTRIBUTION" ≈ 7.25em */
 		font-weight: var(--weight-display);
@@ -95,6 +129,11 @@ const { statement, meta, photo } = hero;
 		line-height: var(--leading-anchor);
 		text-transform: uppercase;
 		white-space: nowrap;
+	}
+
+	/* The mask pads itself; restore the anchor's breathing room on top of it. */
+	.statement__anchor.reveal-mask {
+		margin-block: calc(0.06em - 0.14em) calc(0.05em - 0.14em);
 	}
 
 	.statement__tail {
@@ -132,6 +171,10 @@ const { statement, meta, photo } = hero;
 		background-color: var(--color-well);
 	}
 
+	.hero__image {
+		height: 100%;
+	}
+
 	.hero__frame :global(img) {
 		object-position: var(--focal-portrait);
 	}
@@ -160,7 +203,7 @@ const { statement, meta, photo } = hero;
 
 		.hero__frame {
 			height: auto;
-			aspect-ratio: 16 / 10;
+			aspect-ratio: var(--frame-ratio);
 			border-radius: var(--radius-frame);
 		}
 
@@ -183,6 +226,10 @@ const { statement, meta, photo } = hero;
 
 	/* ── Desktop: actions sit beside "layer for builders." ─────────── */
 	@media (min-width: 64rem) {
+		.hero {
+			--frame-ratio: 2.175; /* 87 / 40 */
+		}
+
 		.hero__statement {
 			grid-template-columns: max-content minmax(0, 1fr);
 			column-gap: var(--space-7);
@@ -194,49 +241,58 @@ const { statement, meta, photo } = hero;
 			align-self: center;
 			margin-top: 0.15em;
 		}
-
-		.hero__frame {
-			aspect-ratio: 87 / 40;
-		}
 	}
 
-	/* ── Entrance ──────────────────────────────────────────────────── */
-	@media (prefers-reduced-motion: no-preference) {
-		.statement > span,
-		.hero__meta,
-		.hero__actions {
-			animation: hero-rise var(--duration-entrance) var(--ease-editorial) both;
-			animation-delay: calc(var(--stagger, 0) * 70ms);
+	/* ── Motion: EXPAND + HANDOFF + DEPTH (≥640px) ─────────────────────
+	   Layout never changes while scrolling: the frame is laid out full-bleed
+	   (plus the paper gap) and only its clip, shade and image transform move.
+	   At --scroll-start: 0 it is pixel-identical to the static composition. */
+	@media (min-width: 40rem) {
+		:global(:root.motion) .hero:not(.hero--no-photo) {
+			padding-bottom: 0;
 		}
 
-		.hero__frame {
-			animation: hero-reveal 1100ms var(--ease-editorial) 80ms both;
+		:global(:root.motion) .hero__photo {
+			container-type: inline-size;
+			padding-inline: 0;
 		}
 
-		.hero__frame :global(img) {
-			animation: hero-settle 1600ms var(--ease-editorial) 80ms both;
-		}
-	}
+		:global(:root.motion) .hero__frame {
+			--inset: var(--gutter-photo);
+			--open: var(--scroll-start);
+			--shut: calc(1 - var(--open));
 
-	@keyframes hero-rise {
-		from {
-			opacity: 0;
-			transform: translateY(0.75rem);
+			aspect-ratio: auto;
+			height: calc((100cqi - 2 * var(--inset)) / var(--frame-ratio) + var(--hero-gap));
+			border-radius: 0;
+			clip-path: inset(
+				0 calc(var(--inset) * var(--shut)) calc(var(--hero-gap) * var(--shut)) calc(var(--inset) * var(--shut))
+					round calc(var(--radius-frame) * var(--shut))
+			);
 		}
-	}
 
-	@keyframes hero-reveal {
-		from {
-			clip-path: inset(0 0 14% 0);
+		/* Vignette and handoff shade follow the visible bottom edge. */
+		:global(:root.motion) .hero__frame::after,
+		:global(:root.motion) .hero__frame::before {
+			translate: 0 calc(-1 * var(--hero-gap) * var(--shut));
 		}
-		to {
-			clip-path: inset(0);
-		}
-	}
 
-	@keyframes hero-settle {
-		from {
-			transform: scale(1.04);
+		/* HANDOFF: near-black rises from the culture section into the photo. */
+		:global(:root.motion) .hero__frame::before {
+			content: '';
+			position: absolute;
+			inset: auto 0 0;
+			z-index: 1;
+			height: 45%;
+			background: linear-gradient(to top, var(--near-black), rgb(14 15 19 / 0));
+			opacity: calc(var(--open) * var(--open));
+			pointer-events: none;
+		}
+
+		/* DEPTH: the photograph sits slightly behind its frame. */
+		:global(:root.motion) .hero__frame :global(img) {
+			scale: 1.05;
+			translate: 0 calc((var(--scroll-through) - 0.5) * 4%);
 		}
 	}
 </style>

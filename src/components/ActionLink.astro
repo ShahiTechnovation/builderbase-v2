@@ -15,7 +15,7 @@ const { link, variant = 'quiet', class: className } = Astro.props;
 ---
 
 <a href={link.href} class:list={['action', `action--${variant}`, className]}>
-	{link.label}{link.arrow && <span class="action__arrow" aria-hidden="true">↗</span>}
+	<span class="action__label">{link.label}</span>{link.arrow && <span class="action__arrow" aria-hidden="true">↗</span>}
 </a>
 
 <style>
@@ -30,42 +30,46 @@ const { link, variant = 'quiet', class: className } = Astro.props;
 		letter-spacing: var(--tracking-ui);
 		line-height: 1;
 		white-space: nowrap;
-		transition:
-			background-color var(--duration-fast) var(--ease-standard),
-			color var(--duration-fast) var(--ease-standard),
-			text-decoration-color var(--duration-fast) var(--ease-standard);
 	}
 
+	/* Primary: a darker fill sweeps in from the left. */
 	.action--primary {
 		min-height: 3.25rem; /* 52px */
 		padding-inline: 1.75rem;
-		background-color: var(--color-accent);
+		background:
+			linear-gradient(var(--color-accent-hover), var(--color-accent-hover)) no-repeat left / 0% 100%,
+			var(--color-accent);
 		color: var(--color-on-accent);
 		border-radius: var(--radius-sm);
+		transition: background-size var(--duration-base) var(--ease-editorial);
 	}
 
 	.action--primary:hover {
-		background-color: var(--color-accent-hover);
+		background-size: 100% 100%;
 	}
 
+	/* Quiet: the underline draws in from the left. */
 	.action--quiet {
 		color: var(--color-text);
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.3em;
-		text-decoration-color: transparent;
 	}
 
-	.action--quiet:hover {
-		text-decoration-color: currentColor;
+	.action--quiet .action__label {
+		padding-block: 0.3em;
+		background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1px;
+		transition: background-size var(--duration-base) var(--ease-editorial);
 	}
 
+	.action--quiet:hover .action__label {
+		background-size: 100% 1px;
+	}
+
+	/* The arrow leans toward where it leads. */
 	.action__arrow {
 		font-size: 0.875em;
-		transition: transform var(--duration-fast) var(--ease-standard);
+		transition: translate var(--duration-base) var(--ease-editorial);
 	}
 
 	.action:hover .action__arrow {
-		transform: translate(1px, -1px);
+		translate: 3px -3px;
 	}
 </style>

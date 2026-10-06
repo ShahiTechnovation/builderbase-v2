@@ -1,10 +1,26 @@
 ---
 import CultureGallery from '../components/CultureGallery.astro';
 import Hero from '../components/Hero.astro';
+import { getHomepageContent } from '../data/content';
+import { home } from '../data/home';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const content = await getHomepageContent();
 ---
 
-<BaseLayout>
-	<Hero />
-	<CultureGallery />
+<BaseLayout ogPhoto={content.heroPhoto}>
+	<Hero
+		statement={home.hero.statement}
+		meta={content.nationalPresence ? home.hero.nationalPresenceMeta : undefined}
+		photo={content.heroPhoto}
+	/>
+	{
+		content.culturePhotos.length > 0 && (
+			<CultureGallery
+				title={home.culture.title}
+				galleryLabel={home.culture.galleryLabel}
+				photos={content.culturePhotos}
+			/>
+		)
+	}
 </BaseLayout>

@@ -18,6 +18,18 @@ export const site = {
 	themeColor: '#f4f2ed',
 } as const;
 
+/**
+ * Where actions lead. Components read these; changing a destination never
+ * requires editing a component.
+ */
+export const destinations = {
+	// TEMPORARY: there is no join/community flow yet. Replace with the real one.
+	join: '/events',
+	partner: '/partners',
+	// Public Builder Base calendar on Luma (verified 2026-10-06).
+	lumaCalendar: 'https://luma.com/Builderbase',
+} as const;
+
 export const primaryNav: NavLink[] = [
 	{ label: 'Events', href: '/events' },
 	{ label: 'Projects', href: '/projects' },
@@ -25,10 +37,10 @@ export const primaryNav: NavLink[] = [
 	{ label: 'About', href: '/about' },
 ];
 
-export const partnersNav: NavLink = { label: 'For partners', href: '/partners', arrow: true };
+export const partnersNav: NavLink = { label: 'For partners', href: destinations.partner, arrow: true };
 
 export const actions = {
-	// Destination pending: there is no join flow yet. Confirm before launch.
-	join: { label: 'Join the base', href: '/events' },
-	partner: { label: 'Partner with us', href: '/partners', arrow: true },
+	join: { label: 'Join the base', href: destinations.join },
+	partner: { label: 'Partner with us', href: destinations.partner, arrow: true },
+	lumaCalendar: { label: 'See the calendar on Luma', href: destinations.lumaCalendar, arrow: true },
 } satisfies Record<string, NavLink>;

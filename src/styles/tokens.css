@@ -98,16 +98,21 @@
 	--radius-frame: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
 
 	/* ── Motion ────────────────────────────────────────────────────── */
+	/* Editorial: fast start, long settle — confident, never springy. */
 	--ease-editorial: cubic-bezier(0.2, 0.7, 0.1, 1);
 	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-	--duration-fast: 160ms;
-	--duration-base: 320ms;
-	--duration-slow: 720ms;
-	--duration-entrance: 900ms;
+	--duration-fast: 160ms; /* hover / focus feedback */
+	--duration-base: 320ms; /* small state changes */
+	--duration-shift: 600ms; /* gallery: one photograph hands focus to another */
+	--duration-slow: 720ms; /* reveals */
+	--duration-entrance: 760ms; /* hero lines on load */
+	--stagger: 70ms; /* between related items entering together */
+	--reveal-distance: 1.5rem; /* metadata / row travel */
 
 	/* ── Layers ────────────────────────────────────────────────────── */
 	--z-header: 20;
 	--z-menu: 30;
+	--z-cursor: 35;
 	--z-skip: 40;
 }
 
@@ -128,7 +133,9 @@
 	:root {
 		--duration-fast: 0ms;
 		--duration-base: 0ms;
+		--duration-shift: 0ms;
 		--duration-slow: 0ms;
 		--duration-entrance: 0ms;
+		--stagger: 0ms;
 	}
 }

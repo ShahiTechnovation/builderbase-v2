@@ -8,37 +8,45 @@
  *
  * Same markup for both. Without JavaScript the first photo stays expanded on
  * desktop and the mobile track still scrolls.
+ *
+ * Motion: the title rises out of its masks (REVEAL), photographs open in
+ * sequence (REVEAL, staggered), selection hands focus between photographs
+ * (SHIFT). Collapsed photographs carry a contextual "View" cursor label.
  */
-import { culture } from '../data/home';
-import { publicPhotoCaption } from '../data/public';
+import type { CulturePhoto } from '../data/content';
 import PhotoFrame from './PhotoFrame.astro';
 
-const { title, galleryLabel, photos } = culture;
+interface Props {
+	title: readonly string[];
+	galleryLabel: string;
+	photos: CulturePhoto[];
+}
+
+const { title, galleryLabel, photos } = Astro.props;
 const total = photos.length;
 const pad = (value: number) => String(value).padStart(2, '0');
 
-const items = photos.map((photo, index) => ({
-	photo,
-	number: pad(index + 1),
-	caption: publicPhotoCaption(photo),
-}));
+const items = photos.map(({ photo, caption }, index) => ({ photo, caption, number: pad(index + 1) }));
 const firstCaption = items[0]?.caption ?? [];
+const CURSOR_LABEL = 'View';
 ---
 
 <section class="culture surface-dark" aria-labelledby="culture-title" data-gallery>
 	<div class="culture__inner page-width">
 		<header class="culture__header">
-			<h2 class="culture__title" id="culture-title">
+			<h2 class="culture__title" id="culture-title" data-reveal="mask">
 				{
 					title.map((line, index) => (
 						<>
 							{index > 0 && ' '}
-							<span class="culture__title-line">{line}</span>
+							<span class="culture__title-line reveal-mask" style={`--i: ${index}`}>
+								<span class="reveal-mask__line">{line}</span>
+							</span>
 						</>
 					))
 				}
 			</h2>
-			<p class="culture__meta meta" aria-hidden="true">
+			<p class="culture__meta meta" aria-hidden="true" data-reveal="meta" style="--i: 2">
 				<span class="culture__count"><span data-gallery-current>01</span> / {pad(total)}</span>
 				<span class="culture__caption" data-gallery-caption>
 					{firstCaption.map((line) => <span>{line}</span>)}
@@ -59,6 +67,9 @@ const firstCaption = items[0]?.caption ?? [];
 							type="button"
 							aria-current={index === 0 ? 'true' : undefined}
 							data-gallery-trigger
+							data-cursor-label={index === 0 ? undefined : CURSOR_LABEL}
+							data-reveal="photo"
+							style={`--i: ${index}`}
 						>
 							<span class="visually-hidden">
 								{`Photograph ${index + 1} of ${total}${caption.length ? ` — ${caption.join(', ')}` : ''}: `}
@@ -81,7 +92,7 @@ const firstCaption = items[0]?.caption ?? [];
 			}
 		</ul>
 
-		<ol class="gallery__progress meta" aria-hidden="true">
+		<ol class="gallery__progress meta" aria-hidden="true" data-reveal="meta" style={`--i: ${Math.min(total, 4)}`}>
 			{
 				items.map(({ number }, index) => (
 					<li class:list={['gallery__progress-step', { 'is-active': index === 0 }]} data-gallery-step>
@@ -97,8 +108,10 @@ const firstCaption = items[0]?.caption ?? [];
 
 <script>
 	import { initCultureGallery } from '../scripts/culture-gallery';
+	import { initMediaCursor } from '../scripts/media-cursor';
 
 	document.querySelectorAll<HTMLElement>('[data-gallery]').forEach(initCultureGallery);
+	initMediaCursor();
 </script>
 
 <style>
@@ -190,7 +203,7 @@ const firstCaption = items[0]?.caption ?? [];
 
 	.gallery__trigger :global(img) {
 		object-position: var(--focal-portrait);
-		transition: filter var(--duration-slow) var(--ease-editorial);
+		transition: filter var(--duration-shift) var(--ease-editorial);
 	}
 
 	.gallery__item:not(.is-active) .gallery__trigger {
@@ -211,7 +224,7 @@ const firstCaption = items[0]?.caption ?? [];
 		background-color: var(--paper);
 		transform: scaleX(0);
 		transform-origin: left;
-		transition: transform var(--duration-slow) var(--ease-editorial);
+		transition: transform var(--duration-shift) var(--ease-editorial);
 	}
 
 	.gallery__item.is-active .gallery__trigger::before {
@@ -303,6 +316,7 @@ const firstCaption = items[0]?.caption ?? [];
 			padding-inline: 0;
 			overflow: visible;
 			scroll-snap-type: none;
+			contain: layout; /* SHIFT reflows stay inside the gallery */
 		}
 
 		.gallery__item {
@@ -311,7 +325,7 @@ const firstCaption = items[0]?.caption ?? [];
 			flex: var(--grow) 1 0%;
 			min-width: 0;
 			aspect-ratio: auto;
-			transition: flex-grow var(--duration-slow) var(--ease-editorial);
+			transition: flex-grow var(--duration-shift) var(--ease-editorial);
 		}
 
 		.gallery__item.is-active {
@@ -363,29 +377,6 @@ const firstCaption = items[0]?.caption ?? [];
 		.gallery__progress {
 			gap: var(--space-6);
 			margin-top: var(--space-6);
-		}
-	}
-
-	/* ── Section entrance (scroll-driven, no JS; skipped where unsupported) ── */
-	@supports (animation-timeline: view()) {
-		@media (prefers-reduced-motion: no-preference) {
-			.culture__title-line,
-			.gallery {
-				animation: culture-rise linear both;
-				animation-timeline: view();
-				animation-range: entry 0% entry 60%;
-			}
-
-			.culture__title-line:nth-child(2) {
-				animation-range: entry 5% entry 70%;
-			}
-		}
-	}
-
-	@keyframes culture-rise {
-		from {
-			opacity: 0;
-			transform: translateY(2rem);
 		}
 	}
 </style>

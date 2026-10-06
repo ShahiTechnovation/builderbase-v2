@@ -1,7 +1,7 @@
 ---
 /** Title, description, canonical, Open Graph / Twitter and structured data. */
 import { getImage } from 'astro:assets';
-import { hero } from '../data/home';
+import type { ResolvedPhoto } from '../data/model';
 import { site } from '../data/site';
 
 interface Props {
@@ -9,22 +9,27 @@ interface Props {
 	title?: string;
 	description?: string;
 	noindex?: boolean;
+	/** Photo for the social card; omitted when there is none. */
+	ogPhoto?: ResolvedPhoto;
 }
 
-const { title, description = site.description, noindex = false } = Astro.props;
+const { title, description = site.description, noindex = false, ogPhoto } = Astro.props;
 
 const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.statement.replace(/\.$/, '')}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
-const ogImage = await getImage({
-	src: hero.photo.image,
-	width: 1200,
-	height: 630,
-	fit: 'cover', // centre crop; sharp's position does not accept CSS percentages
-	format: 'jpg',
-	quality: 80,
-});
-const ogImageUrl = new URL(ogImage.src, Astro.site);
+const ogSource = ogPhoto?.image;
+const ogImage =
+	ogSource &&
+	(await getImage({
+		src: 'format' in ogSource ? ogSource : ogSource.src,
+		width: 1200,
+		height: 630,
+		fit: 'cover', // centre crop; sharp's position does not accept CSS percentages
+		format: 'jpg',
+		quality: 80,
+	}));
+const ogImageUrl = ogImage && new URL(ogImage.src, Astro.site);
 
 const structuredData = {
 	'@context': 'https://schema.org',
@@ -46,14 +51,20 @@ const structuredData = {
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
-<meta property="og:image" content={ogImageUrl} />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content={hero.photo.alt} />
+{
+	ogImageUrl && (
+		<>
+			<meta property="og:image" content={ogImageUrl} />
+			<meta property="og:image:width" content="1200" />
+			<meta property="og:image:height" content="630" />
+			<meta property="og:image:alt" content={ogPhoto?.alt} />
+		</>
+	)
+}
 
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={ogImageUrl} />
+{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 
 <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

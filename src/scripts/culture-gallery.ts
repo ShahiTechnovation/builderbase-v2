@@ -7,6 +7,8 @@
  * position, and tapping a peeking photo scrolls it into place.
  */
 
+import { refreshMediaCursor } from './media-cursor';
+
 const DESKTOP_QUERY = '(min-width: 64rem)';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -26,6 +28,7 @@ export function initCultureGallery(root: HTMLElement): void {
 	const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY);
 	const total = items.length;
 	const captions = items.map((item) => JSON.parse(item.dataset.caption ?? '[]') as string[]);
+	const cursorLabel = triggers.find((trigger) => trigger.dataset.cursorLabel)?.dataset.cursorLabel ?? 'View';
 
 	let activeIndex = Math.max(
 		0,
@@ -39,9 +42,15 @@ export function initCultureGallery(root: HTMLElement): void {
 		items.forEach((item, i) => item.classList.toggle('is-active', i === index));
 		steps.forEach((step, i) => step.classList.toggle('is-active', i === index));
 		triggers.forEach((trigger, i) => {
-			if (i === index) trigger.setAttribute('aria-current', 'true');
-			else trigger.removeAttribute('aria-current');
+			if (i === index) {
+				trigger.setAttribute('aria-current', 'true');
+				trigger.removeAttribute('data-cursor-label');
+			} else {
+				trigger.removeAttribute('aria-current');
+				trigger.setAttribute('data-cursor-label', cursorLabel);
+			}
 		});
+		refreshMediaCursor();
 
 		if (current) current.textContent = pad(index + 1);
 		if (captionSlot) {

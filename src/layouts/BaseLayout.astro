@@ -2,6 +2,8 @@
 import { Font } from 'astro:assets';
 import SeoHead from '../components/SeoHead.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import { getHomepageContent } from '../data/content';
+import type { ResolvedPhoto } from '../data/model';
 import { site } from '../data/site';
 import '../styles/global.css';
 
@@ -9,9 +11,12 @@ interface Props {
 	title?: string;
 	description?: string;
 	noindex?: boolean;
+	/** Social card photo. Defaults to the curated hero photograph. */
+	ogPhoto?: ResolvedPhoto;
 }
 
 const { title, description, noindex } = Astro.props;
+const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 ---
 
 <!doctype html>
@@ -20,11 +25,16 @@ const { title, description, noindex } = Astro.props;
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script is:inline>
-			document.documentElement.classList.add('js');
+			// Set before first paint: `js` enables progressive behaviour; `motion`
+			// enables animation only when reduced motion is not requested.
+			(function (root) {
+				root.classList.add('js');
+				if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) root.classList.add('motion');
+			})(document.documentElement);
 		</script>
 		<Font cssVariable="--font-schibsted-grotesk" preload />
 		<Font cssVariable="--font-fragment-mono" />
-		<SeoHead title={title} description={description} noindex={noindex} />
+		<SeoHead title={title} description={description} noindex={noindex} ogPhoto={ogPhoto} />
 		<meta name="theme-color" content={site.themeColor} />
 		<meta name="color-scheme" content="light" />
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -38,6 +48,10 @@ const { title, description, noindex } = Astro.props;
 		</main>
 	</body>
 </html>
+
+<script>
+	import '../scripts/motion';
+</script>
 
 <style>
 	main:focus {

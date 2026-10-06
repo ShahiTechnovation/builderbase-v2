@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1440, initial-scale=1.0" name="viewport"/>
+<title>Builder Base V2 — Hero Option B</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    width: 1440px;
+    margin: 0 auto;
+    background-color: #F4F2ED;
+    color: #121317;
+    font-family: 'Hanken Grotesk', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    height: 72px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #121317;
+  }
+
+  .brand-square {
+    width: 6px;
+    height: 6px;
+    background-color: #2B2F7C;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #121317;
+    line-height: 1;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-link {
+    font-size: 15px;
+    font-weight: 500;
+    color: #121317;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .partners-link {
+    font-size: 15px;
+    font-weight: 500;
+    color: #121317;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  /* HERO STATEMENT */
+  .hero-statement-section {
+    padding: 16px 32px 0 32px;
+  }
+
+  .statement-line-1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+  }
+
+  .statement-the {
+    font-size: 64px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    color: #121317;
+  }
+
+  .statement-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #5E5B55;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .statement-line-2 {
+    width: 100%;
+    margin: 4px 0 2px 0;
+  }
+
+  .statement-distribution {
+    font-size: 196px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 0.84;
+    text-transform: uppercase;
+    color: #121317;
+    display: block;
+    width: 100%;
+    text-align: justify;
+    text-align-last: justify;
+  }
+
+  .statement-line-3 {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .statement-layer {
+    font-size: 64px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: #121317;
+  }
+
+  .statement-actions {
+    display: flex;
+    align-items: center;
+    margin-left: 40px;
+    gap: 24px;
+  }
+
+  .btn-join {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    padding: 0 28px;
+    background-color: #2B2F7C;
+    color: #F4F2ED;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .partner-link-action {
+    font-size: 16px;
+    font-weight: 500;
+    color: #121317;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  /* HERO PHOTO */
+  .hero-photo-wrapper {
+    margin-top: 32px;
+    padding: 0 24px;
+    margin-bottom: 64px;
+  }
+
+  .hero-photo-frame {
+    position: relative;
+    width: 100%;
+    height: 640px;
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: #0E0F13;
+  }
+
+  .hero-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 45%;
+    display: block;
+  }
+
+  .hero-photo-frame::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background: linear-gradient(to top, rgba(14, 15, 19, 0.45) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* CULTURE SECTION */
+  .culture-section {
+    background-color: #0E0F13;
+    padding: 96px 0 96px 32px;
+    color: #F4F2ED;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .culture-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: 32px;
+    margin-bottom: 48px;
+  }
+
+  .culture-title {
+    font-size: 112px;
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: #F4F2ED;
+  }
+
+  .culture-title span {
+    display: block;
+  }
+
+  .culture-meta-stack {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    line-height: 1.4;
+    padding-bottom: 6px;
+  }
+
+  .meta-paper {
+    color: #F4F2ED;
+    letter-spacing: 0.06em;
+  }
+
+  .meta-grey {
+    color: #9A968E;
+    letter-spacing: 0.06em;
+  }
+
+  /* GALLERY ACCORDION ROW */
+  .culture-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    height: 560px;
+  }
+
+  .photo-frame {
+    height: 560px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: #121317;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Frame 01 (Expanded & Active) */
+  .frame-01 {
+    width: 860px;
+  }
+
+  .frame-01 img {
+    object-position: 50% 55%;
+  }
+
+  .frame-01::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #F4F2ED;
+    z-index: 2;
+  }
+
+  .frame-01 .bottom-vignette {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top, rgba(14, 15, 19, 0.85) 0%, transparent 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 24px;
+    z-index: 2;
+  }
+
+  .frame-01 .caption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #F4F2ED;
+  }
+
+  /* Frame 02 (Hover state) */
+  .frame-02 {
+    width: 180px;
+  }
+
+  .frame-02 img {
+    object-position: 50% 60%;
+  }
+
+  .frame-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 2;
+  }
+
+  .badge-paper {
+    color: #F4F2ED;
+  }
+
+  .badge-grey {
+    color: #9A968E;
+  }
+
+  /* Frames 03, 04, 05 (Collapsed slices) */
+  .frame-collapsed {
+    width: 112px;
+  }
+
+  .frame-03 img {
+    object-position: 50% 50%;
+    filter: grayscale(70%) brightness(0.8);
+  }
+
+  .frame-04 img {
+    object-position: 40% 60%;
+    filter: grayscale(70%) brightness(0.8);
+  }
+
+  .frame-05 img {
+    object-position: 20% 50%;
+    filter: grayscale(70%) brightness(0.8);
+  }
+
+  /* INDEX BAR */
+  .index-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .index-item {
+    color: #9A968E;
+    position: relative;
+    padding-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .index-item.active {
+    color: #F4F2ED;
+  }
+
+  .index-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #2B2F7C;
+  }
+</style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar">
+<div class="nav-left">
+<a class="brand-mark" href="#">
+<div class="brand-square"></div>
+<span class="brand-name">builder base</span>
+</a>
+<div class="nav-links">
+<a class="nav-link" href="#">Events</a>
+<a class="nav-link" href="#">Projects</a>
+<a class="nav-link" href="#">Stories</a>
+<a class="nav-link" href="#">About</a>
+</div>
+</div>
+<div class="nav-right">
+<a class="partners-link" href="#">For partners ↗</a>
+</div>
+</nav>
+<!-- HERO STATEMENT -->
+<section class="hero-statement-section">
+<div class="statement-line-1">
+<div class="statement-the">The</div>
+<div class="statement-meta">BUILDING ACROSS INDIA</div>
+</div>
+<div class="statement-line-2" style="margin: 8px 0 0 0; width: 100%;">
+<div class="statement-distribution" style="font-size: 230px; letter-spacing: -0.05em; line-height: 0.84; text-transform: uppercase; width: 100%; display: block; text-align: justify; text-align-last: justify;">DISTRIBUTION</div>
+</div>
+<div class="statement-line-3" style="margin-top: 16px; display: flex; align-items: center;">
+<div class="statement-layer">layer for builders.</div>
+<div class="statement-actions">
+<a class="btn-join" href="#">Join the base</a>
+<a class="partner-link-action" href="#">Partner with us ↗</a>
+</div>
+</div>
+</section>
+<!-- HERO PHOTO -->
+<div class="hero-photo-wrapper">
+<div class="hero-photo-frame">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCw0OQ-ZeY-HBAd8X7_8qRgozcFfUvslg9JK3YApGX7M5SFrdFTtFkES1ar-Q885vIDpqFSndK0UAmtLxrR49WdLfObUEKW4ZtZxJFNamHHmsdyAEZd_rFBJCd9iJD5tkhrTNM6otDWdTD5dJltwsU_ct-cBSPpaklCZGmE3vhPEsHDWxjm80WsWR6KHbOhPrtYaUFzzcsniM0t-Bg3mP4bR3d6Haa6BeOXlhnikRT5Fd5caZHVA0SSnLF8EzhA6D7noPmt2OGwvyKJ"/>
+</div>
+</div>
+<!-- CULTURE SECTION -->
+<section class="culture-section" style="padding: 96px 0 80px 32px;">
+<div class="culture-header">
+<div class="culture-title">
+<span>YOU HAD TO</span>
+<span>BE THERE.</span>
+</div>
+<div class="culture-meta-stack">
+<div class="meta-paper">01 / 05</div>
+<div class="meta-paper">[CITY] /// [ACTIVATION]</div>
+<div class="meta-grey">[RELATIONSHIP] /// [MONTH YEAR]</div>
+</div>
+</div>
+<!-- ACCORDION GALLERY ROW -->
+<div class="culture-row">
+<!-- Frame 01 (Expanded) -->
+<div class="photo-frame frame-01">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXTNIFSHO3JBd2lQ5pKp4mHuZqP63udCFNZsQt5dfWpi34vY0JGdmZ_h_ZmN-L5dMQujm9Ujl3WGLhK4fgAoCHF7WKqbw2c5GDsYnakP7yn0_mQB6iqwkd7qsr0VTs0u0JRkITkJk3Y0GusKGRrQZHD0br9v3KOTeU5fGZ9oT8l0v1_s3MXQE_Ej9dCiGv-N_jvPPyucPkeOpuYAhFv3H8vwZMgHDbbbOIFuA99WC_vtmCjjrZvdMxst2dXn0caav-4Qa_ql26Aycg"/>
+<div class="bottom-vignette">
+<div class="caption">[CITY] /// [ACTIVATION]</div>
+</div>
+</div>
+<!-- Frame 02 (Hover state) -->
+<div class="photo-frame frame-02">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrwL9US7GG9iIbTB7dU_5YSoaNYezKX6sZ35O4baxH4im26dXmr8lOOFS4xgzjfty_6KS1bj3uVMBHPkVe1QsRqdGvk4pFSZjueQkYIV85jE4f-c14XnifUvsnwrm_2mg4Aifkqo0ZK6Uud1rvQ1i2kiW77Erhdb9RnRnenYI6OsVlffjFHEKSRl3HVDdXZMWgnjD2LmI9t5_C92cu_6fII3Ms4GxnEBIukKxTKGiDF4sC6MrGP6cMSmY-RhYu2f7cYBwCSs8oBCTI"/>
+<div class="frame-badge badge-paper">02</div>
+</div>
+<!-- Frame 03 (Collapsed) -->
+<div class="photo-frame frame-collapsed frame-03">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpHvDkNHws4itVfJwZ1fAADAwHTVAB-xHZRoRo47O65Tn6IXVo-M3pd3B-04NygWa0NZmlOuZxLxTt5o36iDXo7kAaRBRvyvpT1RzADsZewuZAVnX_76U0qadmNi2m73SGwQS4-bly1gey72t4nUy9xCcURhYIH-61ILl9wCk9526d_LPgpQxT80_diZnE1XaAyD42D7239gAMpI4GQQuFvdzkUg7pkgLkuF4pDT_7rvSyhSFI8MQYydt2gAEONsujYrt0DUUl67R7"/>
+<div class="frame-badge badge-grey">03</div>
+</div>
+<!-- Frame 04 (Collapsed) -->
+<div class="photo-frame frame-collapsed frame-04">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5POHAeHMN73iwexj1zHYUgFBj5nH9hALxD9E2J7NWNYAnIN7WlMrVlCR3ATGV6Xe_MUWGJD85wJ55ea0ZdchOTsKKMRh1oTtAKH9IUbzbmYnavtAAh9KuKOIO7VJqmQOCRRwjfTxMEx9ZQT91HBkHuYffV6s1LWUMGZrVD52i8PEE6vqcve-SXr7n88HxKWtnRsQoW0aj2fR6QEPNGXaWj3biv6b-eUBD7kshIKAk7MxDy7PwUq1NcjbxhDuThG_FlQMhgL0ogAF8"/>
+<div class="frame-badge badge-grey">04</div>
+</div>
+<!-- Frame 05 (Collapsed, bleeding off edge) -->
+<div class="photo-frame frame-collapsed frame-05">
+<img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFtg9itfydwZhjBClS9G5ctQSkg3YiJ6_SW0xHDDhdQnI49AwuSqa49VY7thAAdIt3VHjWN-5YIWjaLvg7QfrMlGMEn0vITajIvyfvcERZeh1wg7Ht_sOqtdGXbAkFMAaC_cAdwqmB6on-AUs2nAWisSdj_fodyhyjgqbG3DWkrhWMvF-dk4wzDLfeynG6kugt2E0atksj9AEOY7UxBJh3CyccBOHUKy-u3QJzgNSjpd4Q6igwUF9PKrIwNoypH2_c1T9e2hsjFBDd"/>
+<div class="frame-badge badge-grey">05</div>
+</div>
+</div>
+<!-- INDEX BAR -->
+<div class="index-row">
+<div class="index-item active">01</div>
+<div class="index-item">02</div>
+<div class="index-item">03</div>
+<div class="index-item">04</div>
+<div class="index-item">05</div>
+</div>
+</section>
+</body>
+</html>

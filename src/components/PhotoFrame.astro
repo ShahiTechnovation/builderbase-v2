@@ -1,21 +1,31 @@
 ---
 /**
- * A real photograph, cropped with object-fit to whatever box its parent gives
- * it. The crop is steered by the photo's focal points, so replacing an image
- * is a content change only.
+ * The editorial photograph primitive.
+ *
+ * A real photograph cropped with object-fit to whatever box its parent gives
+ * it (or to `aspect`). The crop is steered by the photo's focal points, so
+ * replacing an image is a content change only. Local masters and allowed
+ * remote assets are both optimised to responsive AVIF/WebP at build time.
  *
  * Exposes `--focal` and `--focal-portrait` on the <img>; parents switch to the
  * portrait focal point in portrait contexts.
+ *
+ * Missing photo → a quiet well in the surface colour, hidden from assistive
+ * tech, so layouts hold without a broken image.
  */
 import { Picture } from 'astro:assets';
-import type { FocalPoint, Photo } from '../data/model';
+import type { FocalPoint, ResolvedPhoto } from '../data/model';
 
 interface Props {
-	photo: Photo;
+	photo: ResolvedPhoto | undefined;
 	/** Rendered width hints for the browser, e.g. "(min-width: 1024px) 66vw, 100vw". */
 	sizes: string;
 	/** Candidate widths. Anything larger than the source is dropped. */
 	widths?: number[];
+	/** CSS aspect-ratio, e.g. "3 / 2". Without it the photo fills its parent. */
+	aspect?: string;
+	/** Verified caption lines, rendered as small metadata under the photo. */
+	caption?: string[];
 	/** Above-the-fold hero image: eager + high fetch priority. */
 	priority?: boolean;
 	/** Use when surrounding text already conveys the image. */
@@ -27,32 +37,62 @@ const {
 	photo,
 	sizes,
 	widths = [480, 720, 960, 1280, 1600, 2000],
+	aspect,
+	caption = [],
 	priority = false,
 	decorative = false,
 	class: className,
 } = Astro.props;
 
-const sourceWidth = photo.image.width;
-const candidateWidths = [...new Set([...widths.filter((width) => width < sourceWidth), sourceWidth])].sort(
-	(a, b) => a - b,
-);
-
 const toPosition = ({ x, y }: FocalPoint) => `${x}% ${y}%`;
-const focal = toPosition(photo.focal);
-const focalPortrait = toPosition(photo.focalPortrait ?? photo.focal);
+const asFigure = Boolean(aspect) || caption.length > 0;
+
+const image = photo?.image;
+// Local masters carry their own metadata; remote assets need explicit dimensions.
+const source = image && ('format' in image ? { src: image } : { src: image.src, width: image.width, height: image.height });
+const candidateWidths = image
+	? [...new Set([...widths.filter((width) => width < image.width), image.width])].sort((a, b) => a - b)
+	: [];
+const pictureProps = photo &&
+	source && {
+		...source,
+		alt: decorative ? '' : photo.alt,
+		widths: candidateWidths,
+		sizes,
+		formats: ['avif', 'webp'] as ('avif' | 'webp')[],
+		priority,
+		style: `--focal: ${toPosition(photo.focal)}; --focal-portrait: ${toPosition(photo.focalPortrait ?? photo.focal)};`,
+	};
 ---
 
-<Picture
-	src={photo.image}
-	alt={decorative ? '' : photo.alt}
-	widths={candidateWidths}
-	sizes={sizes}
-	formats={['avif', 'webp']}
-	priority={priority}
-	class:list={['photo-frame__img', className]}
-	style={`--focal: ${focal}; --focal-portrait: ${focalPortrait};`}
-	pictureAttributes={{ class: 'photo-frame' }}
-/>
+{
+	asFigure ? (
+		<figure class:list={['photo-figure', className]} style={aspect ? `--aspect: ${aspect}` : undefined}>
+			<div class="photo-figure__frame">
+				{pictureProps ? (
+					<Picture {...pictureProps} class="photo-frame__img" pictureAttributes={{ class: 'photo-frame' }} />
+				) : (
+					<span class="photo-frame photo-frame--missing" aria-hidden="true" />
+				)}
+			</div>
+			{caption.length > 0 && (
+				<figcaption class="photo-figure__caption meta">
+					{caption.map((line) => (
+						<span>{line}</span>
+					))}
+				</figcaption>
+			)}
+		</figure>
+	) : pictureProps ? (
+		<Picture
+			{...pictureProps}
+			class:list={['photo-frame__img', className]}
+			pictureAttributes={{ class: 'photo-frame' }}
+		/>
+	) : (
+		<span class:list={['photo-frame', 'photo-frame--missing', className]} aria-hidden="true" />
+	)
+}
 
 <style>
 	.photo-frame {
@@ -61,10 +101,33 @@ const focalPortrait = toPosition(photo.focalPortrait ?? photo.focal);
 		height: 100%;
 	}
 
+	.photo-frame--missing {
+		background-color: var(--color-well);
+	}
+
 	.photo-frame__img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		object-position: var(--focal, 50% 50%);
+	}
+
+	.photo-figure {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.photo-figure__frame {
+		aspect-ratio: var(--aspect, auto);
+		overflow: hidden;
+		background-color: var(--color-well);
+	}
+
+	.photo-figure__caption {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--space-4);
+		color: var(--color-text-muted);
 	}
 </style>

@@ -155,16 +155,6 @@ const isCurrent = (href: string) => currentPath === href;
 		font-weight: var(--weight-medium);
 		letter-spacing: var(--tracking-ui);
 		line-height: 1;
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
-		text-decoration-color: transparent;
-		transition: text-decoration-color var(--duration-fast) var(--ease-standard);
-	}
-
-	.site-nav__link:hover,
-	.site-nav__link[aria-current='page'] {
-		text-decoration-color: currentColor;
 	}
 
 	.site-nav__arrow {
@@ -232,6 +222,17 @@ const isCurrent = (href: string) => currentPath === href;
 			align-items: center;
 			justify-content: space-between;
 			gap: var(--space-6);
+		}
+
+		/* Hover draws a short rule in from the left; the current page keeps it. */
+		.site-nav__link {
+			background: linear-gradient(currentColor, currentColor) no-repeat left calc(50% + 0.85em) / 0% 1px;
+			transition: background-size var(--duration-base) var(--ease-editorial);
+		}
+
+		.site-nav__link:hover,
+		.site-nav__link[aria-current='page'] {
+			background-size: 100% 1px;
 		}
 
 		.site-nav__list {

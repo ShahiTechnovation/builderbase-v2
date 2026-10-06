@@ -1,0 +1,160 @@
+/*
+ * Builder Base motion system.
+ *
+ * Every movement has to say something:
+ *   REVEAL  — content arrives as the visitor reaches it (headlines rise out of
+ *             a mask, photographs open, metadata settles).
+ *   SHIFT   — focus moves from one thing to the next (the culture gallery).
+ *   EXPAND  — a photograph takes over as attention reaches it (hero handoff).
+ *   DEPTH   — the photo sits slightly behind its frame (2–4% travel, no more).
+ *   HANDOFF — one section passes the viewport to the next (expand + shade).
+ *
+ * Gating (set on <html>):
+ *   .motion        JS is running and reduced motion is NOT requested.
+ *   .motion-ready  reveal observers are attached (src/scripts/motion.ts).
+ * Without them every element is in its final, readable state — reduced motion
+ * and no-JS visitors get the static composition, never hidden content.
+ *
+ * Scroll-linked values are written by motion.ts as unitless 0→1 custom
+ * properties: --scroll-start, --scroll-through.
+ */
+
+@property --scroll-start {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 0;
+}
+
+@property --scroll-through {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 0.5;
+}
+
+/* ── Mask: a line that rises into place ──────────────────────────────
+   Markup: <span class="reveal-mask"><span class="reveal-mask__line">…</span></span>
+   Vertical clip only, padded so descenders and tight leading are never cut. */
+
+.reveal-mask {
+	display: block;
+	overflow-x: visible;
+	overflow-y: clip;
+	padding-block: 0.14em;
+	margin-block: -0.14em;
+}
+
+.reveal-mask__line {
+	display: block;
+}
+
+/* ── REVEAL (scroll-triggered, once) ─────────────────────────────── */
+
+:root.motion.motion-ready [data-reveal='mask']:not([data-revealed]) .reveal-mask__line {
+	transform: translateY(calc(100% + 0.3em));
+}
+
+:root.motion.motion-ready [data-reveal='photo']:not([data-revealed]) {
+	clip-path: inset(100% 0 0 0);
+}
+
+:root.motion.motion-ready [data-reveal='photo']:not([data-revealed]) .photo-frame {
+	scale: 1.08;
+}
+
+:root.motion.motion-ready [data-reveal='meta']:not([data-revealed]) {
+	opacity: 0;
+	transform: translateY(calc(var(--reveal-distance) / 2));
+}
+
+:root.motion [data-reveal='mask'][data-revealed] .reveal-mask__line {
+	transition: transform var(--duration-slow) var(--ease-editorial);
+	transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+:root.motion [data-reveal='photo'][data-revealed] {
+	/* Negative inset: the open state never clips focus outlines. */
+	clip-path: inset(-1rem);
+	transition: clip-path calc(var(--duration-slow) * 1.2) var(--ease-editorial);
+	transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+:root.motion [data-reveal='photo'][data-revealed] .photo-frame {
+	transition: scale calc(var(--duration-slow) * 1.6) var(--ease-editorial);
+	transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+:root.motion [data-reveal='meta'][data-revealed] {
+	transition:
+		opacity var(--duration-base) var(--ease-standard),
+		transform var(--duration-slow) var(--ease-editorial);
+	transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+/* ── ENTRANCE (on load, above the fold) ──────────────────────────── */
+
+@keyframes rise-into-mask {
+	from {
+		transform: translateY(calc(100% + 0.3em));
+	}
+}
+
+@keyframes settle-in {
+	from {
+		opacity: 0;
+		transform: translateY(calc(var(--reveal-distance) / 2));
+	}
+}
+
+@keyframes open-photo {
+	from {
+		clip-path: inset(0 0 100% 0);
+	}
+}
+
+:root.motion [data-entrance='mask'] .reveal-mask__line {
+	animation: rise-into-mask var(--duration-entrance) var(--ease-editorial) backwards;
+	animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+:root.motion [data-entrance='meta'] {
+	animation: settle-in var(--duration-entrance) var(--ease-editorial) backwards;
+	animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+:root.motion [data-entrance='photo'] {
+	animation: open-photo calc(var(--duration-entrance) * 1.4) var(--ease-editorial) backwards;
+	animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+/* ── Contextual media cursor (fine pointers only; see media-cursor.ts) ── */
+
+.media-cursor {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: var(--z-cursor);
+	display: grid;
+	place-items: center;
+	width: 4rem;
+	height: 4rem;
+	margin: 0.75rem 0 0 0.75rem; /* sit beside the pointer, never under it */
+	border-radius: 50%;
+	background-color: var(--paper);
+	color: var(--builder-indigo);
+	font-family: var(--font-mono);
+	font-size: 0.6875rem;
+	letter-spacing: var(--tracking-meta);
+	text-transform: uppercase;
+	pointer-events: none;
+	opacity: 0;
+	scale: 0.5;
+	transition:
+		opacity var(--duration-fast) var(--ease-standard),
+		scale var(--duration-base) var(--ease-editorial);
+	will-change: transform;
+}
+
+.media-cursor[data-visible] {
+	opacity: 1;
+	scale: 1;
+}

@@ -13,6 +13,7 @@ const { title } = Astro.props;
 	<section class="placeholder page-width">
 		<h1 class="placeholder__title">{title}</h1>
 		<p class="placeholder__note meta">In development</p>
+		<div class="placeholder__links"><slot /></div>
 	</section>
 </BaseLayout>
 
@@ -26,6 +27,14 @@ const { title } = Astro.props;
 		font-weight: var(--weight-bold);
 		letter-spacing: var(--tracking-display);
 		line-height: var(--leading-display);
+	}
+
+	.placeholder__links:empty {
+		display: none;
+	}
+
+	.placeholder__links {
+		margin-top: var(--space-6);
 	}
 
 	.placeholder__note {

@@ -30,8 +30,11 @@ test.describe('layout', () => {
 			expect(overflow).toBeLessThanOrEqual(0);
 
 			const anchor = await page.locator('.statement__anchor').evaluate((element) => {
+				const text = [...element.querySelectorAll('*'), element]
+					.flatMap((node) => [...node.childNodes])
+					.find((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())!;
 				const range = document.createRange();
-				range.selectNodeContents(element);
+				range.selectNodeContents(text);
 				const rects = range.getClientRects();
 				const box = range.getBoundingClientRect();
 				return { lines: new Set([...rects].map((rect) => Math.round(rect.top))).size, right: box.right };
@@ -63,6 +66,8 @@ test.describe('content and semantics', () => {
 		expect(everything).not.toMatch(/\[[A-Z][A-Z\s]*\]/); // [CITY], [ACTIVATION] …
 		expect(everything).not.toMatch(/stellar|arbitrum|sentient/i);
 		expect(everything).not.toMatch(/\d[\d,]*\+/); // vanity counters such as 3,500+
+		// Only renders with verified activity in 2+ Indian cities; none is verified yet.
+		expect(everything).not.toMatch(/building across india/i);
 	});
 
 	test('hero photo is prioritised; gallery photos are lazy', async ({ page }) => {
@@ -190,10 +195,10 @@ test.describe('reduced motion', () => {
 
 	test('disables entrance and gallery transitions', async ({ page }) => {
 		await page.goto('/');
-		const anchorAnimation = await page
-			.locator('.statement__anchor')
-			.evaluate((element) => getComputedStyle(element).animationName);
-		expect(anchorAnimation).toBe('none');
+		const lineAnimations = await page
+			.locator('.statement .reveal-mask__line')
+			.evaluateAll((lines) => lines.map((line) => getComputedStyle(line).animationName));
+		expect(lineAnimations.every((name) => name === 'none')).toBe(true);
 
 		const itemTransition = await page
 			.locator('[data-gallery-item]')
@@ -203,10 +208,21 @@ test.describe('reduced motion', () => {
 	});
 });
 
-test('keyboard: skip link reaches main content', async ({ page }) => {
+test('keyboard: skip link reaches main content', async ({ page, browserName }) => {
 	await page.goto('/');
-	await page.keyboard.press('Tab');
 	const skip = page.getByRole('link', { name: 'Skip to content' });
+	if (browserName === 'webkit') {
+		// WebKit's Tab skips links unless the user enables "Press Tab to highlight
+		// each item" (Option+Tab on macOS), which automation can't toggle. Check
+		// the skip link is first in focus order, then focus it directly.
+		const firstFocusable = await page.evaluate(
+			() => document.querySelector<HTMLElement>('a[href], button, [tabindex]:not([tabindex="-1"])')?.textContent,
+		);
+		expect(firstFocusable).toBe('Skip to content');
+		await skip.focus();
+	} else {
+		await page.keyboard.press('Tab');
+	}
 	await expect(skip).toBeFocused();
 	await expect(skip).toBeInViewport();
 	await page.keyboard.press('Enter');

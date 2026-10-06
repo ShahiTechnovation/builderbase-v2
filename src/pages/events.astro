@@ -1,5 +1,9 @@
 ---
+import ActionLink from '../components/ActionLink.astro';
+import { actions } from '../data/site';
 import PlaceholderPage from '../layouts/PlaceholderPage.astro';
 ---
 
-<PlaceholderPage title="Events" />
+<PlaceholderPage title="Events">
+	<ActionLink link={actions.lumaCalendar} />
+</PlaceholderPage>

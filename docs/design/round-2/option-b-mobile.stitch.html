@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=375, initial-scale=1.0" name="viewport"/>
+<title>Builder Base V2 — Hero Option B Mobile</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F4F2ED;
+      color: #121317;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 375px;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .text-paper { color: #F4F2ED; }
+    .bg-paper { background-color: #F4F2ED; }
+    .text-ink { color: #121317; }
+    .bg-ink { background-color: #121317; }
+    .text-indigo-bb { color: #2B2F7C; }
+    .bg-indigo-bb { background-color: #2B2F7C; }
+    .bg-near-black { background-color: #0E0F13; }
+    .text-grey-meta { color: #5E5B55; }
+    .text-grey-culture { color: #9A968E; }
+
+    /* Exact word span for DISTRIBUTION */
+    .headline-distribution {
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.86;
+      text-transform: uppercase;
+      display: block;
+      width: 100%;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="bg-paper text-ink min-h-screen">
+<!-- 1. NAVBAR (56px on paper) -->
+<header class="w-full h-[56px] px-[12px] flex items-center justify-between bg-paper select-none">
+<div class="flex items-center gap-[8px]">
+<span class="w-[6px] h-[6px] bg-indigo-bb inline-block"></span>
+<span class="text-[18px] font-semibold tracking-tight text-ink lowercase">builder base</span>
+</div>
+<a class="text-[15px] font-normal text-ink hover:opacity-80 transition-opacity" href="#menu">Menu</a>
+</header>
+<!-- 2. HERO PHOTO (full-bleed, 375px wide, 420px tall, no side margins, no radius) -->
+<section class="w-full h-[420px] relative overflow-hidden bg-[#0E0F13]">
+<img alt="Hero hackathon room" class="w-full h-full object-cover" src="file:///C:/Users/nothi/AppData/Local/Temp/bbv2/r2/photos/hero.jpg" style="object-position: 72% 50%;"/>
+</section>
+<!-- 3. STATEMENT ON PAPER (12px side margins, starting 20px below photo) -->
+<section class="px-[12px] pt-[20px] bg-paper">
+<!-- Line 1: "The" left, "BUILDING ACROSS INDIA" right -->
+<div class="flex items-baseline justify-between w-full">
+<span class="text-[44px] font-semibold tracking-[-0.035em] leading-[1.0] text-ink">The</span>
+<span class="font-mono text-[10px] tracking-wider uppercase text-grey-meta">BUILDING ACROSS INDIA</span>
+</div>
+<!-- Line 2: "DISTRIBUTION" (massive uppercase anchor, edge to edge ~351px) -->
+<div class="w-full mt-[2px]">
+<h1 class="headline-distribution text-ink">DISTRIBUTION</h1>
+</div>
+<!-- Line 3: "layer for builders." -->
+<div class="w-full mt-[2px]">
+<p class="text-[44px] font-semibold tracking-[-0.035em] leading-[1.0] text-ink">layer for builders.</p>
+</div>
+<!-- 4. ACTIONS (24px below, 12px side margins) -->
+<div class="mt-[24px] w-full flex flex-col items-center">
+<button class="w-full h-[52px] bg-indigo-bb text-paper text-[16px] font-semibold rounded-[4px] flex items-center justify-center hover:opacity-95 transition-opacity">
+        Join the base
+      </button>
+<a class="mt-[16px] text-ink text-[15px] font-medium flex items-center justify-center hover:underline" href="#partner">
+        Partner with us ↗
+      </a>
+</div>
+</section>
+<!-- 5. CULTURE SECTION (near-black #0E0F13, hard cut, starts 56px after actions, 64px top padding, 20px side padding) -->
+<section class="mt-[56px] bg-near-black pt-[64px] px-[20px] overflow-hidden">
+<!-- Header: "YOU HAD TO" / "BE THERE." -->
+<h2 class="text-paper text-[52px] font-bold leading-[0.9] tracking-[-0.04em] uppercase">
+      YOU HAD TO<br/>BE THERE.
+    </h2>
+<!-- Metadata stack 20px below -->
+<div class="mt-[20px] font-mono text-[11px] uppercase space-y-[4px]">
+<div class="text-paper tracking-wider">01 / 05</div>
+<div class="text-paper tracking-wider">[CITY] /// [ACTIVATION]</div>
+<div class="text-grey-culture tracking-wider">[RELATIONSHIP] /// [MONTH YEAR]</div>
+</div>
+<!-- Horizontal Swipe Carousel (24px below) -->
+<div class="mt-[24px] relative w-full">
+<div class="flex items-start gap-[8px] overflow-x-hidden">
+<!-- CAROUSEL 01 (ACTIVE): 84% screen width (~315px), 4:5 ratio, 4px radius, full colour, 2px paper rule along top -->
+<div class="relative w-[315px] shrink-0 rounded-[4px] overflow-hidden border-t-[2px] border-[#F4F2ED]" style="aspect-ratio: 4 / 5;">
+<img alt="Culture frame 01" class="w-full h-full object-cover" src="file:///C:/Users/nothi/AppData/Local/Temp/bbv2/r2/photos/f1.jpg" style="object-position: 50% 55%;"/>
+<!-- Bottom vignette and caption -->
+<div class="absolute inset-x-0 bottom-0 pt-[40px] pb-[16px] px-[16px] bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+<span class="font-mono text-[11px] text-paper uppercase tracking-wider block">[CITY] /// [ACTIVATION]</span>
+</div>
+</div>
+<!-- CAROUSEL 02: sits 8px right, same size, desaturated and darkened, peeking in (~40px visible) -->
+<div class="relative w-[315px] shrink-0 rounded-[4px] overflow-hidden opacity-50 brightness-75 grayscale" style="aspect-ratio: 4 / 5;">
+<img alt="Culture frame 02" class="w-full h-full object-cover" src="file:///C:/Users/nothi/AppData/Local/Temp/bbv2/r2/photos/f2.jpg" style="object-position: 50% 60%;"/>
+</div>
+</div>
+</div>
+<!-- Index indicator 20px below: 01 02 03 04 05 in 11px mono -->
+<div class="mt-[20px] flex items-center gap-[16px] font-mono text-[11px]">
+<div class="relative pb-[4px]">
+<span class="text-paper">01</span>
+<div class="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-bb"></div>
+</div>
+<span class="text-grey-culture">02</span>
+<span class="text-grey-culture">03</span>
+<span class="text-grey-culture">04</span>
+<span class="text-grey-culture">05</span>
+</div>
+<!-- 64px near-black bottom padding before page ends -->
+<div class="h-[64px]"></div>
+</section>
+</body>
+</html>
