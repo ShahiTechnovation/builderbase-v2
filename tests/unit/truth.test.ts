@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test';
 import { cultureCandidates, heroCandidates } from '../../src/data/curation';
 import { localPhotos } from '../../src/data/local/photos';
 import type { Activation, City, ContentSnapshot, Photo, Relationship } from '../../src/data/model';
-import { canClaimNationalPresence, publicPhotoCaption, publicRelationship } from '../../src/data/public';
+import { home } from '../../src/data/home';
+import { citiesWithVerifiedActivity, publicPhotoCaption, publicRelationship } from '../../src/data/public';
 
 const verified = { verified: true };
 const city = (id: string, name: string, overrides: Partial<City> = {}): City => ({
@@ -50,31 +51,35 @@ const facts = (partial: Partial<ContentSnapshot>) => ({
 });
 
 test.describe('truth gate', () => {
-	test('"Building across India" needs verified activity in two Indian cities', () => {
+	test('"Building across India" is editorial copy, disabled — never inferred from a city count', () => {
+		expect(home.hero.geography).toEqual({ text: 'Building across India', approved: false });
+	});
+
+	test('cities with verified activity: public, verified, in the country, with a published activation', () => {
 		const two = facts({
 			cities: [city('c1', 'Bhopal'), city('c2', 'Delhi')],
 			activations: [activation('a1', 'c1'), activation('a2', 'c2')],
 		});
-		expect(canClaimNationalPresence(two)).toBe(true);
-
-		expect(canClaimNationalPresence(facts({ cities: two.cities, activations: [activation('a1', 'c1')] }))).toBe(false);
+		const names = (input: ReturnType<typeof facts>) => citiesWithVerifiedActivity(input).map((entry) => entry.name);
+		expect(names(two)).toEqual(['Bhopal', 'Delhi']);
+		expect(names(facts({ cities: two.cities, activations: [activation('a1', 'c1')] }))).toEqual(['Bhopal']);
 		expect(
-			canClaimNationalPresence(
+			names(
 				facts({
 					cities: two.cities,
 					activations: [activation('a1', 'c1'), activation('a2', 'c2', { verification: { verified: false } })],
 				}),
 			),
-		).toBe(false);
+		).toEqual(['Bhopal']);
 		expect(
-			canClaimNationalPresence(
+			names(
 				facts({
 					cities: [city('c1', 'Bhopal'), city('c2', 'Lisbon', { country: 'PT' })],
 					activations: [activation('a1', 'c1'), activation('a2', 'c2')],
 				}),
 			),
-		).toBe(false);
-		expect(canClaimNationalPresence(facts({}))).toBe(false);
+		).toEqual(['Bhopal']);
+		expect(names(facts({}))).toEqual([]);
 	});
 
 	test('photo captions appear only for published activations; city only when published', () => {

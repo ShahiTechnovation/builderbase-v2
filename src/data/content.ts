@@ -31,7 +31,6 @@ import type {
 	TeamMember,
 } from './model';
 import {
-	canClaimNationalPresence,
 	citiesWithVerifiedActivity,
 	isPublicActivation,
 	isPublicBuilder,
@@ -71,8 +70,6 @@ export interface CulturePhoto {
 export interface HomepageContent {
 	heroPhoto?: ResolvedPhoto;
 	culturePhotos: CulturePhoto[];
-	/** "Building across India" may be stated (verified activity in 2+ Indian cities). */
-	nationalPresence: boolean;
 }
 
 export async function getHomepageContent(): Promise<HomepageContent> {
@@ -88,7 +85,7 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 		.slice(0, home.culture.maxPhotos)
 		.map((photo) => ({ photo, caption: publicPhotoCaption(photo, content) }));
 
-	return { heroPhoto, culturePhotos, nationalPresence: canClaimNationalPresence(content) };
+	return { heroPhoto, culturePhotos };
 }
 
 // ── Collections for later sections ─────────────────────────────────────

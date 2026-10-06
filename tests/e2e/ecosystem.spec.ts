@@ -64,18 +64,39 @@ const pointablePlane = (page: Page) =>
 // ── Production build ──────────────────────────────────────────────────
 
 test.describe('production build', () => {
-	test('renders the honest empty state, out of search, with no fixture data', async ({ page }) => {
+	// The build reads whichever source is configured (CONTENT_SOURCE). Both
+	// outcomes are checked against the truth gate, never against fixed names.
+	test('renders real, gated organisations — or the honest empty state — and no fixture data', async ({ page }) => {
 		const errors = collectErrors(page);
 		const response = await page.goto('/ecosystem');
 		expect(response?.status()).toBe(200);
 		await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^\s*The\s+Ecosystem\s*$/);
-		await expect(page.getByText('Relationships appear here once they are verified.')).toBeVisible();
-		await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
-		await expect(page.locator('[data-eco-node]')).toHaveCount(0);
 		expect(await page.content()).not.toMatch(FICTIONAL);
 		expect(await page.locator('body').innerText()).not.toMatch(/fixture|fictional/i);
-		// No organisations → no ecosystem runtime.
-		expect(await page.locator('script[src*="Ecosystem"]').count()).toBe(0);
+
+		const entries = await page.locator('.eco-index__name').allTextContents();
+		if (entries.length === 0) {
+			// Nothing verified: an honest note, out of search, no runtime.
+			await expect(page.getByText('Relationships appear here once they are verified.')).toBeVisible();
+			await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+			await expect(page.locator('[data-eco-node]')).toHaveCount(0);
+			expect(await page.locator('script[src*="Ecosystem"]').count()).toBe(0);
+		} else {
+			await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+			// One record and at least one plane per indexed organisation.
+			await expect(page.locator('[data-eco-record]')).toHaveCount(entries.length);
+			const planes = await page.locator('[data-eco-node]').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).dataset.slug));
+			const records = await page.locator('[data-eco-record]').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).dataset.slug));
+			expect(new Set(planes)).toEqual(new Set(records));
+			// Held relationships and venue-only organisations never enter the index.
+			for (const name of entries) {
+				expect(name).not.toMatch(/MetaMask|Anthropic|Major League Hacking|MLH|University/);
+			}
+			// Venues appear only as a Venue credit.
+			for (const venue of await page.locator('.eco-work__credit', { hasText: 'University' }).all()) {
+				await expect(venue.locator('dt')).toHaveText('Venue');
+			}
+		}
 		expect(errors).toEqual([]);
 	});
 
@@ -175,24 +196,60 @@ test.describe('fixture: sphere (desktop)', () => {
 		await page.waitForTimeout(500);
 		expect(await transforms(page)).toEqual(atRest); // nothing moves on its own
 
-		const box = (await page.locator('[data-eco-world]').boundingBox())!;
-		await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-		await page.mouse.down();
-		for (let step = 1; step <= 10; step++) {
-			await page.mouse.move(box.x + box.width / 2 + step * 24, box.y + box.height / 2);
-			await page.waitForTimeout(16);
-		}
-		await page.mouse.up();
-		const released = await transforms(page);
-		expect(released).not.toEqual(atRest);
+		// Record each gesture with the browser's own timestamps: the last move
+		// before release, the release, and the world at the moment of release.
+		await page.evaluate(() => {
+			const record: { lastMove?: number; release?: number; atRelease?: string[] } = {};
+			(window as unknown as { __gesture: typeof record }).__gesture = record;
+			window.addEventListener('pointermove', (event) => (record.lastMove = event.timeStamp), true);
+			window.addEventListener(
+				'pointerup',
+				(event) => {
+					record.release = event.timeStamp;
+					record.atRelease = [...document.querySelectorAll<HTMLElement>('[data-eco-node]')].map((node) => node.style.transform);
+				},
+				true,
+			);
+		});
+		const gesture = () =>
+			page.evaluate(() => (window as unknown as { __gesture: { lastMove: number; release: number; atRelease: string[] } }).__gesture);
 
-		await page.waitForTimeout(200);
-		expect(await transforms(page)).not.toEqual(released); // momentum
-		await expect.poll(async () => {
-			const before = await transforms(page);
-			await page.waitForTimeout(300);
-			return JSON.stringify(before) === JSON.stringify(await transforms(page));
-		}, { timeout: 8000 }).toBe(true); // and it stops
+		// The world treats a release more than 80 ms after the last movement as
+		// a pause — no throw (src/scripts/ecosystem-world.ts). Whether the test
+		// harness delivers its events faster than that depends on machine load,
+		// so momentum is asserted for every gesture that *is* a throw by that
+		// definition, and the gesture is repeated only if the harness paused.
+		const box = (await page.locator('[data-eco-world]').boundingBox())!;
+		const y = box.y + box.height / 2;
+		let thrown = false;
+		for (let attempt = 0; attempt < 3 && !thrown; attempt++) {
+			const x = box.x + box.width / 2 - 120;
+			await page.mouse.move(x, y);
+			await page.mouse.down();
+			for (let step = 1; step <= 10; step++) await page.mouse.move(x + step * 24, y);
+			await page.mouse.up();
+
+			const { lastMove, release, atRelease } = await gesture();
+			expect(atRelease).not.toEqual(atRest); // the drag itself turned the world
+			if (release - lastMove > 80) continue; // a pause by definition: no throw expected
+
+			thrown = true;
+			// Momentum: the world keeps turning after the release.
+			await expect.poll(async () => JSON.stringify(await transforms(page)) !== JSON.stringify(atRelease)).toBe(true);
+		}
+		expect(thrown).toBe(true);
+
+		// …and then comes to rest by itself.
+		await expect
+			.poll(
+				async () => {
+					const before = await transforms(page);
+					await page.waitForTimeout(300);
+					return JSON.stringify(before) === JSON.stringify(await transforms(page));
+				},
+				{ timeout: 8000 },
+			)
+			.toBe(true);
 		expect(errors).toEqual([]);
 	});
 

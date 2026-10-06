@@ -86,11 +86,6 @@ export function citiesWithVerifiedActivity(facts: Facts, country = 'IN'): City[]
 	);
 }
 
-/** "Building across India" is only true with verified activity in two or more Indian cities. */
-export function canClaimNationalPresence(facts: Facts): boolean {
-	return citiesWithVerifiedActivity(facts, 'IN').length >= 2;
-}
-
 const RELATIONSHIP_LABELS: Record<Exclude<RelationshipKind, 'unknown'>, string> = {
 	partner: 'Partner',
 	sponsor: 'Sponsor',

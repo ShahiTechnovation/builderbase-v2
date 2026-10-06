@@ -64,8 +64,9 @@ docs/
   which returns nothing for unverified facts. No `[CITY]`-style placeholders.
 - A photo showing a company's branding is evidence of activity, not of a
   relationship. Relationships are recorded explicitly or not at all.
-- "Building across India" renders only with verified public activity in two or
-  more Indian cities.
+- "Building across India" is editorial copy, disabled (`home.hero.geography`).
+  It is never inferred from a city count — several verified cities share one
+  metro region — and appears only if deliberately approved.
 - People are published only with their consent.
 - `/ecosystem` lists an organisation only through a stated relationship (see
   `docs/design/ecosystem.md`); venues are credited inside the work.

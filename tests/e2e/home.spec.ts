@@ -67,7 +67,7 @@ test.describe('content and semantics', () => {
 		expect(everything).not.toMatch(/\[[A-Z][A-Z\s]*\]/); // [CITY], [ACTIVATION] …
 		expect(everything).not.toMatch(/stellar|arbitrum|sentient/i);
 		expect(everything).not.toMatch(/\d[\d,]*\+/); // vanity counters such as 3,500+
-		// Only renders with verified activity in 2+ Indian cities; none is verified yet.
+		// Editorial copy, disabled until deliberately approved — never inferred from data.
 		expect(everything).not.toMatch(/building across india/i);
 	});
 

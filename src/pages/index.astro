@@ -14,7 +14,7 @@ const hasCulture = content.culturePhotos.length > 0;
 <BaseLayout ogPhoto={content.heroPhoto}>
 	<Hero
 		statement={home.hero.statement}
-		meta={content.nationalPresence ? home.hero.nationalPresenceMeta : undefined}
+		meta={home.hero.geography.approved ? home.hero.geography.text : undefined}
 		photo={content.heroPhoto}
 	/>
 	{

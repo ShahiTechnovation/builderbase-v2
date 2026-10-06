@@ -27,7 +27,7 @@ Cities `2481110`, Relationships `2481111`, Activations `2481112`, Projects
 
 | Variable | Value |
 | --- | --- |
-| `CONTENT_SOURCE` | `baserow` (default `local`) |
+| `CONTENT_SOURCE` | `baserow` — the production content source since 2026-10-07 (code default and offline fallback: `local`) |
 | `CONTENT_STRICT` | `false` normally; `true` to fail builds instead of falling back |
 | `BASEROW_API_URL` | `https://api.baserow.io` |
 | `BASEROW_DATABASE_TOKEN` | **secret** — read-only database token (below) |
@@ -93,9 +93,10 @@ filter and pages re-check them.
 | Organizations | never a claim on their own |
 
 Derived claims: a photo caption shows the activation (and its city only if
-the city is published); "Building across India" appears only with published
-activity in two or more Indian cities. Links to unpublished or missing records
-simply produce no claim.
+the city is published). "Building across India" is **not** derived from data —
+it is editorial copy, disabled until deliberately approved
+(`home.hero.geography` in `src/data/home.ts`). Links to unpublished or missing
+records simply produce no claim.
 
 ## Verification rules (for editors)
 

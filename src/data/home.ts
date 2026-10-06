@@ -10,8 +10,13 @@ export const home = {
 			anchor: 'distribution',
 			tail: 'layer for builders.',
 		},
-		/** Rendered only when the truth gate allows it (verified activity in 2+ Indian cities). */
-		nationalPresenceMeta: 'Building across India',
+		/**
+		 * Editorial geography line beside "The". Never inferred from data: a
+		 * city count overstates breadth (several verified cities share one
+		 * metro region). It appears only when someone deliberately approves it
+		 * against broader geographic evidence — set `approved: true` then.
+		 */
+		geography: { text: 'Building across India', approved: false },
 	},
 	culture: {
 		title: ['You had to', 'be there.'],

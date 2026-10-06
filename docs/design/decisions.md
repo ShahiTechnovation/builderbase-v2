@@ -24,7 +24,7 @@ Round 2 Option B → Round 2 Stitch project → original references → old repo
 | Lead culture image changeable by content | `cultureRank` on photo records; Stellar-room lead is temporary |
 | Join destination isolated | `destinations.join` in `src/data/site.ts` (temporarily `/events`) |
 | Keep current DISTRIBUTION sizing | unchanged |
-| "Building across India" must be derived | renders only when `canClaimNationalPresence()` — verified public activity in ≥2 Indian cities. **Currently hidden** (no verified data yet). |
+| "Building across India" must be derived | **Superseded 2026-10-07** — see "Content source cutover" below. |
 | Git baseline | commit `37d59ef` |
 | References out of %TEMP% | `docs/design/` |
 | Cross-browser validation | Playwright projects: chromium, firefox, webkit |
@@ -82,13 +82,28 @@ Round 2 Option B → Round 2 Stitch project → original references → old repo
 - ESLint: explicit `role="list"` is now allowed on `ol` as well as `ul`, for
   the same VoiceOver reason.
 
+## Content source cutover (2026-10-07)
+
+- **"Building across India" is editorial, not derived.** The ≥2-cities rule
+  (`canClaimNationalPresence`) was removed: four of the five verified cities
+  are in one metro region, so a city count overstates breadth. The phrase is
+  copy in `home.hero.geography` with `approved: false`; no threshold, schema
+  field or replacement claim. It appears only if deliberately approved.
+- **Baserow is the content source.** Verified with a strict build
+  (`CONTENT_STRICT=true`): all 8 tables load; 10 activations, 11
+  relationships, 5 cities, 8 organisations, 5 approved photos (the Pending
+  Hack Day photo stays excluded), 0 projects/builders/team. The homepage is
+  byte-identical to the local-source build; /ecosystem shows the five eligible
+  organisations. `CONTENT_SOURCE=baserow` is the saved and documented
+  production setting; `local` stays the code default and offline fallback.
+
 ## Content architecture
 
 - Components receive props; pages call `src/data/content.ts`; adapters live in
   `src/lib/`. Components never see Baserow/Luma fields.
 - Read at **build time**; content refresh = rebuild (webhook → deploy hook).
   No runtime API calls, no secrets in the browser (`astro:env` secrets).
-- `CONTENT_SOURCE=local` (default) uses the repository dataset — the real,
+- `CONTENT_SOURCE=local` (code default; production uses `baserow`) uses the repository dataset — the real,
   approved photographs and **no facts**. It is not a fixture of fake data.
 - Baserow failures degrade per table; photos fall back to local so the
   homepage keeps its imagery. `CONTENT_STRICT=true` fails the build instead.
