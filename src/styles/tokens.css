@@ -1,0 +1,134 @@
+/*
+ * Builder Base V2 — design tokens.
+ *
+ * Primitive values are defined once here. Components consume the semantic
+ * tokens (--color-*, --text-*, --space-*) so surfaces can be re-themed by
+ * swapping a handful of variables (see `.surface-dark`).
+ *
+ * Contrast (WCAG 2.x, computed):
+ *   ink on paper            16.6 : 1
+ *   grey-600 on paper        6.0 : 1
+ *   paper on near-black     17.1 : 1
+ *   grey-400 on near-black   6.5 : 1
+ *   paper on indigo         10.4 : 1
+ *   indigo on near-black     1.6 : 1  ← never use indigo for text or
+ *                                        meaning-bearing marks on dark surfaces
+ */
+
+:root {
+	/* ── Primitive palette ─────────────────────────────────────────── */
+	--paper: #f4f2ed;
+	--paper-200: #eae7e0; /* image wells / quiet fills on paper */
+	--paper-300: #dcd8cf; /* hairlines on paper */
+	--ink: #121317;
+	--grey-600: #5e5b55; /* secondary text on paper */
+	--grey-400: #9a968e; /* secondary text on dark */
+	--near-black: #0e0f13;
+	--near-black-800: #17181d; /* image wells on dark */
+	--near-black-700: #2a2b31; /* hairlines on dark */
+
+	/* Builder Base indigo — rationed: identity details, primary action,
+	   active state, small markers. Never a section background. */
+	--builder-indigo: #2b2f7c;
+	--builder-indigo-600: #23276a; /* pressed / hover on paper */
+
+	/* ── Semantic colour (light surface is the default) ─────────────── */
+	--color-bg: var(--paper);
+	--color-text: var(--ink);
+	--color-text-muted: var(--grey-600);
+	--color-rule: var(--paper-300);
+	--color-well: var(--paper-200);
+	--color-accent: var(--builder-indigo);
+	--color-accent-hover: var(--builder-indigo-600);
+	--color-on-accent: var(--paper);
+	--color-focus: var(--builder-indigo);
+
+	/* ── Typography ────────────────────────────────────────────────── */
+	--font-sans: var(--font-schibsted-grotesk), 'Helvetica Neue', Arial, sans-serif;
+	--font-mono: var(--font-fragment-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+	--weight-regular: 400;
+	--weight-medium: 500;
+	--weight-semibold: 600;
+	--weight-bold: 700;
+	--weight-display: 800;
+
+	/* Fixed steps. Body copy never drops below 1rem. */
+	--text-meta: 0.75rem; /* 12px mono metadata, uppercase */
+	--text-ui: 0.9375rem; /* 15px navigation */
+	--text-action: 1rem; /* 16px buttons */
+	--text-body: 1.125rem; /* 18px reading text */
+
+	/* Fluid display steps. The anchor word is sized separately against its
+	   container (see Hero) so it always spans the measure exactly. */
+	--text-lead: clamp(2.5rem, 1.6rem + 2.6vw, 4rem); /* "The" / "layer for builders." */
+	--text-display: clamp(3.25rem, 1.55rem + 6.6vw, 7.5rem); /* section statements */
+	--text-menu: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+
+	--tracking-anchor: -0.055em;
+	--tracking-display: -0.04em;
+	--tracking-lead: -0.035em;
+	--tracking-ui: -0.01em;
+	--tracking-meta: 0.08em;
+
+	--leading-anchor: 0.82;
+	--leading-display: 0.9;
+	--leading-tight: 1;
+	--leading-body: 1.5;
+
+	/* ── Space ─────────────────────────────────────────────────────── */
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 2.5rem;
+	--space-8: 3rem;
+	--space-9: 4rem;
+	--space-10: 6rem;
+
+	--gutter: clamp(1rem, 0.5rem + 2vw, 2rem); /* 16px @375 → 32px @1200+ */
+	--gutter-photo: max(0.5rem, calc(var(--gutter) - 0.5rem)); /* photos sit slightly outside the text measure */
+	--section-space: clamp(4rem, 2.4rem + 6.5vw, 7.5rem);
+	--page-max: 105rem; /* 1680px */
+
+	/* ── Shape ─────────────────────────────────────────────────────── */
+	--radius-sm: 4px;
+	--radius-frame: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+
+	/* ── Motion ────────────────────────────────────────────────────── */
+	--ease-editorial: cubic-bezier(0.2, 0.7, 0.1, 1);
+	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+	--duration-fast: 160ms;
+	--duration-base: 320ms;
+	--duration-slow: 720ms;
+	--duration-entrance: 900ms;
+
+	/* ── Layers ────────────────────────────────────────────────────── */
+	--z-header: 20;
+	--z-menu: 30;
+	--z-skip: 40;
+}
+
+/* Dark surface: re-points the semantic tokens. */
+.surface-dark {
+	--color-bg: var(--near-black);
+	--color-text: var(--paper);
+	--color-text-muted: var(--grey-400);
+	--color-rule: var(--near-black-700);
+	--color-well: var(--near-black-800);
+	--color-focus: var(--paper);
+
+	background-color: var(--color-bg);
+	color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--duration-fast: 0ms;
+		--duration-base: 0ms;
+		--duration-slow: 0ms;
+		--duration-entrance: 0ms;
+	}
+}

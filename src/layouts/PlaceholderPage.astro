@@ -1,0 +1,35 @@
+---
+/** Development placeholder for routes designed in a later phase. Not indexed. */
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<BaseLayout title={title} noindex>
+	<section class="placeholder page-width">
+		<h1 class="placeholder__title">{title}</h1>
+		<p class="placeholder__note meta">In development</p>
+	</section>
+</BaseLayout>
+
+<style>
+	.placeholder {
+		padding: var(--space-10) var(--gutter);
+	}
+
+	.placeholder__title {
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+	}
+
+	.placeholder__note {
+		margin-top: var(--space-5);
+		color: var(--color-text-muted);
+	}
+</style>

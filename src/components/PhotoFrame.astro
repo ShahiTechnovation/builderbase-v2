@@ -1,0 +1,70 @@
+---
+/**
+ * A real photograph, cropped with object-fit to whatever box its parent gives
+ * it. The crop is steered by the photo's focal points, so replacing an image
+ * is a content change only.
+ *
+ * Exposes `--focal` and `--focal-portrait` on the <img>; parents switch to the
+ * portrait focal point in portrait contexts.
+ */
+import { Picture } from 'astro:assets';
+import type { FocalPoint, Photo } from '../data/model';
+
+interface Props {
+	photo: Photo;
+	/** Rendered width hints for the browser, e.g. "(min-width: 1024px) 66vw, 100vw". */
+	sizes: string;
+	/** Candidate widths. Anything larger than the source is dropped. */
+	widths?: number[];
+	/** Above-the-fold hero image: eager + high fetch priority. */
+	priority?: boolean;
+	/** Use when surrounding text already conveys the image. */
+	decorative?: boolean;
+	class?: string;
+}
+
+const {
+	photo,
+	sizes,
+	widths = [480, 720, 960, 1280, 1600, 2000],
+	priority = false,
+	decorative = false,
+	class: className,
+} = Astro.props;
+
+const sourceWidth = photo.image.width;
+const candidateWidths = [...new Set([...widths.filter((width) => width < sourceWidth), sourceWidth])].sort(
+	(a, b) => a - b,
+);
+
+const toPosition = ({ x, y }: FocalPoint) => `${x}% ${y}%`;
+const focal = toPosition(photo.focal);
+const focalPortrait = toPosition(photo.focalPortrait ?? photo.focal);
+---
+
+<Picture
+	src={photo.image}
+	alt={decorative ? '' : photo.alt}
+	widths={candidateWidths}
+	sizes={sizes}
+	formats={['avif', 'webp']}
+	priority={priority}
+	class:list={['photo-frame__img', className]}
+	style={`--focal: ${focal}; --focal-portrait: ${focalPortrait};`}
+	pictureAttributes={{ class: 'photo-frame' }}
+/>
+
+<style>
+	.photo-frame {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.photo-frame__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: var(--focal, 50% 50%);
+	}
+</style>

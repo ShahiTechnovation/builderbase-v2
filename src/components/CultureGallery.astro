@@ -1,0 +1,391 @@
+---
+/**
+ * "YOU HAD TO BE THERE." — the first cultural section.
+ *
+ * ≥1024px: one photograph expanded, neighbours compressed into slices.
+ *          Hover/focus previews a slice; click, Enter or Space selects it.
+ * <1024px: native horizontal scroll with snap; the next photograph peeks in.
+ *
+ * Same markup for both. Without JavaScript the first photo stays expanded on
+ * desktop and the mobile track still scrolls.
+ */
+import { culture } from '../data/home';
+import { publicPhotoCaption } from '../data/public';
+import PhotoFrame from './PhotoFrame.astro';
+
+const { title, galleryLabel, photos } = culture;
+const total = photos.length;
+const pad = (value: number) => String(value).padStart(2, '0');
+
+const items = photos.map((photo, index) => ({
+	photo,
+	number: pad(index + 1),
+	caption: publicPhotoCaption(photo),
+}));
+const firstCaption = items[0]?.caption ?? [];
+---
+
+<section class="culture surface-dark" aria-labelledby="culture-title" data-gallery>
+	<div class="culture__inner page-width">
+		<header class="culture__header">
+			<h2 class="culture__title" id="culture-title">
+				{
+					title.map((line, index) => (
+						<>
+							{index > 0 && ' '}
+							<span class="culture__title-line">{line}</span>
+						</>
+					))
+				}
+			</h2>
+			<p class="culture__meta meta" aria-hidden="true">
+				<span class="culture__count"><span data-gallery-current>01</span> / {pad(total)}</span>
+				<span class="culture__caption" data-gallery-caption>
+					{firstCaption.map((line) => <span>{line}</span>)}
+				</span>
+			</p>
+		</header>
+
+		<ul class="gallery" role="list" aria-label={galleryLabel} data-gallery-track>
+			{
+				items.map(({ photo, number, caption }, index) => (
+					<li
+						class:list={['gallery__item', { 'is-active': index === 0 }]}
+						data-gallery-item
+						data-caption={JSON.stringify(caption)}
+					>
+						<button
+							class="gallery__trigger"
+							type="button"
+							aria-current={index === 0 ? 'true' : undefined}
+							data-gallery-trigger
+						>
+							<span class="visually-hidden">
+								{`Photograph ${index + 1} of ${total}${caption.length ? ` — ${caption.join(', ')}` : ''}: `}
+							</span>
+							<PhotoFrame
+								photo={photo}
+								sizes="(min-width: 64rem) 66vw, (min-width: 40rem) 90vw, 84vw"
+							/>
+							<span class="gallery__number meta" aria-hidden="true">
+								{number}
+							</span>
+							{caption.length > 0 && (
+								<span class="gallery__caption meta" aria-hidden="true">
+									{caption.join(' /// ')}
+								</span>
+							)}
+						</button>
+					</li>
+				))
+			}
+		</ul>
+
+		<ol class="gallery__progress meta" aria-hidden="true">
+			{
+				items.map(({ number }, index) => (
+					<li class:list={['gallery__progress-step', { 'is-active': index === 0 }]} data-gallery-step>
+						{number}
+					</li>
+				))
+			}
+		</ol>
+
+		<p class="visually-hidden" aria-live="polite" data-gallery-status></p>
+	</div>
+</section>
+
+<script>
+	import { initCultureGallery } from '../scripts/culture-gallery';
+
+	document.querySelectorAll<HTMLElement>('[data-gallery]').forEach(initCultureGallery);
+</script>
+
+<style>
+	.culture {
+		container-type: inline-size;
+		--gallery-gap: 0.5rem;
+		--gallery-peek: clamp(2rem, 10cqi, 3rem);
+
+		padding-block: var(--section-space) clamp(4rem, 3rem + 3vw, 5.5rem);
+		overflow-x: clip;
+	}
+
+	.culture__inner {
+		padding-inline: var(--gutter);
+	}
+
+	/* ── Header ────────────────────────────────────────────────────── */
+	.culture__header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-5);
+		margin-bottom: var(--space-5);
+	}
+
+	.culture__title {
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+	}
+
+	.culture__title-line {
+		display: block;
+	}
+
+	.culture__meta {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.culture__caption {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		color: var(--color-text-muted);
+	}
+
+	.culture__caption:empty {
+		display: none;
+	}
+
+	/* ── Track (mobile first: horizontal scroll) ──────────────────── */
+	.gallery {
+		position: relative;
+		display: flex;
+		gap: var(--gallery-gap);
+		margin-inline: calc(-1 * var(--gutter));
+		padding-inline: var(--gutter);
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scroll-padding-inline: var(--gutter);
+		scrollbar-width: none;
+	}
+
+	.gallery::-webkit-scrollbar {
+		display: none;
+	}
+
+	.gallery__item {
+		flex: 0 0 calc(100cqi - var(--gutter) - var(--gallery-gap) - var(--gallery-peek));
+		aspect-ratio: 4 / 5;
+		scroll-snap-align: start;
+	}
+
+	.gallery__trigger {
+		position: relative;
+		display: block;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		border-radius: var(--radius-sm);
+		background-color: var(--color-well);
+		text-align: start;
+		cursor: default;
+	}
+
+	.gallery__trigger :global(img) {
+		object-position: var(--focal-portrait);
+		transition: filter var(--duration-slow) var(--ease-editorial);
+	}
+
+	.gallery__item:not(.is-active) .gallery__trigger {
+		cursor: pointer;
+	}
+
+	.gallery__item:not(.is-active) :global(img) {
+		filter: grayscale(0.7) brightness(0.8);
+	}
+
+	/* Active marker: a paper rule along the top edge. */
+	.gallery__trigger::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto;
+		z-index: 1;
+		height: 2px;
+		background-color: var(--paper);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform var(--duration-slow) var(--ease-editorial);
+	}
+
+	.gallery__item.is-active .gallery__trigger::before {
+		transform: scaleX(1);
+	}
+
+	.gallery__trigger:focus-visible {
+		outline-offset: 4px;
+	}
+
+	.gallery__number {
+		display: none;
+	}
+
+	.gallery__caption {
+		position: absolute;
+		inset: auto 0 0;
+		padding: var(--space-8) var(--space-4) var(--space-4);
+		background: linear-gradient(to top, rgb(14 15 19 / 0.85), transparent);
+		color: var(--paper);
+	}
+
+	/* ── Progress ──────────────────────────────────────────────────── */
+	.gallery__progress {
+		list-style: none;
+		padding: 0;
+		display: flex;
+		gap: var(--space-4);
+		margin-top: var(--space-5);
+		color: var(--color-text-muted);
+	}
+
+	.gallery__progress-step {
+		position: relative;
+		padding-bottom: 0.35rem;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+
+	.gallery__progress-step::after {
+		content: '';
+		position: absolute;
+		inset: auto 0 0;
+		height: 2px;
+		background-color: var(--builder-indigo);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform var(--duration-base) var(--ease-editorial);
+	}
+
+	.gallery__progress-step.is-active {
+		color: var(--color-text);
+	}
+
+	.gallery__progress-step.is-active::after {
+		transform: scaleX(1);
+	}
+
+	/* ── Tablet: landscape cards ───────────────────────────────────── */
+	@media (min-width: 40rem) {
+		.gallery__item {
+			aspect-ratio: 3 / 2;
+		}
+
+		.gallery__trigger :global(img) {
+			object-position: var(--focal);
+		}
+	}
+
+	/* ── Desktop: expanded photograph + compressed slices ──────────── */
+	@media (min-width: 64rem) {
+		.culture__header {
+			flex-direction: row;
+			align-items: flex-end;
+			justify-content: space-between;
+			margin-bottom: var(--space-8);
+		}
+
+		.culture__meta {
+			align-items: flex-end;
+			text-align: end;
+			padding-bottom: 0.4rem;
+		}
+
+		.gallery {
+			--bleed: calc(var(--gutter) + max(0px, (100vw - var(--page-max)) / 2) + 2.5rem);
+
+			height: clamp(26rem, 2rem + 36vw, 40rem);
+			margin-inline: 0 calc(-1 * var(--bleed));
+			padding-inline: 0;
+			overflow: visible;
+			scroll-snap-type: none;
+		}
+
+		.gallery__item {
+			--grow: 1;
+
+			flex: var(--grow) 1 0%;
+			min-width: 0;
+			aspect-ratio: auto;
+			transition: flex-grow var(--duration-slow) var(--ease-editorial);
+		}
+
+		.gallery__item.is-active {
+			--grow: 8;
+		}
+
+		/* Preview: hover or keyboard focus opens a slice slightly and restores colour. */
+		.gallery__item:not(.is-active):hover,
+		.gallery__item:not(.is-active):has(:focus-visible) {
+			--grow: 1.7;
+		}
+
+		.gallery__item:not(.is-active):hover :global(img),
+		.gallery__item:not(.is-active):has(:focus-visible) :global(img) {
+			filter: none;
+		}
+
+		.gallery__number {
+			display: block;
+			position: absolute;
+			top: var(--space-4);
+			left: var(--space-4);
+			z-index: 1;
+			color: var(--color-text-muted);
+			transition: color var(--duration-base) var(--ease-standard);
+		}
+
+		/* The header counter already names the active photograph. */
+		.gallery__item.is-active .gallery__number {
+			opacity: 0;
+		}
+
+		.gallery__item:hover .gallery__number,
+		.gallery__item:has(:focus-visible) .gallery__number {
+			color: var(--paper);
+		}
+
+		.gallery__caption {
+			padding: var(--space-9) var(--space-5) var(--space-5);
+			opacity: 0;
+			transition: opacity var(--duration-base) var(--ease-standard);
+		}
+
+		.gallery__item.is-active .gallery__caption {
+			opacity: 1;
+			transition-delay: var(--duration-base);
+		}
+
+		.gallery__progress {
+			gap: var(--space-6);
+			margin-top: var(--space-6);
+		}
+	}
+
+	/* ── Section entrance (scroll-driven, no JS; skipped where unsupported) ── */
+	@supports (animation-timeline: view()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.culture__title-line,
+			.gallery {
+				animation: culture-rise linear both;
+				animation-timeline: view();
+				animation-range: entry 0% entry 60%;
+			}
+
+			.culture__title-line:nth-child(2) {
+				animation-range: entry 5% entry 70%;
+			}
+		}
+	}
+
+	@keyframes culture-rise {
+		from {
+			opacity: 0;
+			transform: translateY(2rem);
+		}
+	}
+</style>

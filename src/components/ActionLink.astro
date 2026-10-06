@@ -1,0 +1,71 @@
+---
+/**
+ * Link styled as an action. `primary` is the single indigo action on a
+ * surface; `quiet` is a text action.
+ */
+import type { NavLink } from '../data/site';
+
+interface Props {
+	link: NavLink;
+	variant?: 'primary' | 'quiet';
+	class?: string;
+}
+
+const { link, variant = 'quiet', class: className } = Astro.props;
+---
+
+<a href={link.href} class:list={['action', `action--${variant}`, className]}>
+	{link.label}{link.arrow && <span class="action__arrow" aria-hidden="true">↗</span>}
+</a>
+
+<style>
+	.action {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.35em;
+		min-height: 2.75rem; /* 44px touch target */
+		font-size: var(--text-action);
+		font-weight: var(--weight-medium);
+		letter-spacing: var(--tracking-ui);
+		line-height: 1;
+		white-space: nowrap;
+		transition:
+			background-color var(--duration-fast) var(--ease-standard),
+			color var(--duration-fast) var(--ease-standard),
+			text-decoration-color var(--duration-fast) var(--ease-standard);
+	}
+
+	.action--primary {
+		min-height: 3.25rem; /* 52px */
+		padding-inline: 1.75rem;
+		background-color: var(--color-accent);
+		color: var(--color-on-accent);
+		border-radius: var(--radius-sm);
+	}
+
+	.action--primary:hover {
+		background-color: var(--color-accent-hover);
+	}
+
+	.action--quiet {
+		color: var(--color-text);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.3em;
+		text-decoration-color: transparent;
+	}
+
+	.action--quiet:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.action__arrow {
+		font-size: 0.875em;
+		transition: transform var(--duration-fast) var(--ease-standard);
+	}
+
+	.action:hover .action__arrow {
+		transform: translate(1px, -1px);
+	}
+</style>

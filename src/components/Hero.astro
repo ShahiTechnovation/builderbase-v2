@@ -1,0 +1,242 @@
+---
+/**
+ * Option B — "Statement over the room".
+ *
+ * Desktop/tablet: statement on paper, photograph directly beneath.
+ * Mobile (<640px): photograph → statement → actions.
+ *
+ * The <h1> always reads "The distribution layer for builders." The anchor
+ * word is uppercased with CSS so assistive tech reads it as a normal word.
+ */
+import { hero } from '../data/home';
+import { actions } from '../data/site';
+import ActionLink from './ActionLink.astro';
+import PhotoFrame from './PhotoFrame.astro';
+
+const { statement, meta, photo } = hero;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+	<div class="hero__statement page-width">
+		<h1 class="statement" id="hero-title">
+			<span class="statement__lead" style="--stagger: 0">{statement.lead}</span>{' '}
+			<span class="statement__anchor" style="--stagger: 1">{statement.anchor}</span>{' '}
+			<span class="statement__tail" style="--stagger: 2">{statement.tail}</span>
+		</h1>
+		{meta && <p class="hero__meta meta" style="--stagger: 1">{meta}</p>}
+		<div class="hero__actions" style="--stagger: 3">
+			<ActionLink link={actions.join} variant="primary" class="hero__join" />
+			<ActionLink link={actions.partner} />
+		</div>
+	</div>
+
+	<div class="hero__photo page-width">
+		<div class="hero__frame">
+			<PhotoFrame
+				photo={photo}
+				priority
+				widths={[640, 960, 1280, 1600, 2000]}
+				sizes="(min-width: 105rem) 104rem, (min-width: 40rem) calc(100vw - 2rem), 100vw"
+			/>
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		display: flex;
+		flex-direction: column;
+		padding-bottom: clamp(3.5rem, 2.8rem + 2vw, 4rem);
+	}
+
+	/* ── Statement ─────────────────────────────────────────────────── */
+	.hero__statement {
+		container-type: inline-size;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		padding-inline: var(--gutter);
+		padding-top: var(--space-5);
+	}
+
+	.statement {
+		grid-column: 1 / -1;
+		grid-row: 1 / span 3;
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-template-rows: subgrid;
+		font-weight: var(--weight-semibold);
+		color: var(--color-text);
+	}
+
+	.statement__lead,
+	.statement__tail {
+		font-size: var(--text-lead);
+		letter-spacing: var(--tracking-lead);
+		line-height: var(--leading-tight);
+	}
+
+	.statement__lead {
+		grid-row: 1;
+		grid-column: 1 / -1;
+	}
+
+	/* Sized against the statement's own width so the word always spans the
+	   measure exactly: 100cqi ÷ (word width at 1px). Never wraps. */
+	.statement__anchor {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		display: block;
+		margin-inline-start: -0.035em; /* optical: pull the D's side bearing onto the gutter */
+		margin-block: 0.06em 0.05em;
+		font-size: 12.5vw;
+		font-size: calc(100cqi / 7.27); /* Schibsted Grotesk 800 @ -0.055em: "DISTRIBUTION" ≈ 7.25em */
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-anchor);
+		line-height: var(--leading-anchor);
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.statement__tail {
+		grid-row: 3;
+		grid-column: 1;
+	}
+
+	.hero__meta {
+		grid-row: 1;
+		grid-column: -2 / -1;
+		justify-self: end;
+		align-self: center;
+		color: var(--color-text-muted);
+	}
+
+	.hero__actions {
+		grid-row: 4;
+		grid-column: 1 / -1;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--space-2);
+		margin-top: var(--space-6);
+	}
+
+	/* ── Photograph ────────────────────────────────────────────────── */
+	.hero__photo {
+		order: -1; /* mobile: photograph first */
+	}
+
+	.hero__frame {
+		position: relative;
+		height: min(112vw, 56svh);
+		overflow: hidden;
+		background-color: var(--color-well);
+	}
+
+	.hero__frame :global(img) {
+		object-position: var(--focal-portrait);
+	}
+
+	/* Soft bottom vignette — atmosphere, not decoration. */
+	.hero__frame::after {
+		content: '';
+		position: absolute;
+		inset: auto 0 0;
+		height: 24%;
+		background: linear-gradient(to top, rgb(14 15 19 / 0.32), transparent);
+		pointer-events: none;
+	}
+
+	/* ── Tablet: statement first, photograph beneath ───────────────── */
+	@media (min-width: 40rem) {
+		.hero__photo {
+			order: 0;
+			margin-top: var(--space-7);
+			padding-inline: var(--gutter-photo);
+		}
+
+		.hero__statement {
+			padding-top: var(--space-4);
+		}
+
+		.hero__frame {
+			height: auto;
+			aspect-ratio: 16 / 10;
+			border-radius: var(--radius-frame);
+		}
+
+		.hero__frame :global(img) {
+			object-position: var(--focal);
+		}
+
+		.hero__meta {
+			align-self: end;
+			padding-bottom: 0.4em;
+		}
+
+		.hero__actions {
+			flex-direction: row;
+			align-items: center;
+			gap: var(--space-5);
+			margin-top: var(--space-6);
+		}
+	}
+
+	/* ── Desktop: actions sit beside "layer for builders." ─────────── */
+	@media (min-width: 64rem) {
+		.hero__statement {
+			grid-template-columns: max-content minmax(0, 1fr);
+			column-gap: var(--space-7);
+		}
+
+		.hero__actions {
+			grid-row: 3;
+			grid-column: 2;
+			align-self: center;
+			margin-top: 0.15em;
+		}
+
+		.hero__frame {
+			aspect-ratio: 87 / 40;
+		}
+	}
+
+	/* ── Entrance ──────────────────────────────────────────────────── */
+	@media (prefers-reduced-motion: no-preference) {
+		.statement > span,
+		.hero__meta,
+		.hero__actions {
+			animation: hero-rise var(--duration-entrance) var(--ease-editorial) both;
+			animation-delay: calc(var(--stagger, 0) * 70ms);
+		}
+
+		.hero__frame {
+			animation: hero-reveal 1100ms var(--ease-editorial) 80ms both;
+		}
+
+		.hero__frame :global(img) {
+			animation: hero-settle 1600ms var(--ease-editorial) 80ms both;
+		}
+	}
+
+	@keyframes hero-rise {
+		from {
+			opacity: 0;
+			transform: translateY(0.75rem);
+		}
+	}
+
+	@keyframes hero-reveal {
+		from {
+			clip-path: inset(0 0 14% 0);
+		}
+		to {
+			clip-path: inset(0);
+		}
+	}
+
+	@keyframes hero-settle {
+		from {
+			transform: scale(1.04);
+		}
+	}
+</style>

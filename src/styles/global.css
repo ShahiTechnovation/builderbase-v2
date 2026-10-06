@@ -1,0 +1,122 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100vh;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-body);
+	line-height: var(--leading-body);
+	font-kerning: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+	overflow-x: clip;
+}
+
+img,
+picture,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+ul[role='list'],
+ol[role='list'] {
+	list-style: none;
+	padding: 0;
+}
+
+::selection {
+	background-color: var(--builder-indigo);
+	color: var(--paper);
+}
+
+/* Visible, consistent keyboard focus. Mouse clicks do not show the ring. */
+:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+/* ── Utilities ───────────────────────────────────────────────────── */
+
+.visually-hidden {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+.skip-link {
+	position: absolute;
+	top: var(--space-2);
+	left: var(--space-2);
+	z-index: var(--z-skip);
+	padding: var(--space-3) var(--space-4);
+	background-color: var(--ink);
+	color: var(--paper);
+	font-size: var(--text-action);
+	border-radius: var(--radius-sm);
+	transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+	transform: none;
+}
+
+/* Small uppercase monospace metadata. */
+.meta {
+	font-family: var(--font-mono);
+	font-size: var(--text-meta);
+	font-weight: var(--weight-regular);
+	letter-spacing: var(--tracking-meta);
+	line-height: 1.4;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+
+.page-width {
+	width: 100%;
+	max-width: var(--page-max);
+	margin-inline: auto;
+}

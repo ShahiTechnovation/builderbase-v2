@@ -1,0 +1,46 @@
+---
+import { Font } from 'astro:assets';
+import SeoHead from '../components/SeoHead.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	noindex?: boolean;
+}
+
+const { title, description, noindex } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script is:inline>
+			document.documentElement.classList.add('js');
+		</script>
+		<Font cssVariable="--font-schibsted-grotesk" preload />
+		<Font cssVariable="--font-fragment-mono" />
+		<SeoHead title={title} description={description} noindex={noindex} />
+		<meta name="theme-color" content={site.themeColor} />
+		<meta name="color-scheme" content="light" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<SiteHeader />
+		<main id="main" tabindex="-1">
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style>
+	main:focus {
+		outline: none;
+	}
+</style>
