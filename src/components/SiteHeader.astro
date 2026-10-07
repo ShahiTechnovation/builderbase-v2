@@ -3,6 +3,7 @@
  * Restrained site header. One <nav>: inline from 768px, a disclosure panel
  * below it. Without JavaScript the links simply stay visible.
  */
+import { monogram } from '../data/brand';
 import { partnersNav, primaryNav, site } from '../data/site';
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -10,9 +11,15 @@ const isCurrent = (href: string) => currentPath === href;
 ---
 
 <header class="site-header" data-site-header>
+	<!-- The BB monogram, defined once per page; every BB on the page <use>s it. -->
+	<svg class="site-header__symbols" aria-hidden="true" focusable="false">
+		<symbol id={monogram.id} viewBox={monogram.viewBox}><path fill="currentColor" d={monogram.path}></path></symbol>
+	</svg>
 	<div class="site-header__bar page-width">
 		<a class="wordmark" href="/" aria-label={`${site.name} — home`}>
-			<span class="wordmark__mark" aria-hidden="true"></span>
+			<svg class="wordmark__mark" viewBox={monogram.viewBox} aria-hidden="true" focusable="false"
+				><use href={`#${monogram.id}`}></use></svg
+			>
 			<span class="wordmark__text">{site.wordmark}</span>
 		</a>
 
@@ -120,11 +127,26 @@ const isCurrent = (href: string) => currentPath === href;
 		line-height: 1;
 	}
 
+	.site-header__symbols {
+		position: absolute;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+	}
+
+	/* The BB monogram: small and editorial, sized against the lowercase wordmark. */
 	.wordmark__mark {
-		width: 6px;
-		height: 6px;
-		background-color: var(--builder-indigo);
+		display: block;
 		flex-shrink: 0;
+		height: 0.9375rem; /* 15px on mobile */
+		width: auto;
+		aspect-ratio: 210.5 / 233.3; /* the mark's own proportions (its viewBox) */
+		color: var(--builder-indigo);
+	}
+
+	/* Indigo on near-black is 1.6:1 (tokens.css) — on a dark page the mark is paper. */
+	:global(.surface-dark) .wordmark__mark {
+		color: var(--color-text);
 	}
 
 	.menu-toggle {
@@ -210,6 +232,10 @@ const isCurrent = (href: string) => currentPath === href;
 
 		.wordmark {
 			font-size: 1.25rem;
+		}
+
+		.wordmark__mark {
+			height: 1.0625rem; /* 17px */
 		}
 
 		.menu-toggle {

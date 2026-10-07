@@ -34,6 +34,7 @@ const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 				if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) root.classList.add('motion');
 			})(document.documentElement);
 		</script>
+		<slot name="head" />
 		<Font cssVariable="--font-schibsted-grotesk" preload />
 		<Font cssVariable="--font-fragment-mono" />
 		<SeoHead title={title} description={description} noindex={noindex} ogPhoto={ogPhoto} />

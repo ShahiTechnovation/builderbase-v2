@@ -1,0 +1,233 @@
+---
+/**
+ * Opening sequence — the BB monogram assembles itself into the homepage.
+ *
+ * First homepage load in a browsing session only (sessionStorage), decided
+ * before first paint by the inline head script below:
+ *
+ *   BB settles at the centre (CSS, from first paint)
+ *   → travels onto the header's own BB mark (measured; transforms only),
+ *     arriving at exactly its position and size
+ *   → swaps with it in a single frame: both are the same <symbol>, so one
+ *     logo is seen moving from the centre into the header
+ *   → meanwhile the header settles and the EXISTING hero entrance plays
+ *
+ * Holding: while `opening` is set, the header's contents are hidden (and
+ * therefore not focusable) and the hero's existing `data-entrance` animations
+ * are paused at their first frame. Releasing the class lets them run — no
+ * second hero animation system.
+ *
+ * Classes on <html> (set by OpeningHead.astro), removed in order by the script:
+ *   opening        header contents + hero entrance held
+ *   opening-mark   the header's small indigo mark held (the BB lands on it)
+ *   opening-stage  the centred BB layer is displayed
+ *
+ * Never a trap: any pointer, key, wheel, touch or scroll finishes at once; a
+ * failsafe in the head script releases everything after 2.6 s even if the
+ * sequence script never runs. No JavaScript → none of this exists.
+ * Reduced motion: no travel — the BB is shown briefly, then a 150 ms
+ * crossfade to the finished hero.
+ */
+import { monogram } from '../data/brand';
+
+---
+
+<div class="opening-layer" aria-hidden="true" data-opening>
+	<div class="opening-layer__mark" data-opening-mark>
+		<svg viewBox={monogram.viewBox} focusable="false"><use href={`#${monogram.id}`}></use></svg>
+	</div>
+</div>
+
+<script>
+	const root = document.documentElement;
+	const layer = document.querySelector<HTMLElement>('[data-opening]');
+	const mark = layer?.querySelector<HTMLElement>('[data-opening-mark]');
+	const target = document.querySelector<HTMLElement>('.site-header .wordmark__mark');
+
+	const EASE = 'cubic-bezier(0.2, 0.7, 0.1, 1)'; // --ease-editorial
+	const ENTER_MS = 480; // the BB arrives
+	const PRESENCE_MS = 60; // and is simply there
+	const DOCK_MS = 520; // then travels into the header
+	const INTERRUPTIONS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+
+	let finished = false;
+	const timers: number[] = [];
+	const later = (ms: number, run: () => void) => timers.push(window.setTimeout(run, ms));
+
+	/** Everything back to the normal homepage, now. Safe to call more than once. */
+	function finish(): void {
+		if (finished) return;
+		finished = true;
+		timers.forEach((timer) => window.clearTimeout(timer));
+		INTERRUPTIONS.forEach((type) => window.removeEventListener(type, interrupt, true));
+		root.classList.remove('opening', 'opening-mark');
+		const fade = mark?.animate([{ opacity: Number(getComputedStyle(mark).opacity) || 0 }, { opacity: 0 }], {
+			duration: 120,
+			fill: 'forwards',
+		});
+		const done = () => root.classList.remove('opening-stage');
+		if (fade) fade.finished.then(done, done);
+		else done();
+	}
+
+	function interrupt(): void {
+		finish();
+	}
+
+	/** The hand-off: the BB travels onto the header's BB — same position, same size — and swaps. */
+	function dock(): void {
+		if (finished || !mark || !target) return finish();
+		const from = (mark.querySelector('svg') ?? mark).getBoundingClientRect();
+		const to = target.getBoundingClientRect();
+		// Before the first rendered frame there is no layout yet (every box is
+		// 0×0); measure again on the next frame rather than animate to nowhere.
+		if (!from.width || !to.width) {
+			requestAnimationFrame(dock);
+			return;
+		}
+		const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+		const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+		const scale = to.height / from.height; // same symbol, same proportions
+		const end = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px) scale(${scale.toFixed(5)})`;
+
+		// The header settles and the existing hero entrance begins as the BB leaves the centre.
+		root.classList.remove('opening');
+		const travel = mark.animate([{ transform: 'none', easing: EASE }, { transform: end }], {
+			duration: DOCK_MS,
+			fill: 'forwards',
+		});
+		// Arrived exactly on the header's mark: reveal it and remove the travelling
+		// copy in the same task, so the swap happens within one frame.
+		travel.finished.then(() => {
+			if (finished) return;
+			finished = true;
+			INTERRUPTIONS.forEach((type) => window.removeEventListener(type, interrupt, true));
+			root.classList.remove('opening-mark', 'opening-stage');
+		}, finish);
+	}
+
+	if (!root.classList.contains('opening-stage')) {
+		// Not this visit (already seen this session, no JS-held state).
+	} else if (!layer || !mark || !target) {
+		finish();
+	} else {
+		INTERRUPTIONS.forEach((type) => window.addEventListener(type, interrupt, { capture: true, passive: true }));
+
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			// No travel: the BB is present for a moment, then a short crossfade to the finished page.
+			later(260, finish);
+		} else {
+			// The entrance itself is CSS (it starts at first paint, before this script
+			// can see it); dock a beat after it ends. The timer is a fallback in case
+			// \`animationend\` never arrives (e.g. a background tab).
+			let settled = false;
+			const settle = () => {
+				if (settled) return;
+				settled = true;
+				later(PRESENCE_MS, dock);
+			};
+			mark.addEventListener('animationend', settle, { once: true });
+			// Timed from the first rendered frame — the moment the entrance can begin.
+			requestAnimationFrame(() => later(ENTER_MS + 200, settle));
+		}
+	}
+</script>
+
+<style is:global>
+	/* The BB layer exists only while the sequence runs (never without JavaScript).
+	   Its class must never match <html>, which carries `opening` itself. */
+	.opening-layer {
+		display: none;
+	}
+
+	:root.opening-stage .opening-layer {
+		position: fixed;
+		inset: 0;
+		z-index: calc(var(--z-skip) - 1);
+		display: grid;
+		place-items: center;
+		pointer-events: none;
+	}
+
+	/* Optical size: the viewBox is cropped to the mark itself, not a padded canvas. */
+	.opening-layer__mark {
+		width: clamp(5.25rem, 3.6rem + 6.4vw, 8.75rem); /* ≈86px at 375 → 140px at 1440 */
+		color: var(--builder-indigo);
+		will-change: transform, opacity;
+	}
+
+	/* Entrance from first paint: opacity, scale, a small perspective tilt and blur settle. */
+	@keyframes opening-enter {
+		from {
+			opacity: 0;
+			transform: perspective(600px) rotateX(12deg) rotateY(-9deg) scale(0.92);
+			filter: blur(6px);
+		}
+	}
+
+	:root.motion.opening-stage .opening-layer__mark {
+		animation: opening-enter 480ms var(--ease-editorial) both; /* = ENTER_MS */
+	}
+
+	.opening-layer__mark svg {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	/* Hold: the header's contents wait for the hand-off. Hidden, so not focusable. */
+	:root.opening .site-header .wordmark__text,
+	:root.opening .site-header .menu-toggle,
+	:root.opening .site-header .site-nav,
+	:root.opening-mark .site-header .wordmark__mark {
+		visibility: hidden;
+		opacity: 0;
+	}
+
+	.site-header .wordmark__text,
+	.site-header .menu-toggle,
+	.site-header .site-nav {
+		transition: opacity var(--duration-slow) var(--ease-editorial);
+	}
+
+	.site-header .site-nav,
+	.site-header .menu-toggle {
+		transition-delay: var(--stagger);
+	}
+
+	/* Hold: only paper behind the BB — the photograph's empty well waits too,
+	   and fades in as the existing entrance opens the photograph. */
+	:root.opening .hero__photo {
+		opacity: 0;
+	}
+
+	.hero__photo {
+		transition: opacity var(--duration-slow) var(--ease-editorial);
+	}
+
+	/* Hold: the hero's existing entrance (motion.css) waits at its first frame.
+	   !important: the entrance shorthand would otherwise reset the play state. */
+	:root.opening [data-entrance],
+	:root.opening [data-entrance] .reveal-mask__line {
+		animation-play-state: paused !important;
+	}
+
+	/* Reduced motion has no entrance to hold: the hero simply waits, then crossfades in. */
+	@media (prefers-reduced-motion: reduce) {
+		:root.opening .hero {
+			opacity: 0;
+		}
+
+		.hero {
+			transition: opacity 150ms linear;
+		}
+
+		.site-header .wordmark__text,
+		.site-header .menu-toggle,
+		.site-header .site-nav,
+		.site-header .wordmark__mark {
+			transition: opacity 150ms linear;
+			transition-delay: 0ms;
+		}
+	}
+</style>

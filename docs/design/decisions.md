@@ -97,6 +97,36 @@ Round 2 Option B → Round 2 Stitch project → original references → old repo
   organisations. `CONTENT_SOURCE=baserow` is the saved and documented
   production setting; `local` stays the code default and offline fallback.
 
+## Opening sequence (2026-10-07, awaiting visual review)
+
+- First homepage load per browsing session (`sessionStorage`, key
+  `bb-opening`): the BB monogram settles at the centre, then docks into the
+  header's brand mark while the header settles and the **existing** hero
+  entrance (motion.css) plays. Repeat visits — including refresh — render the
+  finished homepage immediately. Never from a scrolled position or an in-page
+  link.
+- Decided before first paint by `OpeningHead.astro` (inline, via a new
+  optional `head` slot in BaseLayout); run by `OpeningSequence.astro`. The
+  hero's `data-entrance` animations are paused at their first frame while held
+  and released in place — no second animation system. Header contents are
+  hidden (so not focusable) while held.
+- Timing (from the first rendered frame): entrance 480 ms, presence 60 ms,
+  dock 520 ms. Hero released ≈0.54 s; hand-off complete ≈1.06 s; headline
+  settled ≈1.45 s. No loading counter, no waiting on assets.
+- Hand-off: the start and end boxes are measured (the real
+  `.wordmark__mark`, so mobile targets the mobile header); one transform-only
+  animation travels there, landing at ~2× the marker before handing over.
+- Never a trap: pointer, key, wheel, touch or scroll finishes at once; a
+  failsafe releases everything 2.6 s after the first frame even if the script
+  never runs. No JS → nothing. Reduced motion → no travel, a 150 ms crossfade.
+- Asset: `src/assets/brand/bb-monogram.svg`, a cleaned copy of the traced
+  monogram (main shape only, stray trace specks removed, viewBox cropped to the
+  mark for optical centring, `currentColor` → `--builder-indigo`), 10 KB /
+  2.8 KB gzipped, inlined. The header mark itself is unchanged.
+- Cost on `/`: +4.5 KB gzipped HTML (JS +0.8, CSS +0.3, SVG ≈2.8); no new
+  requests; other pages byte-identical. Lighthouse 100 → 99 (Speed Index rises
+  because the page is deliberately held); CLS 0; TBT 0.
+
 ## Content architecture
 
 - Components receive props; pages call `src/data/content.ts`; adapters live in

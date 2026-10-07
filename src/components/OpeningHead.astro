@@ -1,0 +1,29 @@
+---
+/**
+ * Decides, before first paint, whether this homepage load plays the opening
+ * sequence (see OpeningSequence.astro): only the first homepage visit in a
+ * browsing session (sessionStorage — cleared when the session ends), only
+ * from the top of the page, never for an in-page link. A failsafe releases
+ * the page 2.6 s after the first rendered frame even if the sequence script
+ * never runs.
+ */
+---
+
+<script is:inline>
+	(function (root) {
+		try {
+			if (sessionStorage.getItem('bb-opening') || location.hash || window.scrollY > 0) return;
+			sessionStorage.setItem('bb-opening', '1');
+		} catch {
+			return; // storage unavailable: no sequence
+		}
+		root.classList.add('opening', 'opening-mark', 'opening-stage');
+		// Failsafe, timed from the first rendered frame: never hold the page
+		// longer than the sequence needs, even if its script never runs.
+		requestAnimationFrame(function () {
+			window.setTimeout(function () {
+				root.classList.remove('opening', 'opening-mark', 'opening-stage');
+			}, 2600);
+		});
+	})(document.documentElement);
+</script>

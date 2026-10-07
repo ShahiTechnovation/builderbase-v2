@@ -2,6 +2,8 @@
 import CultureGallery from '../components/CultureGallery.astro';
 import Hero from '../components/Hero.astro';
 import NextRooms from '../components/NextRooms.astro';
+import OpeningHead from '../components/OpeningHead.astro';
+import OpeningSequence from '../components/OpeningSequence.astro';
 import { getHomepageContent } from '../data/content';
 import { home } from '../data/home';
 import { actions, destinations } from '../data/site';
@@ -12,6 +14,8 @@ const hasCulture = content.culturePhotos.length > 0;
 ---
 
 <BaseLayout ogPhoto={content.heroPhoto}>
+	<OpeningHead slot="head" />
+	<OpeningSequence />
 	<Hero
 		statement={home.hero.statement}
 		meta={home.hero.geography.approved ? home.hero.geography.text : undefined}
