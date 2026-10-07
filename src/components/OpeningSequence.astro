@@ -1,233 +1,422 @@
 ---
 /**
- * Opening sequence — the BB monogram assembles itself into the homepage.
+ * Builder Base Premium Opening Sequence — Signature Brand Film
  *
- * First homepage load in a browsing session only (sessionStorage), decided
- * before first paint by the inline head script below:
- *
- *   BB settles at the centre (CSS, from first paint)
- *   → travels onto the header's own BB mark (measured; transforms only),
- *     arriving at exactly its position and size
- *   → swaps with it in a single frame: both are the same <symbol>, so one
- *     logo is seen moving from the centre into the header
- *   → meanwhile the header settles and the EXISTING hero entrance plays
- *
- * Holding: while `opening` is set, the header's contents are hidden (and
- * therefore not focusable) and the hero's existing `data-entrance` animations
- * are paused at their first frame. Releasing the class lets them run — no
- * second hero animation system.
- *
- * Classes on <html> (set by OpeningHead.astro), removed in order by the script:
- *   opening        header contents + hero entrance held
- *   opening-mark   the header's small indigo mark held (the BB lands on it)
- *   opening-stage  the centred BB layer is displayed
- *
- * Never a trap: any pointer, key, wheel, touch or scroll finishes at once; a
- * failsafe in the head script releases everything after 2.6 s even if the
- * sequence script never runs. No JavaScript → none of this exists.
- * Reduced motion: no travel — the BB is shown briefly, then a 150 ms
- * crossfade to the finished hero.
+ * Runs once per session. Features:
+ * - Dimensional assembly of the BB monogram.
+ * - The BB becomes a portal into the actual Hero photograph.
+ * - The mask expands into the final hero frame (FLIP technique).
+ * - A separate BB logo separates and docks into the header.
  */
 import { monogram } from '../data/brand';
+import type { ResolvedPhoto } from '../data/model';
+import PhotoFrame from './PhotoFrame.astro';
 
+interface Props {
+	heroPhoto?: ResolvedPhoto;
+}
+const { heroPhoto } = Astro.props;
+
+const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${monogram.viewBox}" fill="white"><path d="${monogram.path}"/></svg>`;
+const maskDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
 ---
 
-<div class="opening-layer" aria-hidden="true" data-opening>
-	<div class="opening-layer__mark" data-opening-mark>
-		<svg viewBox={monogram.viewBox} focusable="false"><use href={`#${monogram.id}`}></use></svg>
+<div id="opening-sequence" class="opening" aria-hidden="true">
+	<div class="opening__overlay" id="opening-overlay"></div>
+
+	<!-- BEAT 01: Void Metadata -->
+	<div class="opening__meta" id="opening-meta">
+		<p>BUILDER BASE / 2026</p>
+		<p>DISTRIBUTION LAYER</p>
+	</div>
+
+	<!-- BEAT 02: Assembly Fragments -->
+	<div class="opening__assembly" id="opening-assembly">
+		<div class="opening__fragment opening__fragment--1">
+			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
+		</div>
+		<div class="opening__fragment opening__fragment--2">
+			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
+		</div>
+		<div class="opening__fragment opening__fragment--3">
+			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
+		</div>
+		<div class="opening__fragment opening__fragment--4">
+			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
+		</div>
+	</div>
+
+	<!-- BEAT 03 & 04: Portal & Expansion -->
+	<div class="opening__portal-wrapper" id="opening-portal-wrapper">
+		<div class="opening__portal-mask" id="opening-portal-mask" style={`mask-image: url("${maskDataUri}"); -webkit-mask-image: url("${maskDataUri}");`}>
+			<div class="opening__portal-image" id="opening-portal-image">
+				{heroPhoto && (
+					<PhotoFrame photo={heroPhoto} priority widths={[640, 960, 1280, 1600, 2000]} sizes="100vw" />
+				)}
+			</div>
+		</div>
+	</div>
+
+	<!-- BEAT 06: Header Handoff Logo -->
+	<div class="opening__handoff" id="opening-handoff">
+		<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
 	</div>
 </div>
 
 <script>
+	// SIGNATURE OPENING SEQUENCE RUNTIME
 	const root = document.documentElement;
-	const layer = document.querySelector<HTMLElement>('[data-opening]');
-	const mark = layer?.querySelector<HTMLElement>('[data-opening-mark]');
-	const target = document.querySelector<HTMLElement>('.site-header .wordmark__mark');
-
-	const EASE = 'cubic-bezier(0.2, 0.7, 0.1, 1)'; // --ease-editorial
-	const ENTER_MS = 480; // the BB arrives
-	const PRESENCE_MS = 60; // and is simply there
-	const DOCK_MS = 520; // then travels into the header
-	const INTERRUPTIONS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
-
-	let finished = false;
-	const timers: number[] = [];
-	const later = (ms: number, run: () => void) => timers.push(window.setTimeout(run, ms));
-
-	/** Everything back to the normal homepage, now. Safe to call more than once. */
-	function finish(): void {
-		if (finished) return;
-		finished = true;
-		timers.forEach((timer) => window.clearTimeout(timer));
-		INTERRUPTIONS.forEach((type) => window.removeEventListener(type, interrupt, true));
-		root.classList.remove('opening', 'opening-mark');
-		const fade = mark?.animate([{ opacity: Number(getComputedStyle(mark).opacity) || 0 }, { opacity: 0 }], {
-			duration: 120,
-			fill: 'forwards',
-		});
-		const done = () => root.classList.remove('opening-stage');
-		if (fade) fade.finished.then(done, done);
-		else done();
+	const sequence = document.getElementById('opening-sequence');
+	const overlay = document.getElementById('opening-overlay');
+	const meta = document.getElementById('opening-meta');
+	const assembly = document.getElementById('opening-assembly');
+	const portalWrapper = document.getElementById('opening-portal-wrapper');
+	const portalMask = document.getElementById('opening-portal-mask');
+	const portalImage = document.getElementById('opening-portal-image');
+	const handoffLogo = document.getElementById('opening-handoff');
+	
+	const STORAGE_KEY = 'bb_v2_signature_intro_played';
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	let hasPlayed = false;
+	try {
+		hasPlayed = sessionStorage.getItem(STORAGE_KEY) === 'true';
+	} catch (e) {
+		// Ignore storage errors; we'll just assume it hasn't played, 
+		// but it won't crash the page.
 	}
+	const forceReplay = window.location.search.includes('replay-intro');
 
-	function interrupt(): void {
-		finish();
-	}
+	// Active animations array so we can cancel/finish them on interruption
+	let activeAnimations: Animation[] = [];
+	const phaseHistory: string[] = [];
+	
+	const setIntroPhase = (phase: string) => {
+		phaseHistory.push(phase);
+		root.setAttribute('data-intro-phase', phase);
+		window.dispatchEvent(
+			new CustomEvent('builderbase:intro-phase', {
+				detail: { phase }
+			})
+		);
+	};
 
-	/** The hand-off: the BB travels onto the header's BB — same position, same size — and swaps. */
-	function dock(): void {
-		if (finished || !mark || !target) return finish();
-		const from = (mark.querySelector('svg') ?? mark).getBoundingClientRect();
-		const to = target.getBoundingClientRect();
-		// Before the first rendered frame there is no layout yet (every box is
-		// 0×0); measure again on the next frame rather than animate to nowhere.
-		if (!from.width || !to.width) {
-			requestAnimationFrame(dock);
-			return;
-		}
-		const dx = to.left + to.width / 2 - (from.left + from.width / 2);
-		const dy = to.top + to.height / 2 - (from.top + from.height / 2);
-		const scale = to.height / from.height; // same symbol, same proportions
-		const end = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px) scale(${scale.toFixed(5)})`;
-
-		// The header settles and the existing hero entrance begins as the BB leaves the centre.
-		root.classList.remove('opening');
-		const travel = mark.animate([{ transform: 'none', easing: EASE }, { transform: end }], {
-			duration: DOCK_MS,
-			fill: 'forwards',
-		});
-		// Arrived exactly on the header's mark: reveal it and remove the travelling
-		// copy in the same task, so the swap happens within one frame.
-		travel.finished.then(() => {
-			if (finished) return;
-			finished = true;
-			INTERRUPTIONS.forEach((type) => window.removeEventListener(type, interrupt, true));
-			root.classList.remove('opening-mark', 'opening-stage');
-		}, finish);
-	}
-
-	if (!root.classList.contains('opening-stage')) {
-		// Not this visit (already seen this session, no JS-held state).
-	} else if (!layer || !mark || !target) {
-		finish();
+	if (!sequence || prefersReducedMotion || (hasPlayed && !forceReplay)) {
+		// Fast-forward or fallback
+		if (sequence) sequence.style.display = 'none';
+		root.classList.add('intro-complete');
 	} else {
-		INTERRUPTIONS.forEach((type) => window.addEventListener(type, interrupt, { capture: true, passive: true }));
+		// Start the show
+		root.classList.add('intro-active');
+		try {
+			sessionStorage.setItem(STORAGE_KEY, 'true');
+		} catch (e) {}
 
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-			// No travel: the BB is present for a moment, then a short crossfade to the finished page.
-			later(260, finish);
-		} else {
-			// The entrance itself is CSS (it starts at first paint, before this script
-			// can see it); dock a beat after it ends. The timer is a fallback in case
-			// \`animationend\` never arrives (e.g. a background tab).
-			let settled = false;
-			const settle = () => {
-				if (settled) return;
-				settled = true;
-				later(PRESENCE_MS, dock);
-			};
-			mark.addEventListener('animationend', settle, { once: true });
-			// Timed from the first rendered frame — the moment the entrance can begin.
-			requestAnimationFrame(() => later(ENTER_MS + 200, settle));
-		}
+		// Utility to run Web Animations and track them
+		const animate = (el: HTMLElement | null, keyframes: Keyframe[], options: KeyframeAnimationOptions) => {
+			if (!el) return null;
+			const anim = el.animate(keyframes, options);
+			activeAnimations.push(anim);
+			return anim;
+		};
+
+		// ── THE CHOREOGRAPHY ──
+		const playSequence = async () => {
+			// Find the real target elements in the DOM to FLIP to.
+			// We wait a frame so layout is ready.
+			await new Promise(r => requestAnimationFrame(r));
+			const realHeroFrame = document.querySelector('.hero__frame');
+			const realWordmarkLogo = document.querySelector('[data-opening-brand-target]');
+			
+			// If missing targets, abort gracefully
+			if (!realHeroFrame || !realWordmarkLogo) {
+				if (import.meta.env?.DEV) console.warn('[opening] missing brand target');
+				finishIntroImmediately();
+				return;
+			}
+
+			setIntroPhase('void');
+
+			// Calculate target bounds for handoff
+			const heroRect = realHeroFrame.getBoundingClientRect();
+			const wordmarkRect = realWordmarkLogo.getBoundingClientRect();
+			const cx = window.innerWidth / 2;
+			const cy = window.innerHeight / 2;
+			
+			// Setup flawless FLIP for the portal image
+			// Set the image container to the exact final dimensions and position so object-fit calculates the exact crop
+			if (portalImage) {
+				portalImage.style.width = `${heroRect.width}px`;
+				portalImage.style.height = `${heroRect.height}px`;
+				portalImage.style.top = `${heroRect.top}px`;
+				portalImage.style.left = `${heroRect.left}px`;
+			}
+			
+			// Calculate transform to blow it up to cover the screen and center it
+			const scaleX = window.innerWidth / heroRect.width;
+			const scaleY = window.innerHeight / heroRect.height;
+			const scaleFill = Math.max(scaleX, scaleY) * 1.05; // 5% bleed
+			
+			const currentCenterX = heroRect.left + (heroRect.width / 2);
+			const currentCenterY = heroRect.top + (heroRect.height / 2);
+			const dx = cx - currentCenterX;
+			const dy = cy - currentCenterY;
+			
+			const fullScreenTransform = `translate(${dx}px, ${dy}px) scale(${scaleFill})`;
+
+			// BEAT 1: Void Metadata (0-600ms)
+			animate(meta, [
+				{ opacity: 0, transform: 'translateY(10px)' },
+				{ opacity: 1, transform: 'translateY(0)', offset: 0.2 },
+				{ opacity: 1, transform: 'translateY(0)', offset: 0.8 },
+				{ opacity: 0, transform: 'translateY(-10px)' }
+			], { duration: 1000, easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)' });
+
+			// BEAT 2: BB Assembly (600ms - 1300ms)
+			setIntroPhase('assembly');
+			const fragments = Array.from(document.querySelectorAll('.opening__fragment')) as HTMLElement[];
+			fragments.forEach((frag, i) => {
+				const z = (i % 2 === 0 ? 1 : -1) * (i + 1) * 50;
+				const rotateX = i % 2 === 0 ? 45 : -45;
+				animate(frag, [
+					{ transform: `translate3d(0, ${z}px, ${z}px) rotateX(${rotateX}deg)`, opacity: 0, filter: 'blur(10px)' },
+					{ transform: 'translate3d(0, 0, 0) rotateX(0deg)', opacity: 1, filter: 'blur(0px)' }
+				], { duration: 800, delay: 600 + (i * 50), easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)', fill: 'forwards' });
+			});
+
+			// Assembly lock and fade out
+			animate(assembly, [
+				{ opacity: 1, transform: 'scale(1)' },
+				{ opacity: 0, transform: 'scale(1.05)' }
+			], { duration: 400, delay: 1400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' });
+
+			// BEAT 3: Portal Open (1300ms - 1600ms)
+			const portalTimer = animate(sequence, [{ transform: 'none' }, { transform: 'none' }], { duration: 1300 });
+			if (portalTimer) portalTimer.finished.then(() => setIntroPhase('portal')).catch(() => {});
+			if (portalWrapper) portalWrapper.style.display = 'block';
+			
+			// Initialize the image at full-screen scale
+			if (portalImage) portalImage.style.transform = fullScreenTransform;
+
+			animate(portalMask, [
+				{ opacity: 0, maskSize: 'clamp(5rem, 15vw, 8rem)' },
+				{ opacity: 1, maskSize: 'clamp(5rem, 15vw, 8rem)' }
+			], { duration: 300, delay: 1400, fill: 'forwards' });
+
+			// BEAT 4: Mask Expansion & Transform FLIP (1700ms - 2400ms)
+			// Scale mask massively
+			const maskExpand = animate(portalMask, [
+				{ maskSize: 'clamp(5rem, 15vw, 8rem)' },
+				{ maskSize: '5000vmax' }
+			], { duration: 800, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
+
+			// Image shrinks and lands perfectly in its real frame
+			animate(portalImage, [
+				{ transform: fullScreenTransform },
+				{ transform: `translate(0px, 0px) scale(1)` }
+			], { duration: 800, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
+
+			// BEAT 5: Header Handoff Logo (1700ms - 2300ms)
+			const dockTimer = animate(sequence, [{ transform: 'none' }, { transform: 'none' }], { duration: 1700 });
+			if (dockTimer) dockTimer.finished.then(() => setIntroPhase('dock')).catch(() => {});
+			if (handoffLogo) handoffLogo.style.display = 'flex';
+			
+			// Calculate path from center to logo
+			const logoW = wordmarkRect.width;
+			const startLogoW = window.innerWidth * 0.15 > 120 ? window.innerWidth * 0.15 : (window.innerWidth * 0.15 < 80 ? 80 : window.innerWidth * 0.15); // Matches clamp(5rem, 15vw, 8rem) approx
+			
+			animate(handoffLogo, [
+				{ 
+					transform: `translate(${cx - startLogoW/2}px, ${cy - startLogoW/2}px) scale(1)`,
+					opacity: 1
+				},
+				{ 
+					transform: `translate(${wordmarkRect.left}px, ${wordmarkRect.top}px) scale(${logoW / startLogoW})`,
+					opacity: 1
+				}
+			], { duration: 700, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
+
+			// Fade out the overlay
+			animate(overlay, [
+				{ opacity: 1 },
+				{ opacity: 0 }
+			], { duration: 600, delay: 1800, fill: 'forwards' });
+
+			// Wait for completion
+			if (maskExpand) {
+				await maskExpand.finished;
+				finishIntroImmediately();
+			}
+		};
+
+		const finishIntroImmediately = () => {
+			// Cancel all running animations
+			activeAnimations.forEach(a => {
+				try { a.finish(); } catch (e) {}
+			});
+			activeAnimations = [];
+			
+			if (root.classList.contains('intro-complete')) return;
+			root.classList.remove('intro-active');
+			root.classList.add('intro-complete');
+			setIntroPhase('complete');
+			
+			// Hide the intro sequence
+			if (sequence) sequence.style.opacity = '0';
+			setTimeout(() => { if (sequence) sequence.remove(); }, 300);
+		};
+
+		// Start sequence
+		playSequence().catch(finishIntroImmediately);
+
+		// Interruption logic
+		const interrupt = () => finishIntroImmediately();
+		window.addEventListener('click', interrupt, { once: true });
+		window.addEventListener('keydown', interrupt, { once: true });
+		window.addEventListener('touchstart', interrupt, { once: true });
+		window.addEventListener('wheel', interrupt, { once: true });
+		document.addEventListener('visibilitychange', () => {
+			if (document.visibilityState === 'hidden') interrupt();
+		});
 	}
 </script>
 
-<style is:global>
-	/* The BB layer exists only while the sequence runs (never without JavaScript).
-	   Its class must never match <html>, which carries `opening` itself. */
-	.opening-layer {
+<style>
+	.opening {
 		display: none;
-	}
-
-	:root.opening-stage .opening-layer {
 		position: fixed;
 		inset: 0;
-		z-index: calc(var(--z-skip) - 1);
-		display: grid;
-		place-items: center;
+		z-index: 10000;
 		pointer-events: none;
+		overflow: hidden;
 	}
 
-	/* Optical size: the viewBox is cropped to the mark itself, not a padded canvas. */
-	.opening-layer__mark {
-		width: clamp(5.25rem, 3.6rem + 6.4vw, 8.75rem); /* ≈86px at 375 → 140px at 1440 */
-		color: var(--builder-indigo);
-		will-change: transform, opacity;
-	}
-
-	/* Entrance from first paint: opacity, scale, a small perspective tilt and blur settle. */
-	@keyframes opening-enter {
-		from {
-			opacity: 0;
-			transform: perspective(600px) rotateX(12deg) rotateY(-9deg) scale(0.92);
-			filter: blur(6px);
-		}
-	}
-
-	:root.motion.opening-stage .opening-layer__mark {
-		animation: opening-enter 480ms var(--ease-editorial) both; /* = ENTER_MS */
-	}
-
-	.opening-layer__mark svg {
+	:global(html.intro-active) .opening {
 		display: block;
+		pointer-events: auto;
+	}
+
+	.opening__overlay {
+		position: absolute;
+		inset: 0;
+		background-color: var(--near-black);
+		/* Subtle atmospheric grain could go here if requested, keeping it clean for now */
+	}
+
+	/* Meta Text */
+	.opening__meta {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		color: var(--paper);
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		opacity: 0;
+	}
+
+	/* Assembly Layers */
+	.opening__assembly {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		perspective: 1200px;
+	}
+
+	.opening__fragment {
+		position: absolute;
+		width: clamp(5rem, 15vw, 8rem);
+		height: clamp(5rem, 15vw, 8rem);
+		opacity: 0;
+		will-change: transform, opacity, filter;
+		color: var(--paper); /* The fragments are white during assembly */
+	}
+	
+	.opening__fragment svg {
 		width: 100%;
-		height: auto;
+		height: 100%;
+		fill: currentColor;
 	}
 
-	/* Hold: the header's contents wait for the hand-off. Hidden, so not focusable. */
-	:root.opening .site-header .wordmark__text,
-	:root.opening .site-header .menu-toggle,
-	:root.opening .site-header .site-nav,
-	:root.opening-mark .site-header .wordmark__mark {
-		visibility: hidden;
+	/* Slice the BB logo into 4 quadrants for a mechanical assembly */
+	.opening__fragment--1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+	.opening__fragment--2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+	.opening__fragment--3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+	.opening__fragment--4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+
+	/* Portal & Image */
+	.opening__portal-wrapper {
+		position: absolute;
+		inset: 0;
+		display: none;
+		overflow: hidden;
+		will-change: transform, width, height, border-radius;
+		transform-origin: top left;
+	}
+
+	.opening__portal-mask {
+		position: absolute;
+		inset: 0;
+		/* The mask-image is the BB logo. We center it and scale it. */
+		/* Inline style provides the URL */
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-position: center;
+		-webkit-mask-size: clamp(5rem, 15vw, 8rem);
+		mask-size: clamp(5rem, 15vw, 8rem);
 		opacity: 0;
+		will-change: mask-size, opacity;
 	}
 
-	.site-header .wordmark__text,
-	.site-header .menu-toggle,
-	.site-header .site-nav {
-		transition: opacity var(--duration-slow) var(--ease-editorial);
+	.opening__portal-image {
+		position: absolute;
+		/* JS controls dimensions and top/left to match the hero frame */
+		will-change: transform;
+		transform-origin: center center;
+		overflow: hidden;
+		border-radius: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+	}
+	
+	.opening__portal-image :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: var(--focal-portrait);
 	}
 
-	.site-header .site-nav,
-	.site-header .menu-toggle {
-		transition-delay: var(--stagger);
-	}
-
-	/* Hold: only paper behind the BB — the photograph's empty well waits too,
-	   and fades in as the existing entrance opens the photograph. */
-	:root.opening .hero__photo {
-		opacity: 0;
-	}
-
-	.hero__photo {
-		transition: opacity var(--duration-slow) var(--ease-editorial);
-	}
-
-	/* Hold: the hero's existing entrance (motion.css) waits at its first frame.
-	   !important: the entrance shorthand would otherwise reset the play state. */
-	:root.opening [data-entrance],
-	:root.opening [data-entrance] .reveal-mask__line {
-		animation-play-state: paused !important;
-	}
-
-	/* Reduced motion has no entrance to hold: the hero simply waits, then crossfades in. */
-	@media (prefers-reduced-motion: reduce) {
-		:root.opening .hero {
-			opacity: 0;
+	@media (min-width: 40rem) {
+		.opening__portal-image :global(img) {
+			object-position: var(--focal);
 		}
+	}
 
-		.hero {
-			transition: opacity 150ms linear;
-		}
+	/* Handoff Logo */
+	.opening__handoff {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: clamp(5rem, 15vw, 8rem);
+		height: clamp(5rem, 15vw, 8rem);
+		display: none;
+		will-change: transform, opacity;
+		transform-origin: top left;
+		color: var(--builder-indigo); /* The header logo color */
+	}
+	
+	.opening__handoff svg {
+		width: 100%;
+		height: 100%;
+		fill: currentColor;
+	}
 
-		.site-header .wordmark__text,
-		.site-header .menu-toggle,
-		.site-header .site-nav,
-		.site-header .wordmark__mark {
-			transition: opacity 150ms linear;
-			transition-delay: 0ms;
-		}
+	/* Graceful cleanup */
+	:global(html.intro-complete) .opening {
+		display: none !important;
 	}
 </style>

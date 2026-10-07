@@ -83,10 +83,11 @@
 :root.motion.motion-ready [data-reveal='meta']:not([data-revealed]) {
 	opacity: 0;
 	transform: translateY(calc(var(--reveal-distance) / 2));
+	filter: blur(8px);
 }
 
 :root.motion [data-reveal='mask'][data-revealed] .reveal-mask__line {
-	transition: transform var(--duration-slow) var(--ease-editorial);
+	transition: transform var(--duration-slow) var(--ease-editorial), filter var(--duration-slow) var(--ease-editorial);
 	transition-delay: calc(var(--i, 0) * var(--stagger));
 }
 
@@ -105,15 +106,19 @@
 :root.motion [data-reveal='meta'][data-revealed] {
 	transition:
 		opacity var(--duration-base) var(--ease-standard),
+		filter var(--duration-base) var(--ease-standard),
 		transform var(--duration-slow) var(--ease-editorial);
 	transition-delay: calc(var(--i, 0) * var(--stagger));
+	filter: blur(0px);
 }
 
 /* ── ENTRANCE (on load, above the fold) ──────────────────────────── */
+/* Entrances wait for the intro sequence to finish via the .intro-complete class */
 
 @keyframes rise-into-mask {
 	from {
 		transform: translateY(calc(100% + 0.3em));
+		filter: blur(8px);
 	}
 }
 
@@ -121,26 +126,42 @@
 	from {
 		opacity: 0;
 		transform: translateY(calc(var(--reveal-distance) / 2));
+		filter: blur(8px);
 	}
 }
 
 @keyframes open-photo {
 	from {
 		clip-path: inset(0 0 100% 0);
+		filter: blur(12px) brightness(1.2);
+		scale: 1.1;
 	}
 }
 
-:root.motion [data-entrance='mask'] .reveal-mask__line {
+/* Initially hide entrance elements if motion is enabled and intro is NOT complete */
+:global(:root.motion:not(.intro-complete)) [data-entrance] {
+	opacity: 0;
+	visibility: hidden;
+}
+
+/* Hide the FLIP target elements while the intro is active so they don't duplicate */
+:global(:root.motion.intro-active) .hero__frame,
+:global(:root.motion.intro-active) .wordmark__logo {
+	opacity: 0 !important;
+	visibility: hidden !important;
+}
+
+:global(:root.motion.intro-complete) [data-entrance='mask'] .reveal-mask__line {
 	animation: rise-into-mask var(--duration-entrance) var(--ease-editorial) backwards;
 	animation-delay: calc(var(--i, 0) * var(--stagger));
 }
 
-:root.motion [data-entrance='meta'] {
+:global(:root.motion.intro-complete) [data-entrance='meta'] {
 	animation: settle-in var(--duration-entrance) var(--ease-editorial) backwards;
 	animation-delay: calc(var(--i, 0) * var(--stagger));
 }
 
-:root.motion [data-entrance='photo'] {
+:global(:root.motion.intro-complete) [data-entrance='photo'] {
 	animation: open-photo calc(var(--duration-entrance) * 1.4) var(--ease-editorial) backwards;
 	animation-delay: calc(var(--i, 0) * var(--stagger));
 }

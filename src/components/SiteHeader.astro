@@ -17,7 +17,7 @@ const isCurrent = (href: string) => currentPath === href;
 	</svg>
 	<div class="site-header__bar page-width">
 		<a class="wordmark" href="/" aria-label={`${site.name} — home`}>
-			<svg class="wordmark__mark" viewBox={monogram.viewBox} aria-hidden="true" focusable="false"
+			<svg class="wordmark__mark" data-opening-brand-target viewBox={monogram.viewBox} aria-hidden="true" focusable="false"
 				><use href={`#${monogram.id}`}></use></svg
 			>
 			<span class="wordmark__text">{site.wordmark}</span>
