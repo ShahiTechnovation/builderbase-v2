@@ -31,6 +31,7 @@
 	   active state, small markers. Never a section background. */
 	--builder-indigo: #2b2f7c;
 	--builder-indigo-600: #23276a; /* pressed / hover on paper */
+	--builder-indigo-tint: #a7aeff; /* on dark backgrounds */
 
 	/* ── Semantic colour (light surface is the default) ─────────────── */
 	--color-bg: var(--paper);
@@ -98,14 +99,24 @@
 	--radius-frame: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
 
 	/* ── Motion ────────────────────────────────────────────────────── */
-	/* Editorial: fast start, long settle — confident, never springy. */
+	/* Editorial Machine: fast start, long settle, or hard mechanical cuts. */
+	--ease-mechanical: cubic-bezier(0.85, 0, 0.15, 1); /* Hard structural acceleration */
 	--ease-editorial: cubic-bezier(0.2, 0.7, 0.1, 1);
 	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
 	--duration-fast: 160ms; /* hover / focus feedback */
 	--duration-base: 320ms; /* small state changes */
 	--duration-shift: 600ms; /* gallery: one photograph hands focus to another */
 	--duration-slow: 720ms; /* reveals */
 	--duration-entrance: 760ms; /* hero lines on load */
+
+	--motion-cut: 140ms; /* 120-160ms */
+	--motion-lock: 240ms; /* 180-300ms */
+	--motion-reveal: 550ms; /* 450-650ms */
+	--motion-glide: 800ms; /* 650-900ms */
+	--motion-open: 1000ms; /* 800-1200ms */
+	--motion-signature: 1600ms; /* 1200-2200ms */
+
 	--stagger: 70ms; /* between related items entering together */
 	--reveal-distance: 1.5rem; /* metadata / row travel */
 
@@ -136,6 +147,12 @@
 		--duration-shift: 0ms;
 		--duration-slow: 0ms;
 		--duration-entrance: 0ms;
+		--motion-cut: 0ms;
+		--motion-lock: 0ms;
+		--motion-reveal: 0ms;
+		--motion-glide: 0ms;
+		--motion-open: 0ms;
+		--motion-signature: 0ms;
 		--stagger: 0ms;
 	}
 }

@@ -19,6 +19,7 @@ export const site = {
 	locale: 'en_IN',
 	themeColor: '#f4f2ed',
 	themeColorDark: '#0e0f13',
+	contact: '/partners',
 } as const;
 
 /**

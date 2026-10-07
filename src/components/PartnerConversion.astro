@@ -1,0 +1,53 @@
+---
+import { actions } from '../data/site';
+import ActionLink from './ActionLink.astro';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section class="partner-conversion surface-dark" aria-labelledby="partner-title">
+	<div class="partner__inner page-width">
+		<h2 class="partner__title" id="partner-title" data-reveal="mask">
+			<span class="partner__title-line reveal-mask" style="--i: 0">
+				<span class="reveal-mask__line">{title}</span>
+			</span>
+		</h2>
+		<div class="partner__action" data-reveal="meta" style="--i: 1">
+			<ActionLink link={actions.partner} />
+		</div>
+	</div>
+</section>
+
+<style>
+	.partner-conversion {
+		padding-block: clamp(6rem, 10vw, 12rem);
+		padding-inline: var(--gutter);
+	}
+
+	.partner__inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: var(--space-5);
+	}
+
+	.partner__title {
+		font-family: var(--font-sans);
+		font-size: clamp(3rem, 6vw, 8rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-tight);
+		color: var(--color-text);
+		max-width: 14ch;
+		text-wrap: balance;
+	}
+
+	.partner__title-line {
+		display: block;
+	}
+</style>

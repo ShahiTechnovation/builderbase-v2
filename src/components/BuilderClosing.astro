@@ -1,0 +1,107 @@
+---
+import { actions } from '../data/site';
+import ActionLink from './ActionLink.astro';
+
+interface Props {
+	title: string;
+	marqueeText: string;
+}
+
+const { title, marqueeText } = Astro.props;
+---
+
+<section class="builder-closing" aria-labelledby="closing-title">
+	<div class="closing__marquee-wrapper" aria-hidden="true" data-scroll="start through">
+		<div class="closing__marquee">
+			<span class="closing__marquee-text">{marqueeText}</span>
+			<span class="closing__marquee-text">{marqueeText}</span>
+			<span class="closing__marquee-text">{marqueeText}</span>
+			<span class="closing__marquee-text">{marqueeText}</span>
+		</div>
+	</div>
+
+	<div class="closing__content page-width">
+		<h2 class="closing__title" id="closing-title" data-reveal="mask">
+			<span class="closing__title-line reveal-mask" style="--i: 0">
+				<span class="reveal-mask__line">{title}</span>
+			</span>
+		</h2>
+		<div class="closing__action" data-reveal="meta" style="--i: 1">
+			<ActionLink link={actions.join} variant="primary" />
+		</div>
+	</div>
+</section>
+
+<style>
+	.builder-closing {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-block: var(--section-space) clamp(6rem, 8vw, 12rem);
+		overflow: hidden;
+		min-height: 70vh;
+	}
+
+	.closing__marquee-wrapper {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0.05;
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.closing__marquee {
+		display: flex;
+		white-space: nowrap;
+		animation: scroll-marquee 20s linear infinite;
+	}
+
+	.closing__marquee-text {
+		font-family: var(--font-sans);
+		font-size: clamp(8rem, 20vw, 24rem);
+		font-weight: var(--weight-display);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-anchor);
+		line-height: 1;
+		padding-inline: 1rem;
+	}
+
+	@keyframes scroll-marquee {
+		0% { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
+	}
+
+	.closing__content {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: var(--space-6);
+	}
+
+	.closing__title {
+		font-size: clamp(2.5rem, 4vw, 5rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-tight);
+		text-transform: uppercase;
+		max-width: 12ch;
+		text-wrap: balance;
+	}
+
+	.closing__title-line {
+		display: block;
+	}
+
+	/* Scroll-driven parallax for the marquee */
+	:global(:root.motion) .closing__marquee-wrapper {
+		transform: translateY(calc((var(--scroll-through) - 0.5) * 15%));
+	}
+</style>

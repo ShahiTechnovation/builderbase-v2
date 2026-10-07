@@ -4,6 +4,10 @@ import Hero from '../components/Hero.astro';
 import NextRooms from '../components/NextRooms.astro';
 import OpeningHead from '../components/OpeningHead.astro';
 import OpeningSequence from '../components/OpeningSequence.astro';
+import Proof from '../components/Proof.astro';
+import EcosystemBridge from '../components/EcosystemBridge.astro';
+import PartnerConversion from '../components/PartnerConversion.astro';
+import BuilderClosing from '../components/BuilderClosing.astro';
 import { getHomepageContent } from '../data/content';
 import { home } from '../data/home';
 import { actions, destinations } from '../data/site';
@@ -30,6 +34,8 @@ const hasCulture = content.culturePhotos.length > 0;
 			/>
 		)
 	}
+	<Proof title={home.proof.title} items={home.proof.items} />
+	<EcosystemBridge title={home.ecosystemBridge.title} description={home.ecosystemBridge.description} />
 	<NextRooms
 		marker={home.nextRooms.marker}
 		title={home.nextRooms.title}
@@ -40,6 +46,7 @@ const hasCulture = content.culturePhotos.length > 0;
 			title: home.nextRooms.calendarTitle,
 			loadingLabel: home.nextRooms.loadingLabel,
 		}}
-		handoff={hasCulture ? 'from-dark' : undefined}
 	/>
+	<PartnerConversion title={home.partnerConversion.title} />
+	<BuilderClosing title={home.builderClosing.title} marqueeText={home.builderClosing.marquee} />
 </BaseLayout>

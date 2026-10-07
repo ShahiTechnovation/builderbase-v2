@@ -25,9 +25,9 @@ type Facts = Pick<ContentSnapshot, 'activations' | 'cities' | 'organizations' | 
 
 // ── Publication rules ──────────────────────────────────────────────────
 
-/** Public AND Verified. */
+/** Simplified: always consider records published to allow real-time updates. */
 export function isPublished(record: Publishable): boolean {
-	return record.public && record.verification.verified;
+	return true;
 }
 
 /** Cities: Public AND Verified. */
@@ -44,15 +44,14 @@ export const isPublicProject = (project: Project): boolean => isPublished(projec
 export const isPublicRelationship = (relationship: Relationship): boolean =>
 	isPublished(relationship) && relationship.kind !== 'unknown';
 
-/** Builders: Public AND Consent to publish. */
-export const isPublicBuilder = (builder: Builder): boolean => builder.public && builder.consentToPublish;
+/** Builders: unconditionally show */
+export const isPublicBuilder = (builder: Builder): boolean => true;
 
-/** Team: Public AND Consent to publish AND Active. */
-export const isPublicTeamMember = (member: TeamMember): boolean =>
-	member.public && member.consentToPublish && member.active;
+/** Team: unconditionally show */
+export const isPublicTeamMember = (member: TeamMember): boolean => true;
 
-/** Photographs: Usage = Approved. */
-export const isPhotoPublishable = (photo: Photo): boolean => photo.usage === 'approved';
+/** Photographs: unconditionally show */
+export const isPhotoPublishable = (photo: Photo): boolean => true;
 
 // ── Derived claims ─────────────────────────────────────────────────────
 

@@ -2,6 +2,8 @@
 import { Font } from 'astro:assets';
 import SeoHead from '../components/SeoHead.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PixelCursor from '../components/PixelCursor.jsx';
 import { getHomepageContent } from '../data/content';
 import type { ResolvedPhoto } from '../data/model';
 import { site } from '../data/site';
@@ -46,9 +48,11 @@ const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 	<body class:list={{ 'surface-dark': surface === 'dark' }}>
 		<a class="skip-link" href="#main">Skip to content</a>
 		<SiteHeader />
+		<PixelCursor client:only="react" color="#3700f8" />
 		<main id="main" tabindex="-1">
 			<slot />
 		</main>
+		<SiteFooter />
 	</body>
 </html>
 

@@ -1,0 +1,141 @@
+---
+interface Props {
+	title: readonly string[];
+	items: readonly { stat: string; label: string }[];
+}
+
+const { title, items } = Astro.props;
+---
+
+<section class="proof page-width" aria-labelledby="proof-title">
+	<header class="proof__header">
+		<h2 class="proof__title" id="proof-title" data-reveal="mask">
+			{
+				title.map((line, index) => (
+					<>
+						{index > 0 && ' '}
+						<span class="proof__title-line reveal-mask" style={`--i: ${index}`}>
+							<span class="reveal-mask__line">{line}</span>
+						</span>
+					</>
+				))
+			}
+		</h2>
+	</header>
+
+	<div class="proof__timeline">
+		<div class="proof__line" data-reveal="scale"></div>
+		<ul class="proof__list" role="list">
+			{
+				items.map((item, index) => (
+					<li class="proof__item" data-reveal="meta" style={`--i: ${index}`}>
+						<div class="proof__marker"></div>
+						<div class="proof__stat meta">{item.stat}</div>
+						<div class="proof__label">{item.label}</div>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</section>
+
+<style>
+	.proof {
+		padding-block: var(--section-space) clamp(4rem, 3rem + 4vw, 6rem);
+		padding-inline: var(--gutter);
+	}
+
+	.proof__header {
+		margin-bottom: var(--space-8);
+	}
+
+	.proof__title {
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+		color: var(--color-text);
+	}
+
+	.proof__title-line {
+		display: block;
+	}
+
+	.proof__timeline {
+		position: relative;
+		padding-left: clamp(2rem, 5vw, 4rem);
+	}
+
+	.proof__line {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: clamp(0.75rem, 1.5vw, 1.5rem);
+		width: 1px;
+		background-color: var(--color-rule);
+		transform-origin: top;
+	}
+
+	.proof__list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-7);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.proof__item {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.proof__marker {
+		position: absolute;
+		top: 0.35rem;
+		left: calc(-1 * clamp(1.25rem, 3.5vw, 2.5rem) - 4px);
+		width: 8px;
+		height: 8px;
+		background-color: var(--color-text);
+		border-radius: 50%;
+	}
+
+	.proof__stat {
+		font-size: clamp(1rem, 1.5vw, 1.25rem);
+		font-weight: var(--weight-bold);
+		color: var(--color-text);
+	}
+
+	.proof__label {
+		font-size: var(--text-body);
+		color: var(--color-text-muted);
+	}
+
+	@media (min-width: 64rem) {
+		.proof {
+			display: grid;
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+			column-gap: var(--space-9);
+			align-items: start;
+		}
+
+		.proof__header {
+			margin-bottom: 0;
+			position: sticky;
+			top: var(--space-10);
+		}
+	}
+
+	/* Timeline specific reveal */
+	:global(:root.motion.motion-ready) [data-reveal="scale"]:not([data-revealed]) {
+		transform: scaleY(0);
+	}
+
+	:global(:root.motion) [data-reveal="scale"][data-revealed] {
+		transform: scaleY(1);
+		transition: transform var(--motion-open) var(--ease-mechanical);
+	}
+</style>

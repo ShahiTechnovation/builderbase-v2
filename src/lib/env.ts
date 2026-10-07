@@ -34,7 +34,7 @@ export function baserowConfig(): BaserowConfig | undefined {
 			cities: BASEROW_TABLE_CITIES,
 			organizations: BASEROW_TABLE_ORGANIZATIONS,
 			relationships: BASEROW_TABLE_RELATIONSHIPS,
-			activations: BASEROW_TABLE_ACTIVATIONS,
+			events: BASEROW_TABLE_ACTIVATIONS,
 			projects: BASEROW_TABLE_PROJECTS,
 			builders: BASEROW_TABLE_BUILDERS,
 			team: BASEROW_TABLE_TEAM,

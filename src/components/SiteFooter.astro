@@ -1,0 +1,122 @@
+---
+import { site } from '../data/site';
+---
+
+<footer class="site-footer surface-dark" aria-labelledby="footer-title">
+	<div class="footer__inner page-width">
+		<div class="footer__left">
+			<h2 class="visually-hidden" id="footer-title">Site footer</h2>
+			<div class="footer__brand">
+				<span class="footer__logomark">Builder Base</span>
+			</div>
+			<p class="footer__tagline meta">The distribution layer for builders.</p>
+		</div>
+		
+		<div class="footer__right">
+			<nav class="footer__nav" aria-label="Footer navigation">
+				<ul class="footer__list" role="list">
+					<li><a href="/" class="footer__link">Home</a></li>
+					<li><a href="/events" class="footer__link">Events</a></li>
+					<li><a href="/about" class="footer__link">About</a></li>
+				</ul>
+				<ul class="footer__list" role="list">
+					<li><a href="/partners" class="footer__link">Partners</a></li>
+					<li><a href={site.contact} class="footer__link">Contact</a></li>
+				</ul>
+			</nav>
+			<p class="footer__copyright meta">&copy; {new Date().getFullYear()} Builder Base. All rights reserved.</p>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		padding-block: clamp(4rem, 6vw, 8rem);
+		padding-inline: var(--gutter);
+		background-color: var(--near-black);
+		color: var(--paper);
+	}
+
+	.footer__inner {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-8);
+		border-top: 2px solid var(--color-rule);
+		padding-top: var(--space-8);
+	}
+
+	.footer__left {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.footer__brand {
+		font-size: var(--text-menu);
+		font-weight: var(--weight-display);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-display);
+	}
+
+	.footer__tagline {
+		color: var(--color-text-muted);
+		max-width: 30ch;
+	}
+
+	.footer__right {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+	}
+
+	.footer__nav {
+		display: flex;
+		gap: clamp(2rem, 5vw, 6rem);
+	}
+
+	.footer__list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.footer__link {
+		font-weight: var(--weight-medium);
+		color: var(--paper);
+		text-decoration: none;
+		text-transform: uppercase;
+		font-size: var(--text-ui);
+		letter-spacing: var(--tracking-ui);
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.footer__link:hover,
+	.footer__link:focus-visible {
+		color: var(--color-text-muted);
+	}
+
+	.footer__copyright {
+		color: var(--color-text-muted);
+		margin-top: auto;
+	}
+
+	@media (min-width: 64rem) {
+		.footer__inner {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: flex-start;
+		}
+
+		.footer__right {
+			align-items: flex-end;
+			text-align: right;
+		}
+
+		.footer__list {
+			align-items: flex-end;
+		}
+	}
+</style>

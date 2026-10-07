@@ -1,0 +1,72 @@
+---
+import ActionLink from './ActionLink.astro';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<section class="ecosystem-bridge surface-dark" aria-labelledby="bridge-title">
+	<div class="bridge__inner page-width">
+		<h2 class="bridge__title" id="bridge-title" data-reveal="mask">
+			<span class="bridge__title-line reveal-mask" style="--i: 0">
+				<span class="reveal-mask__line">{title}</span>
+			</span>
+		</h2>
+		<p class="bridge__desc meta" data-reveal="meta" style="--i: 1">{description}</p>
+		<div class="bridge__action" data-reveal="meta" style="--i: 2">
+			<ActionLink link={{ href: '/ecosystem', label: 'Explore the ecosystem' }} />
+		</div>
+	</div>
+</section>
+
+<style>
+	.ecosystem-bridge {
+		padding-block: var(--section-space);
+		padding-inline: var(--gutter);
+		border-top: 2px solid var(--color-rule);
+	}
+
+	.bridge__inner {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.bridge__title {
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-tight);
+		text-transform: uppercase;
+		max-width: 15ch;
+	}
+
+	.bridge__desc {
+		color: var(--color-text-muted);
+		max-width: 30ch;
+	}
+
+	.bridge__title-line {
+		display: block;
+	}
+
+	@media (min-width: 64rem) {
+		.bridge__inner {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: flex-end;
+		}
+
+		.bridge__title {
+			max-width: none;
+		}
+
+		.bridge__desc {
+			text-align: right;
+		}
+	}
+</style>

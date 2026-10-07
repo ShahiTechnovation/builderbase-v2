@@ -1,0 +1,65 @@
+---
+interface Props {
+	text: string;
+	class?: string;
+}
+const { text, class: className } = Astro.props;
+---
+<span class:list={["shutter-text", className]} aria-label={text}>
+    <span class="shutter-text__layer shutter-text__layer--top" aria-hidden="true">{text}</span>
+    <span class="shutter-text__layer shutter-text__layer--bottom" aria-hidden="true">{text}</span>
+</span>
+
+<style>
+	.shutter-text {
+		position: relative;
+		display: inline-block;
+        /* The container takes up the space */
+	}
+
+	.shutter-text__layer {
+		display: block;
+		white-space: nowrap;
+	}
+
+	.shutter-text__layer--top {
+		clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+	}
+
+	.shutter-text__layer--bottom {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+	}
+
+    /* Motion */
+    :global(:root.motion.motion-ready) [data-entrance] .shutter-text__layer--top {
+        transform: translateX(-5%) translateY(10%);
+        opacity: 0;
+        filter: blur(10px);
+    }
+    :global(:root.motion.motion-ready) [data-entrance] .shutter-text__layer--bottom {
+        transform: translateX(5%) translateY(-10%);
+        opacity: 0;
+        filter: blur(10px);
+    }
+
+    :global(:root.motion.intro-complete) [data-entrance="shutter"] .shutter-text__layer--top {
+        animation: shutter-in-top var(--motion-glide) var(--ease-mechanical) forwards;
+        animation-delay: calc(var(--i, 0) * var(--stagger));
+    }
+    :global(:root.motion.intro-complete) [data-entrance="shutter"] .shutter-text__layer--bottom {
+        animation: shutter-in-bottom var(--motion-glide) var(--ease-mechanical) forwards;
+        animation-delay: calc(var(--i, 0) * var(--stagger));
+    }
+
+    @keyframes shutter-in-top {
+        to { transform: none; opacity: 1; filter: blur(0); }
+    }
+    @keyframes shutter-in-bottom {
+        to { transform: none; opacity: 1; filter: blur(0); }
+    }
+</style>

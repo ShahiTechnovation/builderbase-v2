@@ -2,307 +2,199 @@
 /**
  * Builder Base Premium Opening Sequence — Signature Brand Film
  *
- * Runs once per session. Features:
- * - Dimensional assembly of the BB monogram.
- * - The BB becomes a portal into the actual Hero photograph.
- * - The mask expands into the final hero frame (FLIP technique).
- * - A separate BB logo separates and docks into the header.
+ * VOID -> BB MATERIALIZES -> TRANSITION TO NAVBAR
  */
 import { monogram } from '../data/brand';
-import type { ResolvedPhoto } from '../data/model';
-import PhotoFrame from './PhotoFrame.astro';
-
-interface Props {
-	heroPhoto?: ResolvedPhoto;
-}
-const { heroPhoto } = Astro.props;
-
-const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${monogram.viewBox}" fill="white"><path d="${monogram.path}"/></svg>`;
-const maskDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
 ---
 
 <div id="opening-sequence" class="opening" aria-hidden="true">
-	<div class="opening__overlay" id="opening-overlay"></div>
+	<div class="opening__camera" id="opening-camera">
+		<!-- Assembly Fragments -->
+		<div class="opening__assembly" id="opening-assembly">
+			<div class="opening__fragment opening__fragment--1"><svg viewBox={monogram.viewBox}><use href={`#${monogram.id}`}></use></svg></div>
+			<div class="opening__fragment opening__fragment--2"><svg viewBox={monogram.viewBox}><use href={`#${monogram.id}`}></use></svg></div>
+			<div class="opening__fragment opening__fragment--3"><svg viewBox={monogram.viewBox}><use href={`#${monogram.id}`}></use></svg></div>
+			<div class="opening__fragment opening__fragment--4"><svg viewBox={monogram.viewBox}><use href={`#${monogram.id}`}></use></svg></div>
+		</div>
 
-	<!-- BEAT 01: Void Metadata -->
+		<!-- Solid BB that becomes the header handoff -->
+		<div class="opening__solid-bb" id="opening-solid-bb">
+			<svg viewBox={monogram.viewBox}><use href={`#${monogram.id}`}></use></svg>
+		</div>
+	</div>
+	
+	<!-- Meta Text -->
 	<div class="opening__meta" id="opening-meta">
-		<p>BUILDER BASE / 2026</p>
-		<p>DISTRIBUTION LAYER</p>
-	</div>
-
-	<!-- BEAT 02: Assembly Fragments -->
-	<div class="opening__assembly" id="opening-assembly">
-		<div class="opening__fragment opening__fragment--1">
-			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
-		</div>
-		<div class="opening__fragment opening__fragment--2">
-			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
-		</div>
-		<div class="opening__fragment opening__fragment--3">
-			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
-		</div>
-		<div class="opening__fragment opening__fragment--4">
-			<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
-		</div>
-	</div>
-
-	<!-- BEAT 03 & 04: Portal & Expansion -->
-	<div class="opening__portal-wrapper" id="opening-portal-wrapper">
-		<div class="opening__portal-mask" id="opening-portal-mask" style={`mask-image: url("${maskDataUri}"); -webkit-mask-image: url("${maskDataUri}");`}>
-			<div class="opening__portal-image" id="opening-portal-image">
-				{heroPhoto && (
-					<PhotoFrame photo={heroPhoto} priority widths={[640, 960, 1280, 1600, 2000]} sizes="100vw" />
-				)}
-			</div>
-		</div>
-	</div>
-
-	<!-- BEAT 06: Header Handoff Logo -->
-	<div class="opening__handoff" id="opening-handoff">
-		<svg viewBox={monogram.viewBox} aria-hidden="true"><use href={`#${monogram.id}`}></use></svg>
+		<p>BUILDER BASE</p>
+		<p class="opening__meta-sub">INITIALIZING DISTRIBUTION</p>
 	</div>
 </div>
 
 <script>
-	// SIGNATURE OPENING SEQUENCE RUNTIME
 	const root = document.documentElement;
 	const sequence = document.getElementById('opening-sequence');
-	const overlay = document.getElementById('opening-overlay');
-	const meta = document.getElementById('opening-meta');
-	const assembly = document.getElementById('opening-assembly');
-	const portalWrapper = document.getElementById('opening-portal-wrapper');
-	const portalMask = document.getElementById('opening-portal-mask');
-	const portalImage = document.getElementById('opening-portal-image');
-	const handoffLogo = document.getElementById('opening-handoff');
 	
-	const STORAGE_KEY = 'bb_v2_signature_intro_played';
-	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	let hasPlayed = false;
-	try {
-		hasPlayed = sessionStorage.getItem(STORAGE_KEY) === 'true';
-	} catch (e) {
-		// Ignore storage errors; we'll just assume it hasn't played, 
-		// but it won't crash the page.
-	}
-	const forceReplay = window.location.search.includes('replay-intro');
+	if (sequence) {
+		const assembly = document.getElementById('opening-assembly')!;
+		const fragments = Array.from(document.querySelectorAll('.opening__fragment')) as HTMLElement[];
+		const solidBb = document.getElementById('opening-solid-bb')!;
+		const meta = document.getElementById('opening-meta')!;
+		
+		const STORAGE_KEY = 'bb_v2_signature_intro_played';
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const forceReplay = window.location.search.includes('replay-intro');
+		
+		let hasPlayed = false;
+		try { hasPlayed = sessionStorage.getItem(STORAGE_KEY) === 'true'; } catch { /* ignore */ }
 
-	// Active animations array so we can cancel/finish them on interruption
-	let activeAnimations: Animation[] = [];
-	const phaseHistory: string[] = [];
-	
-	const setIntroPhase = (phase: string) => {
-		phaseHistory.push(phase);
-		root.setAttribute('data-intro-phase', phase);
-		window.dispatchEvent(
-			new CustomEvent('builderbase:intro-phase', {
-				detail: { phase }
-			})
-		);
-	};
-
-	if (!sequence || prefersReducedMotion || (hasPlayed && !forceReplay)) {
-		// Fast-forward or fallback
-		if (sequence) sequence.style.display = 'none';
-		root.classList.add('intro-complete');
-	} else {
-		// Start the show
-		root.classList.add('intro-active');
-		try {
-			sessionStorage.setItem(STORAGE_KEY, 'true');
-		} catch (e) {}
-
-		// Utility to run Web Animations and track them
-		const animate = (el: HTMLElement | null, keyframes: Keyframe[], options: KeyframeAnimationOptions) => {
-			if (!el) return null;
+		let activeAnimations: Animation[] = [];
+		const animate = (el: HTMLElement, keyframes: Keyframe[], options: KeyframeAnimationOptions) => {
 			const anim = el.animate(keyframes, options);
 			activeAnimations.push(anim);
 			return anim;
 		};
 
-		// ── THE CHOREOGRAPHY ──
-		const playSequence = async () => {
-			// Find the real target elements in the DOM to FLIP to.
-			// We wait a frame so layout is ready.
+		const finishIntro = () => {
+			activeAnimations.forEach(a => { try { a.finish(); } catch { /* ignore */ } });
+			activeAnimations = [];
+			root.classList.remove('intro-active');
+			root.classList.add('intro-complete');
+			sequence.style.opacity = '0';
+			sequence.style.pointerEvents = 'none';
+			setTimeout(() => sequence.remove(), 600);
+		};
+
+		const play = async () => {
+			// Find final targets
 			await new Promise(r => requestAnimationFrame(r));
-			const realHeroFrame = document.querySelector('.hero__frame');
-			const realWordmarkLogo = document.querySelector('[data-opening-brand-target]');
+			const targetBrand = document.querySelector('[data-opening-brand-target]');
+			if (!targetBrand) return finishIntro();
 			
-			// If missing targets, abort gracefully
-			if (!realHeroFrame || !realWordmarkLogo) {
-				if (import.meta.env?.DEV) console.warn('[opening] missing brand target');
-				finishIntroImmediately();
-				return;
-			}
-
-			setIntroPhase('void');
-
-			// Calculate target bounds for handoff
-			const heroRect = realHeroFrame.getBoundingClientRect();
-			const wordmarkRect = realWordmarkLogo.getBoundingClientRect();
 			const cx = window.innerWidth / 2;
 			const cy = window.innerHeight / 2;
-			
-			// Setup flawless FLIP for the portal image
-			// Set the image container to the exact final dimensions and position so object-fit calculates the exact crop
-			if (portalImage) {
-				portalImage.style.width = `${heroRect.width}px`;
-				portalImage.style.height = `${heroRect.height}px`;
-				portalImage.style.top = `${heroRect.top}px`;
-				portalImage.style.left = `${heroRect.left}px`;
-			}
-			
-			// Calculate transform to blow it up to cover the screen and center it
-			const scaleX = window.innerWidth / heroRect.width;
-			const scaleY = window.innerHeight / heroRect.height;
-			const scaleFill = Math.max(scaleX, scaleY) * 1.05; // 5% bleed
-			
-			const currentCenterX = heroRect.left + (heroRect.width / 2);
-			const currentCenterY = heroRect.top + (heroRect.height / 2);
-			const dx = cx - currentCenterX;
-			const dy = cy - currentCenterY;
-			
-			const fullScreenTransform = `translate(${dx}px, ${dy}px) scale(${scaleFill})`;
 
-			// BEAT 1: Void Metadata (0-600ms)
+			// BEAT 01: VOID META (0-1200ms)
 			animate(meta, [
 				{ opacity: 0, transform: 'translateY(10px)' },
 				{ opacity: 1, transform: 'translateY(0)', offset: 0.2 },
 				{ opacity: 1, transform: 'translateY(0)', offset: 0.8 },
 				{ opacity: 0, transform: 'translateY(-10px)' }
-			], { duration: 1000, easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)' });
+			], { duration: 1600, easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)' });
 
-			// BEAT 2: BB Assembly (600ms - 1300ms)
-			setIntroPhase('assembly');
-			const fragments = Array.from(document.querySelectorAll('.opening__fragment')) as HTMLElement[];
+			// BEAT 02: BB MATERIALIZES (1200-2000ms)
 			fragments.forEach((frag, i) => {
-				const z = (i % 2 === 0 ? 1 : -1) * (i + 1) * 50;
-				const rotateX = i % 2 === 0 ? 45 : -45;
+				const z = (i % 2 === 0 ? 1 : -1) * (i + 1) * 80;
+				const rotateX = i % 2 === 0 ? 60 : -60;
 				animate(frag, [
 					{ transform: `translate3d(0, ${z}px, ${z}px) rotateX(${rotateX}deg)`, opacity: 0, filter: 'blur(10px)' },
 					{ transform: 'translate3d(0, 0, 0) rotateX(0deg)', opacity: 1, filter: 'blur(0px)' }
-				], { duration: 800, delay: 600 + (i * 50), easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)', fill: 'forwards' });
+				], { duration: 900, delay: 1000 + (i * 60), easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)', fill: 'forwards' });
 			});
 
-			// Assembly lock and fade out
 			animate(assembly, [
-				{ opacity: 1, transform: 'scale(1)' },
-				{ opacity: 0, transform: 'scale(1.05)' }
-			], { duration: 400, delay: 1400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' });
+				{ opacity: 1 }, { opacity: 0 }
+			], { duration: 400, delay: 2200, fill: 'forwards' });
 
-			// BEAT 3: Portal Open (1300ms - 1600ms)
-			const portalTimer = animate(sequence, [{ transform: 'none' }, { transform: 'none' }], { duration: 1300 });
-			if (portalTimer) portalTimer.finished.then(() => setIntroPhase('portal')).catch(() => {});
-			if (portalWrapper) portalWrapper.style.display = 'block';
+			// Swap to Solid BB
+			animate(solidBb, [
+				{ opacity: 0, transform: 'scale(1)' },
+				{ opacity: 1, transform: 'scale(1)' }
+			], { duration: 0, delay: 2200, fill: 'forwards' });
+
+			// BEAT 03: MOVE TO NAVBAR
+			// Fade out black background so page is visible during move
+			animate(sequence, [
+				{ backgroundColor: '#000' },
+				{ backgroundColor: 'transparent' }
+			], { duration: 600, delay: 2400, fill: 'forwards' });
+
+			const brandRect = targetBrand.getBoundingClientRect();
+			const destX = brandRect.left + brandRect.width/2 - cx;
+			const destY = brandRect.top + brandRect.height/2 - cy;
 			
-			// Initialize the image at full-screen scale
-			if (portalImage) portalImage.style.transform = fullScreenTransform;
+			const moveBb = animate(solidBb, [
+				{ opacity: 1, transform: `translate(0px, 0px) scale(1)` },
+				{ opacity: 1, transform: `translate(${destX}px, ${destY}px) scale(${brandRect.width / 120})` }
+			], { duration: 900, delay: 2400, easing: 'cubic-bezier(0.7, 0, 0.2, 1)', fill: 'forwards' });
 
-			animate(portalMask, [
-				{ opacity: 0, maskSize: 'clamp(5rem, 15vw, 8rem)' },
-				{ opacity: 1, maskSize: 'clamp(5rem, 15vw, 8rem)' }
-			], { duration: 300, delay: 1400, fill: 'forwards' });
-
-			// BEAT 4: Mask Expansion & Transform FLIP (1700ms - 2400ms)
-			// Scale mask massively
-			const maskExpand = animate(portalMask, [
-				{ maskSize: 'clamp(5rem, 15vw, 8rem)' },
-				{ maskSize: '5000vmax' }
-			], { duration: 800, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
-
-			// Image shrinks and lands perfectly in its real frame
-			animate(portalImage, [
-				{ transform: fullScreenTransform },
-				{ transform: `translate(0px, 0px) scale(1)` }
-			], { duration: 800, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
-
-			// BEAT 5: Header Handoff Logo (1700ms - 2300ms)
-			const dockTimer = animate(sequence, [{ transform: 'none' }, { transform: 'none' }], { duration: 1700 });
-			if (dockTimer) dockTimer.finished.then(() => setIntroPhase('dock')).catch(() => {});
-			if (handoffLogo) handoffLogo.style.display = 'flex';
-			
-			// Calculate path from center to logo
-			const logoW = wordmarkRect.width;
-			const startLogoW = window.innerWidth * 0.15 > 120 ? window.innerWidth * 0.15 : (window.innerWidth * 0.15 < 80 ? 80 : window.innerWidth * 0.15); // Matches clamp(5rem, 15vw, 8rem) approx
-			
-			animate(handoffLogo, [
-				{ 
-					transform: `translate(${cx - startLogoW/2}px, ${cy - startLogoW/2}px) scale(1)`,
-					opacity: 1
-				},
-				{ 
-					transform: `translate(${wordmarkRect.left}px, ${wordmarkRect.top}px) scale(${logoW / startLogoW})`,
-					opacity: 1
-				}
-			], { duration: 700, delay: 1700, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'forwards' });
-
-			// Fade out the overlay
-			animate(overlay, [
-				{ opacity: 1 },
-				{ opacity: 0 }
-			], { duration: 600, delay: 1800, fill: 'forwards' });
-
-			// Wait for completion
-			if (maskExpand) {
-				await maskExpand.finished;
-				finishIntroImmediately();
-			}
+			await moveBb.finished;
+			finishIntro();
 		};
 
-		const finishIntroImmediately = () => {
-			// Cancel all running animations
-			activeAnimations.forEach(a => {
-				try { a.finish(); } catch (e) {}
-			});
-			activeAnimations = [];
+		if (!prefersReducedMotion && (!hasPlayed || forceReplay)) {
+			root.classList.add('intro-active');
+			try { sessionStorage.setItem(STORAGE_KEY, 'true'); } catch { /* ignore */ }
+			play().catch(finishIntro);
 			
-			if (root.classList.contains('intro-complete')) return;
-			root.classList.remove('intro-active');
-			root.classList.add('intro-complete');
-			setIntroPhase('complete');
-			
-			// Hide the intro sequence
-			if (sequence) sequence.style.opacity = '0';
-			setTimeout(() => { if (sequence) sequence.remove(); }, 300);
-		};
-
-		// Start sequence
-		playSequence().catch(finishIntroImmediately);
-
-		// Interruption logic
-		const interrupt = () => finishIntroImmediately();
-		window.addEventListener('click', interrupt, { once: true });
-		window.addEventListener('keydown', interrupt, { once: true });
-		window.addEventListener('touchstart', interrupt, { once: true });
-		window.addEventListener('wheel', interrupt, { once: true });
-		document.addEventListener('visibilitychange', () => {
-			if (document.visibilityState === 'hidden') interrupt();
-		});
+			// Interruption
+			const interrupt = () => finishIntro();
+			window.addEventListener('keydown', interrupt, { once: true });
+			window.addEventListener('wheel', interrupt, { once: true });
+			window.addEventListener('click', interrupt, { once: true });
+		} else {
+			finishIntro();
+		}
 	}
 </script>
 
 <style>
 	.opening {
-		display: none;
 		position: fixed;
 		inset: 0;
 		z-index: 10000;
-		pointer-events: none;
 		overflow: hidden;
+		background: #000;
 	}
 
-	:global(html.intro-active) .opening {
-		display: block;
-		pointer-events: auto;
+	:global(html:not(.intro-active)) .opening {
+		display: none !important;
 	}
 
-	.opening__overlay {
+	.opening__camera {
 		position: absolute;
 		inset: 0;
-		background-color: var(--near-black);
-		/* Subtle atmospheric grain could go here if requested, keeping it clean for now */
+		perspective: 1000px;
+		transform-style: preserve-3d;
+		pointer-events: none;
 	}
 
-	/* Meta Text */
+	.opening__assembly {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transform-style: preserve-3d;
+	}
+
+	.opening__fragment {
+		position: absolute;
+		width: clamp(5rem, 15vw, 8rem);
+		height: clamp(5rem, 15vw, 8rem);
+		color: var(--paper);
+		opacity: 0;
+		will-change: transform, opacity, filter;
+	}
+
+	.opening__fragment svg { width: 100%; height: 100%; fill: currentColor; }
+	.opening__fragment--1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+	.opening__fragment--2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+	.opening__fragment--3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+	.opening__fragment--4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+
+	.opening__solid-bb {
+		position: absolute;
+		left: 50%; top: 50%;
+		width: clamp(5rem, 15vw, 8rem);
+		height: clamp(5rem, 15vw, 8rem);
+		margin: calc(clamp(5rem, 15vw, 8rem) / -2);
+		color: var(--paper);
+		opacity: 0;
+		will-change: transform, opacity;
+	}
+
+	.opening__solid-bb svg { width: 100%; height: 100%; fill: currentColor; }
+
 	.opening__meta {
 		position: absolute;
 		inset: 0;
@@ -316,107 +208,10 @@ const maskDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgSt
 		font-size: var(--text-meta);
 		letter-spacing: var(--tracking-meta);
 		opacity: 0;
+		pointer-events: none;
 	}
 
-	/* Assembly Layers */
-	.opening__assembly {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		perspective: 1200px;
-	}
-
-	.opening__fragment {
-		position: absolute;
-		width: clamp(5rem, 15vw, 8rem);
-		height: clamp(5rem, 15vw, 8rem);
-		opacity: 0;
-		will-change: transform, opacity, filter;
-		color: var(--paper); /* The fragments are white during assembly */
-	}
-	
-	.opening__fragment svg {
-		width: 100%;
-		height: 100%;
-		fill: currentColor;
-	}
-
-	/* Slice the BB logo into 4 quadrants for a mechanical assembly */
-	.opening__fragment--1 { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
-	.opening__fragment--2 { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
-	.opening__fragment--3 { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
-	.opening__fragment--4 { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
-
-	/* Portal & Image */
-	.opening__portal-wrapper {
-		position: absolute;
-		inset: 0;
-		display: none;
-		overflow: hidden;
-		will-change: transform, width, height, border-radius;
-		transform-origin: top left;
-	}
-
-	.opening__portal-mask {
-		position: absolute;
-		inset: 0;
-		/* The mask-image is the BB logo. We center it and scale it. */
-		/* Inline style provides the URL */
-		-webkit-mask-repeat: no-repeat;
-		mask-repeat: no-repeat;
-		-webkit-mask-position: center;
-		mask-position: center;
-		-webkit-mask-size: clamp(5rem, 15vw, 8rem);
-		mask-size: clamp(5rem, 15vw, 8rem);
-		opacity: 0;
-		will-change: mask-size, opacity;
-	}
-
-	.opening__portal-image {
-		position: absolute;
-		/* JS controls dimensions and top/left to match the hero frame */
-		will-change: transform;
-		transform-origin: center center;
-		overflow: hidden;
-		border-radius: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
-	}
-	
-	.opening__portal-image :global(img) {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: var(--focal-portrait);
-	}
-
-	@media (min-width: 40rem) {
-		.opening__portal-image :global(img) {
-			object-position: var(--focal);
-		}
-	}
-
-	/* Handoff Logo */
-	.opening__handoff {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: clamp(5rem, 15vw, 8rem);
-		height: clamp(5rem, 15vw, 8rem);
-		display: none;
-		will-change: transform, opacity;
-		transform-origin: top left;
-		color: var(--builder-indigo); /* The header logo color */
-	}
-	
-	.opening__handoff svg {
-		width: 100%;
-		height: 100%;
-		fill: currentColor;
-	}
-
-	/* Graceful cleanup */
-	:global(html.intro-complete) .opening {
-		display: none !important;
+	.opening__meta-sub {
+		color: var(--color-text-muted);
 	}
 </style>

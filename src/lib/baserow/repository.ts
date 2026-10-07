@@ -65,7 +65,7 @@ export async function loadBaserowContent(config: BaserowConfig, fetchImpl?: Fetc
 		load('cities'),
 		load('organizations'),
 		load('relationships'),
-		load('activations'),
+		load('events'),
 		load('projects'),
 		load('builders'),
 		load('team'),
@@ -89,7 +89,7 @@ export async function loadBaserowContent(config: BaserowConfig, fetchImpl?: Fetc
 			// An organisation on its own makes no claim; claims live in relationships.
 			organizations: collect(mapRows(organizations, mapOrganization, () => true)),
 			relationships: collect(mapRows(relationships, mapRelationship, isPublicRelationship)),
-			activations: collect(mapRows(activations, mapActivation, isPublicActivation)),
+			activations: collect(mapRows(activations, mapActivation, isPublicActivation)), // Map to the domain term 'activations'
 			projects: collect(mapRows(projects, mapProject, isPublicProject)),
 			builders: collect(mapRows(builders, mapBuilder, isPublicBuilder)),
 			teamMembers: collect(mapRows(team, mapTeamMember, isPublicTeamMember)),

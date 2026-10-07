@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+declare global {
+	interface Window {
+		__bbIntroPhaseHistory: string[];
+	}
+}
+
 test.describe('Signature Intro Sequence', () => {
 	test.use({ reducedMotion: 'no-preference' });
 	
@@ -10,8 +16,9 @@ test.describe('Signature Intro Sequence', () => {
 			
 			// Listen for deterministic phase events emitted by the script
 			window.__bbIntroPhaseHistory = [];
-			window.addEventListener('builderbase:intro-phase', (e) => {
-				window.__bbIntroPhaseHistory.push(e.detail.phase);
+			window.addEventListener('builderbase:intro-phase', (e: Event) => {
+				const customEvent = e as CustomEvent<{ phase: string }>;
+				window.__bbIntroPhaseHistory.push(customEvent.detail.phase);
 			});
 		});
 	});
