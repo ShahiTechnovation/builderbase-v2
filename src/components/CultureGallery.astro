@@ -26,7 +26,7 @@ const { title, galleryLabel, photos } = Astro.props;
 const total = photos.length;
 const pad = (value: number) => String(value).padStart(2, '0');
 
-const items = photos.map(({ photo, caption }, index) => ({ photo, caption, number: pad(index + 1) }));
+const items = photos.map(({ photoUrl, caption }, index) => ({ photoUrl, caption, number: pad(index + 1) }));
 const firstCaption = items[0]?.caption ?? [];
 const CURSOR_LABEL = 'View';
 ---
@@ -56,7 +56,7 @@ const CURSOR_LABEL = 'View';
 
 		<ul class="gallery" role="list" aria-label={galleryLabel} data-gallery-track>
 			{
-				items.map(({ photo, number, caption }, index) => (
+				items.map(({ photoUrl, number, caption }, index) => (
 					<li
 						class:list={['gallery__item', { 'is-active': index === 0 }]}
 						data-gallery-item
@@ -74,10 +74,18 @@ const CURSOR_LABEL = 'View';
 							<span class="visually-hidden">
 								{`Photograph ${index + 1} of ${total}${caption.length ? ` — ${caption.join(', ')}` : ''}: `}
 							</span>
-							<PhotoFrame
-								photo={photo}
-								sizes="(min-width: 64rem) 66vw, (min-width: 40rem) 90vw, 84vw"
-							/>
+							{photoUrl.match(/\.(mp4|webm)$/i) ? (
+								<video 
+									src={photoUrl} 
+									autoplay 
+									loop 
+									muted 
+									playsinline 
+									style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"
+								/>
+							) : (
+								<img src={photoUrl} alt="" style="width: 100%; height: 100%; object-fit: cover;" />
+							)}
 							<span class="gallery__number meta" aria-hidden="true">
 								{number}
 							</span>
@@ -201,7 +209,7 @@ const CURSOR_LABEL = 'View';
 		cursor: default;
 	}
 
-	.gallery__trigger :global(img) {
+	.gallery__trigger :global(img), .gallery__trigger :global(video) {
 		object-position: var(--focal-portrait);
 		transition: filter var(--duration-shift) var(--ease-editorial);
 	}
@@ -210,7 +218,7 @@ const CURSOR_LABEL = 'View';
 		cursor: pointer;
 	}
 
-	.gallery__item:not(.is-active) :global(img) {
+	.gallery__item:not(.is-active) :global(img), .gallery__item:not(.is-active) :global(video) {
 		filter: grayscale(0.7) brightness(0.8);
 	}
 
@@ -288,7 +296,7 @@ const CURSOR_LABEL = 'View';
 			aspect-ratio: 3 / 2;
 		}
 
-		.gallery__trigger :global(img) {
+		.gallery__trigger :global(img), .gallery__trigger :global(video) {
 			object-position: var(--focal);
 		}
 	}
@@ -339,7 +347,9 @@ const CURSOR_LABEL = 'View';
 		}
 
 		.gallery__item:not(.is-active):hover :global(img),
-		.gallery__item:not(.is-active):has(:focus-visible) :global(img) {
+		.gallery__item:not(.is-active):has(:focus-visible) :global(img),
+		.gallery__item:not(.is-active):hover :global(video),
+		.gallery__item:not(.is-active):has(:focus-visible) :global(video) {
 			filter: none;
 		}
 

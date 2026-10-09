@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { baserowConfig } from '../lib/env';
+import AdminDashboard from '../components/admin/AdminDashboard';
+
+const config = baserowConfig() || { token: '', apiUrl: 'https://api.baserow.io', tables: { events: '', partners: '', projects: '' } };
+---
+
+<BaseLayout title="Command Center" surface="dark">
+  <AdminDashboard client:load config={config} />
+</BaseLayout>

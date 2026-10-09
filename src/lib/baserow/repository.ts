@@ -8,26 +8,16 @@
  */
 import type { ContentSnapshot } from '../../data/model';
 import {
-	isPhotoPublishable,
 	isPublicActivation,
-	isPublicBuilder,
-	isPublicCity,
 	isPublicProject,
-	isPublicRelationship,
-	isPublicTeamMember,
 } from '../../data/public';
 import type { FetchLike } from '../http';
 import { listAllRows } from './client';
 import {
 	mapActivation,
-	mapBuilder,
-	mapCity,
-	mapOrganization,
-	mapPhoto,
+	mapPartner,
 	mapProject,
-	mapRelationship,
 	mapRows,
-	mapTeamMember,
 } from './mappers';
 import type { BaserowRow, BaserowTable } from './types';
 
@@ -60,15 +50,10 @@ export async function loadBaserowContent(config: BaserowConfig, fetchImpl?: Fetc
 		}
 	};
 
-	const [photos, cities, organizations, relationships, activations, projects, builders, team] = await Promise.all([
-		load('photos'),
-		load('cities'),
-		load('organizations'),
-		load('relationships'),
+	const [activations, partners, projects] = await Promise.all([
 		load('events'),
+		load('partners'),
 		load('projects'),
-		load('builders'),
-		load('team'),
 	]);
 
 	const collect = <T>(result: { records: T[]; issues: string[] }) => {
@@ -76,23 +61,15 @@ export async function loadBaserowContent(config: BaserowConfig, fetchImpl?: Fetc
 		return result.records;
 	};
 
-	// Publication rules come from the truth gate, so the adapter and the pages
-	// can never disagree about what is public.
 	return {
 		failed,
 		issues,
 		snapshot: {
 			source: 'baserow',
 			degraded: failed.length > 0,
-			photos: collect(mapRows(photos, mapPhoto, isPhotoPublishable)),
-			cities: collect(mapRows(cities, mapCity, isPublicCity)),
-			// An organisation on its own makes no claim; claims live in relationships.
-			organizations: collect(mapRows(organizations, mapOrganization, () => true)),
-			relationships: collect(mapRows(relationships, mapRelationship, isPublicRelationship)),
-			activations: collect(mapRows(activations, mapActivation, isPublicActivation)), // Map to the domain term 'activations'
+			activations: collect(mapRows(activations, mapActivation, isPublicActivation)),
+			partners: collect(mapRows(partners, mapPartner, () => true)),
 			projects: collect(mapRows(projects, mapProject, isPublicProject)),
-			builders: collect(mapRows(builders, mapBuilder, isPublicBuilder)),
-			teamMembers: collect(mapRows(team, mapTeamMember, isPublicTeamMember)),
 		},
 	};
 }

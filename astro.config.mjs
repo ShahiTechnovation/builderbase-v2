@@ -7,6 +7,7 @@ import react from '@astrojs/react';
 
 import tailwindcss from '@tailwindcss/vite';
 
+
 // Production origin. Taken from the previous site; confirm before launch.
 const SITE = 'https://builderbase.xyz';
 
@@ -23,7 +24,11 @@ const photoAssetHosts = PHOTO_ASSET_HOSTS.split(',')
 /** Server-only Baserow table IDs. Unset tables simply contribute no content. */
 const tableId = () => envField.number({ context: 'server', access: 'public', optional: true, int: true });
 
+import vercel from '@astrojs/vercel';
+
 export default defineConfig({
+  output: 'server',
+  adapter: vercel(),
   site: SITE,
   devToolbar: { enabled: false },
   trailingSlash: 'ignore',
@@ -55,14 +60,9 @@ export default defineConfig({
               default: 'https://api.baserow.io',
           }),
           BASEROW_DATABASE_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
-          BASEROW_TABLE_PHOTOS: tableId(),
-          BASEROW_TABLE_CITIES: tableId(),
-          BASEROW_TABLE_ORGANIZATIONS: tableId(),
-          BASEROW_TABLE_RELATIONSHIPS: tableId(),
-          BASEROW_TABLE_ACTIVATIONS: tableId(),
+          BASEROW_TABLE_EVENTS: tableId(),
+          BASEROW_TABLE_PARTNERS: tableId(),
           BASEROW_TABLE_PROJECTS: tableId(),
-          BASEROW_TABLE_BUILDERS: tableId(),
-          BASEROW_TABLE_TEAM: tableId(),
 
           // Luma public API key (Luma Plus, scoped to the Builder Base calendar).
           LUMA_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),

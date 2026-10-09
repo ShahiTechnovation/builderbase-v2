@@ -31,7 +31,7 @@ interface Props {
 const { statement, meta, photo } = Astro.props;
 ---
 
-<section class:list={['hero', { 'hero--no-photo': !photo }]} aria-labelledby="hero-title">
+<section class="hero" aria-labelledby="hero-title">
 	<div class="hero__statement page-width">
 		<h1 class="statement" id="hero-title">
 			<span class="statement__lead reveal-mask" data-entrance="mask" style="--i: 0"
@@ -57,22 +57,20 @@ const { statement, meta, photo } = Astro.props;
 		</div>
 	</div>
 
-	{
-		photo && (
-			<div class="hero__photo page-width">
-				<div class="hero__frame" data-scroll="start through">
-					<div class="hero__image" data-entrance="photo" style="--i: 1; position: relative; overflow: hidden; width: 100%; height: 100%;">
-						<iframe
-							src="https://player.mux.com/v9o2Bar1JiNxNWRt01zMTu1l4XwPXHX3Cjgea3N4uuuc?autoplay=true&loop=true&muted=true&controls=false"
-							style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%); border: none; pointer-events: none;"
-							allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-							allowfullscreen
-						></iframe>
-					</div>
-				</div>
+	<div class="hero__photo page-width">
+		<div class="hero__frame" data-scroll="start through">
+			<div class="hero__image" data-entrance="photo" style="--i: 1; position: relative; overflow: hidden; width: 100%; height: 100%;">
+				<video
+					src="https://k0zc4ww8smbcswkz.public.blob.vercel-storage.com/builder-base-hero.mp4"
+					autoplay
+					loop
+					muted
+					playsinline
+					style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; transform: translate(-50%, -50%); border: none; pointer-events: none; object-fit: cover;"
+				></video>
 			</div>
-		)
-	}
+		</div>
+	</div>
 </section>
 
 <style>

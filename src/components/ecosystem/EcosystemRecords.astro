@@ -34,8 +34,7 @@ const pad = (value: number) => String(value).padStart(2, '0');
 
 		<div class="eco-detail__body" data-eco-body>
 			{
-				organizations.map((organization) => {
-					const extra = organization.works.length - copy.initialWorks;
+				organizations.map((organization, index) => {
 					return (
 						<article
 							class="eco-record"
@@ -46,17 +45,15 @@ const pad = (value: number) => String(value).padStart(2, '0');
 						>
 							<header class="eco-record__header">
 								<p class="eco-record__kicker meta">
-									<span>{pad(organization.number)}</span>
+									<span>{pad(index + 1)}</span>
 									{organization.typeName && <span>{organization.typeName}</span>}
 								</p>
 								{organization.logoImage && (
-									<Image
+									<img
 										class="eco-record__logo"
 										src={organization.logoImage.src}
 										width={organization.logoImage.width}
 										height={organization.logoImage.height}
-										widths={[240, 480]}
-										sizes="15rem"
 										alt=""
 									/>
 								)}
@@ -64,10 +61,7 @@ const pad = (value: number) => String(value).padStart(2, '0');
 									{organization.name}
 								</h2>
 								<p class="eco-record__relation meta">
-									<span class="eco-record__roles">{organization.roles.join(' · ')}</span>
-									{organization.activationCount > 0 && (
-										<span>{activationCountLabel(organization.activationCount)}</span>
-									)}
+									<span class="eco-record__roles">{organization.type ?? 'Partner'}</span>
 								</p>
 								{organization.url && (
 									<a class="eco-record__site" href={organization.url}>
@@ -78,54 +72,7 @@ const pad = (value: number) => String(value).padStart(2, '0');
 								)}
 							</header>
 
-							{organization.works.length > 0 && (
-								<section class="eco-record__work" aria-labelledby={`org-${organization.slug}-work`}>
-									<h3 class="eco-record__work-title meta" id={`org-${organization.slug}-work`}>
-										{copy.workTitle}
-									</h3>
-									<ol class="eco-works" role="list">
-										{organization.works.map((work, index) => (
-											<li
-												class:list={['eco-work', { 'eco-work--more': index >= copy.initialWorks }]}
-												tabindex={index === copy.initialWorks ? -1 : undefined}
-												data-eco-more-first={index === copy.initialWorks ? '' : undefined}
-											>
-												<p class="eco-work__when meta">
-													<time datetime={work.date}>{work.dateLabel}</time>
-													{work.city && <span>{work.city}</span>}
-												</p>
-												<div class="eco-work__body">
-													<h4 class="eco-work__title">{work.title}</h4>
-													{work.summary && <p class="eco-work__summary">{work.summary}</p>}
-													{work.credits.length > 0 && (
-														<dl class="eco-work__credits">
-															{work.credits.map((credit) => (
-																<div class="eco-work__credit">
-																	<dt class="meta">{credit.label}</dt>
-																	<dd>{credit.organizations.join(', ')}</dd>
-																</div>
-															))}
-														</dl>
-													)}
-													{work.url && (
-														<a class="eco-work__link" href={work.url}>
-															{copy.eventLink}
-															<span class="visually-hidden">: {work.title}</span>
-															<span aria-hidden="true">↗</span>
-														</a>
-													)}
-												</div>
-											</li>
-										))}
-									</ol>
-									{extra > 0 && (
-										<button class="eco-record__more" type="button" aria-expanded="false" data-eco-more>
-											{copy.moreWorks}
-											<span class="meta">+{extra}</span>
-										</button>
-									)}
-								</section>
-							)}
+							{/* We removed works/relationships in the DB simplification */}
 						</article>
 					);
 				})

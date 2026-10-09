@@ -114,13 +114,11 @@ const weight = (organization: ResolvedEcosystemOrganization) => 1 + 0.07 * Math.
 									draggable="false"
 								/>
 							) : logo ? (
-								<Image
+								<img
 									class="eco-plane__logo"
 									src={logo.src}
 									width={logo.width}
 									height={logo.height}
-									widths={[240, 480]}
-									sizes="14rem"
 									alt=""
 									draggable="false"
 								/>
@@ -344,9 +342,9 @@ const weight = (organization: ResolvedEcosystemOrganization) => 1 + 0.07 * Math.
 	}
 
 	.eco-plane--logo {
-		padding: 0.8em 0.9em;
+		padding: 0;
 		border-color: transparent;
-		background-color: var(--paper);
+		background-color: transparent;
 	}
 
 	.eco-plane--image {
@@ -393,6 +391,10 @@ const weight = (organization: ResolvedEcosystemOrganization) => 1 + 0.07 * Math.
 		max-width: 12em;
 		height: 2.2em;
 		object-fit: contain;
+	}
+
+	.eco-plane--logo::after {
+		display: none;
 	}
 
 	.eco-plane__image {

@@ -12,6 +12,7 @@ import { getHomepageContent } from '../data/content';
 import { home } from '../data/home';
 import { actions, destinations } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { GridPatternSpotlight } from '../components/ui/demo';
 
 const content = await getHomepageContent();
 const hasCulture = content.culturePhotos.length > 0;
@@ -34,6 +35,9 @@ const hasCulture = content.culturePhotos.length > 0;
 			/>
 		)
 	}
+	<div class="page-width py-12">
+		<GridPatternSpotlight client:load />
+	</div>
 	<Proof title={home.proof.title} items={home.proof.items} />
 	<EcosystemBridge title={home.ecosystemBridge.title} description={home.ecosystemBridge.description} />
 	<NextRooms

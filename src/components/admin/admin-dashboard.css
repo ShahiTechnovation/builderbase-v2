@@ -1,0 +1,210 @@
+.admin-section {
+    padding: var(--section-space) var(--gutter);
+    max-width: var(--page-max);
+    margin: 0 auto;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+}
+
+.admin-header {
+    margin-bottom: var(--space-8);
+}
+
+.admin-title {
+    font-size: var(--text-display);
+    font-weight: var(--weight-display);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+    text-transform: uppercase;
+    margin-block: var(--space-2) var(--space-4);
+}
+
+.admin-subtitle {
+    font-size: var(--text-body);
+    color: var(--color-text-muted);
+    max-width: 45ch;
+    line-height: var(--leading-body);
+}
+
+.admin-meta {
+    font-size: var(--text-meta);
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--builder-indigo-tint);
+    margin-bottom: var(--space-2);
+}
+
+/* Tabs */
+.admin-tabs {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-rule);
+    padding-bottom: var(--space-2);
+}
+
+.admin-tab {
+    font-family: var(--font-mono);
+    font-size: var(--text-ui);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: var(--space-2) 0;
+    position: relative;
+    transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.admin-tab:hover, .admin-tab:focus-visible {
+    color: var(--color-text);
+}
+
+.admin-tab.is-active {
+    color: var(--color-text);
+}
+
+.admin-tab.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-1 * var(--space-2) - 1px);
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--color-text);
+}
+
+/* Forms */
+.admin-content {
+    background-color: var(--color-well);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-frame);
+    padding: var(--space-6) var(--gutter);
+}
+
+.admin-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+}
+
+@media (min-width: 48rem) {
+    .admin-form {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .form-group:nth-child(1),
+    .form-group:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+    
+    .admin-form textarea {
+        grid-column: 1 / -1;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.form-group label {
+    font-size: var(--text-meta);
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    background-color: transparent;
+    border: 1px solid var(--color-rule);
+    color: var(--color-text);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: var(--color-focus);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-size: var(--text-ui);
+    color: var(--color-text);
+}
+
+.checkbox-label input {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--color-accent);
+}
+
+.admin-submit {
+    grid-column: 1 / -1;
+    justify-self: start;
+    background-color: var(--color-text);
+    color: var(--color-bg);
+    font-family: var(--font-sans);
+    font-size: var(--text-action);
+    font-weight: var(--weight-medium);
+    padding: var(--space-3) var(--space-6);
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    margin-top: var(--space-4);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.admin-submit:hover:not(:disabled) {
+    background-color: var(--color-text-muted);
+}
+
+.admin-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Status Messages */
+.admin-status {
+    padding: var(--space-4);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-6);
+    font-size: var(--text-ui);
+    font-weight: var(--weight-medium);
+}
+
+.admin-status--loading {
+    background-color: var(--color-well);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-rule);
+}
+
+.admin-status--success {
+    background-color: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.admin-status--error {
+    background-color: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.2);
+}

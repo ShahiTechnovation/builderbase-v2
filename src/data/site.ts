@@ -38,8 +38,7 @@ export const destinations = {
 
 export const primaryNav: NavLink[] = [
 	{ label: 'Events', href: '/events' },
-	{ label: 'Projects', href: '/projects' },
-	{ label: 'Stories', href: '/stories' },
+	{ label: 'Ecosystem', href: '/ecosystem' },
 	{ label: 'About', href: '/about' },
 ];
 
