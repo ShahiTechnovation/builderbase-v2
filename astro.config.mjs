@@ -12,7 +12,7 @@ import tailwindcss from '@tailwindcss/vite';
 const SITE = 'https://builderbase.xyz';
 
 // Phase 1 placeholder routes are kept out of the sitemap until they ship.
-const UNPUBLISHED_ROUTES = ['/events/', '/projects/', '/stories/', '/about/', '/partners/', '/ecosystem/'];
+const UNPUBLISHED_ROUTES = ['/projects/', '/stories/', '/about/', '/partners/', '/ecosystem/'];
 
 // Hosts that serve remote photo masters (e.g. object storage / CDN) and may be
 // optimised at build time. Comma-separated hostnames.

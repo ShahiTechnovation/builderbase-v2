@@ -1,9 +1,582 @@
 ---
+/**
+ * /events — Upcoming and past events of Builder Base.
+ *
+ * Primary source: Official Builder Base Luma Calendar (cal-Rmfu84P0S7JWiHl).
+ * Supplementary source: Baserow / local activations (for photo galleries & records).
+ *
+ * UX Refinements:
+ * - Upcoming: Initially displays first 6 events, expandable to all with accessible toggle.
+ * - Past: Grouped by year; most recent year expanded by default, older years collapsible.
+ * - Compact card proportions without cropping posters.
+ * - Reduced vertical whitespace around hero.
+ * - Chronological sorting, accurate counts, and Luma links maintained.
+ */
 import ActionLink from '../components/ActionLink.astro';
-import { actions } from '../data/site';
-import PlaceholderPage from '../layouts/PlaceholderPage.astro';
+import EventCard from '../components/events/EventCard.astro';
+import { getEventsContent } from '../data/content';
+import { actions, destinations } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { status, upcoming, past, years } = await getEventsContent();
+const hasEvents = upcoming.length > 0 || past.length > 0;
+const INITIAL_UPCOMING_LIMIT = 6;
 ---
 
-<PlaceholderPage title="Events">
-	<ActionLink link={actions.lumaCalendar} />
-</PlaceholderPage>
+<BaseLayout
+	title="Events — Builder Base"
+	description="Every room, build night, and gathering across the Builder Base network in India."
+>
+	<div class="events-page page-width">
+		<header class="events-page__header">
+			<p class="events-page__marker meta">Events</p>
+			<h1 class="events-page__title">Where Builders Gather</h1>
+			<p class="events-page__lede">
+				Every event, hackathon, and room Builder Base hosts and supports across India.
+				<a
+					class="events-page__luma-link meta"
+					href={destinations.lumaCalendar}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<span>Follow on Luma</span>
+					<span aria-hidden="true">↗</span>
+				</a>
+			</p>
+		</header>
+
+		{
+			status === 'unavailable' && !hasEvents ? (
+				<div class="events-fallback">
+					<p class="events-fallback__text meta">Events feed currently unavailable</p>
+					<p class="events-fallback__sub">
+						We could not connect to Luma just now. You can view all upcoming and past rooms directly on our official calendar.
+					</p>
+					<div class="events-fallback__action">
+						<ActionLink link={actions.lumaCalendar} variant="primary" />
+					</div>
+				</div>
+			) : (
+				<div class="events-content">
+					{/* ── Upcoming Events Section ────────────────────── */}
+					<section class="events-section" aria-labelledby="upcoming-heading">
+						<div class="events-section__bar">
+							<h2 class="events-section__heading" id="upcoming-heading">
+								Upcoming
+							</h2>
+							<span class="events-section__count meta" aria-label={`${upcoming.length} upcoming events`}>
+								{upcoming.length}
+							</span>
+						</div>
+
+						{upcoming.length > 0 ? (
+							<>
+								<ul
+									class="events-grid events-grid--upcoming"
+									role="list"
+									id="upcoming-grid"
+									data-upcoming-grid
+								>
+									{upcoming.map((event, index) => (
+										<li
+											class:list={[
+												'events-grid__item',
+												{ 'events-grid__item--overflow': index >= INITIAL_UPCOMING_LIMIT },
+											]}
+										>
+											<EventCard event={event} upcoming />
+										</li>
+									))}
+								</ul>
+
+								{upcoming.length > INITIAL_UPCOMING_LIMIT && (
+									<div class="events-section__expand-wrapper">
+										<button
+											class="events-expand-btn meta"
+											type="button"
+											id="toggle-upcoming-btn"
+											aria-expanded="false"
+											aria-controls="upcoming-grid"
+											data-toggle-upcoming
+											data-total={upcoming.length}
+										>
+											<span class="events-expand-btn__label">
+												View all upcoming events ({upcoming.length})
+											</span>
+											<span class="events-expand-btn__icon" aria-hidden="true">↓</span>
+										</button>
+									</div>
+								)}
+							</>
+						) : (
+							<div class="events-empty">
+								<p class="events-empty__text">
+									Nothing announced right now. New events appear here as soon as they are on{' '}
+									<a
+										class="events-empty__link"
+										href={destinations.lumaCalendar}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Luma ↗
+									</a>
+									.
+								</p>
+							</div>
+						)}
+					</section>
+
+					{/* ── Past Events Section ────────────────────────── */}
+					<section class="events-section" aria-labelledby="past-heading">
+						<div class="events-section__bar">
+							<h2 class="events-section__heading" id="past-heading">
+								Past Events
+							</h2>
+							<span class="events-section__count meta" aria-label={`${past.length} past events`}>
+								{past.length}
+							</span>
+						</div>
+
+						{past.length > 0 ? (
+							<div class="events-years">
+								{[...years.entries()].map(([year, list], index) => {
+									const isMostRecent = index === 0;
+									const hasOverflow = list.length > INITIAL_UPCOMING_LIMIT;
+									const gridId = `year-grid-${year}`;
+									return (
+										<details class="events-year" open={isMostRecent} data-events-year>
+											<summary class="events-year__summary">
+												<h3 class="events-year__label meta">{year}</h3>
+												<div class="events-year__summary-right meta">
+													<span class="events-year__count">
+														{list.length} {list.length === 1 ? 'event' : 'events'}
+													</span>
+													<span class="events-year__chevron" aria-hidden="true">
+														<svg
+															width="12"
+															height="12"
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															stroke-width="2.5"
+															stroke-linecap="round"
+															stroke-linejoin="round"
+														>
+															<polyline points="6 9 12 15 18 9" />
+														</svg>
+													</span>
+												</div>
+											</summary>
+
+											<div class="events-year__content">
+												<ul
+													class="events-grid events-year__grid"
+													role="list"
+													id={gridId}
+													data-year-grid={year}
+												>
+													{list.map((event, eventIdx) => (
+														<li
+															class:list={[
+																'events-grid__item',
+																{ 'events-grid__item--overflow': eventIdx >= INITIAL_UPCOMING_LIMIT },
+															]}
+														>
+															<EventCard event={event} />
+														</li>
+													))}
+												</ul>
+
+												{hasOverflow && (
+													<div class="events-section__expand-wrapper">
+														<button
+															class="events-expand-btn meta"
+															type="button"
+															aria-expanded="false"
+															aria-controls={gridId}
+															data-toggle-year={year}
+															data-year={year}
+															data-total={list.length}
+														>
+															<span class="events-expand-btn__label">
+																View all {year} events ({list.length})
+															</span>
+															<span class="events-expand-btn__icon" aria-hidden="true">↓</span>
+														</button>
+													</div>
+												)}
+											</div>
+										</details>
+									);
+								})}
+							</div>
+						) : (
+							<div class="events-empty">
+								<p class="events-empty__text">No past events recorded yet.</p>
+							</div>
+						)}
+					</section>
+				</div>
+			)
+		}
+	</div>
+</BaseLayout>
+
+<script>
+	function initToggles() {
+		// Upcoming events toggle
+		const upcomingBtn = document.querySelector('[data-toggle-upcoming]') as HTMLButtonElement | null;
+		const upcomingGrid = document.querySelector('[data-upcoming-grid]') as HTMLElement | null;
+
+		if (upcomingBtn && upcomingGrid && !upcomingBtn.hasAttribute('data-bound')) {
+			upcomingBtn.setAttribute('data-bound', 'true');
+			const total = upcomingBtn.dataset.total || '';
+			let isExpanded = false;
+
+			upcomingBtn.addEventListener('click', () => {
+				isExpanded = !isExpanded;
+				upcomingGrid.dataset.expanded = isExpanded ? 'true' : 'false';
+				upcomingBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+
+				const label = upcomingBtn.querySelector('.events-expand-btn__label');
+				const icon = upcomingBtn.querySelector('.events-expand-btn__icon');
+
+				if (label) {
+					label.textContent = isExpanded
+						? 'Show fewer'
+						: `View all upcoming events (${total})`;
+				}
+
+				if (icon) {
+					icon.textContent = isExpanded ? '↑' : '↓';
+				}
+			});
+		}
+
+		// Past events per-year toggles
+		const yearBtns = document.querySelectorAll<HTMLButtonElement>('[data-toggle-year]');
+		yearBtns.forEach((btn) => {
+			if (btn.hasAttribute('data-bound')) return;
+			btn.setAttribute('data-bound', 'true');
+
+			const year = btn.dataset.year;
+			const total = btn.dataset.total || '';
+			const grid = document.querySelector(`[data-year-grid="${year}"]`) as HTMLElement | null;
+			if (!grid) return;
+
+			let isExpanded = false;
+			btn.addEventListener('click', () => {
+				isExpanded = !isExpanded;
+				grid.dataset.expanded = isExpanded ? 'true' : 'false';
+				btn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+
+				const label = btn.querySelector('.events-expand-btn__label');
+				const icon = btn.querySelector('.events-expand-btn__icon');
+
+				if (label) {
+					label.textContent = isExpanded
+						? 'Show fewer'
+						: `View all ${year} events (${total})`;
+				}
+
+				if (icon) {
+					icon.textContent = isExpanded ? '↑' : '↓';
+				}
+			});
+		});
+	}
+
+	// Initialize on page load and on Astro navigation
+	initToggles();
+	document.addEventListener('astro:page-load', initToggles);
+</script>
+
+<style>
+	.events-page {
+		/* Reduced top vertical whitespace around the hero */
+		padding-block: var(--space-4) var(--section-space);
+		padding-inline: var(--gutter);
+	}
+
+	/* ── Page Header ─────────────────────────────────────────────── */
+	.events-page__header {
+		display: flex;
+		flex-direction: column;
+		max-width: 60rem;
+		/* Reduced whitespace below hero */
+		margin-bottom: var(--space-6);
+	}
+
+	.events-page__marker {
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-2);
+	}
+
+	.events-page__title {
+		font-size: var(--text-display);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		text-transform: uppercase;
+		margin-bottom: var(--space-3);
+	}
+
+	.events-page__lede {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		max-width: 44ch;
+	}
+
+	.events-page__luma-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: 0.5rem;
+		color: var(--color-accent);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.events-page__luma-link span:first-child {
+		background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1px;
+		transition: background-size var(--duration-base) var(--ease-editorial);
+		padding-bottom: 2px;
+	}
+
+	.events-page__luma-link:hover span:first-child {
+		background-size: 100% 1px;
+	}
+
+	/* ── Sections ────────────────────────────────────────────────── */
+	.events-content {
+		display: flex;
+		flex-direction: column;
+		/* Slightly tightened section gap */
+		gap: var(--space-8);
+	}
+
+	.events-section {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.events-section__bar {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+		padding-bottom: var(--space-3);
+		margin-bottom: var(--space-5);
+		border-bottom: 2px solid var(--color-text);
+	}
+
+	.events-section__heading {
+		font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+		text-transform: uppercase;
+		margin: 0;
+	}
+
+	.events-section__count {
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	/* ── Event Grid (Three-column desktop, responsive) ───────────── */
+	.events-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-5);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	@media (min-width: 40rem) {
+		.events-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 64rem) {
+		.events-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: var(--space-5);
+		}
+	}
+
+	.events-grid__item {
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Progressive disclosure for upcoming overflow items */
+	:global(html.js) .events-grid__item--overflow {
+		display: none;
+	}
+
+	:global(html.js) .events-grid[data-expanded="true"] .events-grid__item--overflow {
+		display: flex;
+	}
+
+	/* ── Expand Control ──────────────────────────────────────────── */
+	.events-section__expand-wrapper {
+		display: flex;
+		justify-content: center;
+		margin-top: var(--space-6);
+	}
+
+	.events-expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		min-height: 2.75rem;
+		padding: var(--space-3) var(--space-6);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		background-color: var(--color-well);
+		color: var(--color-text);
+		font-size: var(--text-action);
+		font-weight: var(--weight-medium);
+		cursor: pointer;
+		transition:
+			border-color var(--duration-fast) var(--ease-editorial),
+			background-color var(--duration-fast) var(--ease-editorial),
+			color var(--duration-fast) var(--ease-editorial);
+	}
+
+	.events-expand-btn:hover {
+		border-color: var(--color-text);
+		background-color: var(--color-bg);
+		color: var(--color-accent);
+	}
+
+	.events-expand-btn__icon {
+		font-size: 1.1em;
+		transition: transform var(--duration-fast) var(--ease-editorial);
+	}
+
+	/* No-JS fallback: all items stay visible, hide the button */
+	:global(html:not(.js)) .events-section__expand-wrapper {
+		display: none;
+	}
+
+	/* ── Collapsible Year Grouping (<details> / <summary>) ────────── */
+	.events-years {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+	}
+
+	.events-year {
+		display: flex;
+		flex-direction: column;
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-5);
+	}
+
+	.events-year__summary {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		padding-block: var(--space-3);
+		list-style: none;
+		cursor: pointer;
+		user-select: none;
+		transition: color var(--duration-fast) var(--ease-editorial);
+	}
+
+	.events-year__summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.events-year__summary:hover {
+		color: var(--color-accent);
+	}
+
+	.events-year__label {
+		font-size: 1.25rem;
+		font-weight: var(--weight-bold);
+		letter-spacing: 0.05em;
+		margin: 0;
+	}
+
+	.events-year__summary-right {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		color: var(--color-text-muted);
+	}
+
+	.events-year__summary:hover .events-year__summary-right {
+		color: var(--color-text);
+	}
+
+	.events-year__chevron {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform var(--duration-fast) var(--ease-editorial);
+	}
+
+	.events-year[open] .events-year__chevron {
+		transform: rotate(180deg);
+	}
+
+	.events-year__grid {
+		padding-top: var(--space-4);
+	}
+
+	/* ── Empty & Fallback States ─────────────────────────────────── */
+	.events-empty {
+		padding: var(--space-6);
+		border: 1px dashed var(--color-rule);
+		border-radius: var(--radius-sm);
+		background-color: var(--color-well);
+	}
+
+	.events-empty__text {
+		color: var(--color-text-muted);
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		margin: 0;
+	}
+
+	.events-empty__link {
+		color: var(--color-accent);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.events-fallback {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-4);
+		padding: var(--space-8);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		background-color: var(--color-well);
+		max-width: 40rem;
+	}
+
+	.events-fallback__text {
+		color: var(--color-accent);
+		font-weight: var(--weight-bold);
+		margin: 0;
+	}
+
+	.events-fallback__sub {
+		color: var(--color-text-muted);
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		margin: 0;
+	}
+
+	.events-fallback__action {
+		margin-top: var(--space-3);
+	}
+</style>

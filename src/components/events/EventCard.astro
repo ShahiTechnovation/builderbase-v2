@@ -1,0 +1,306 @@
+---
+/**
+ * Builder Base Event Card.
+ *
+ * Displays a single event in the Builder Base editorial aesthetic:
+ * - Cover image (with CDN optimization or quiet fallback)
+ * - Timezone-aware date, time, and location
+ * - Ownership indicator (Hosted vs. Curated)
+ * - Accessible external link to Luma
+ * - Optional link to photo gallery when matched with local/Baserow records
+ * - Optional verified guest count
+ */
+import type { Event } from '../../data/model';
+import { whenLabel } from '../../lib/luma/events';
+
+interface Props {
+	event: Event;
+	upcoming?: boolean;
+}
+
+const { event, upcoming = false } = Astro.props;
+const where = event.online ? 'Online' : event.city;
+---
+
+<article class:list={['event-card', { 'event-card--upcoming': upcoming }]}>
+	<a
+		class="event-card__media"
+		href={event.url}
+		target="_blank"
+		rel="noopener noreferrer"
+		tabindex="-1"
+		aria-hidden="true"
+	>
+		{
+			event.coverUrl ? (
+				<>
+					<img
+						class="event-card__cover-backdrop"
+						src={event.coverUrl}
+						alt=""
+						aria-hidden="true"
+						loading="lazy"
+						decoding="async"
+					/>
+					<img
+						class="event-card__cover"
+						src={event.coverUrl}
+						alt=""
+						loading="lazy"
+						decoding="async"
+					/>
+				</>
+			) : (
+				<div class="event-card__placeholder">
+					<span class="event-card__placeholder-text meta">Builder Base</span>
+				</div>
+			)
+		}
+	</a>
+
+	<div class="event-card__body">
+		<div class="event-card__meta-bar">
+			<time class="event-card__when meta" datetime={event.startsAt}>
+				{whenLabel(event, upcoming)}
+			</time>
+			{where && <span class="event-card__where meta">· {where}</span>}
+			{
+				event.hostedByBuilderBase ? (
+					<span class="event-card__pill event-card__pill--hosted meta">
+						Hosted
+					</span>
+				) : event.hostName ? (
+					<span class="event-card__pill meta" title={`Listed via ${event.hostName}`}>
+						{event.hostName}
+					</span>
+				) : null
+			}
+		</div>
+
+		<h3 class="event-card__title">
+			<a
+				class="event-card__title-link"
+				href={event.url}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{event.title}
+			</a>
+		</h3>
+
+		<div class="event-card__footer">
+			<div class="event-card__links">
+				<a
+					class="event-card__action meta"
+					href={event.url}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<span>{upcoming ? 'Register on Luma' : 'View on Luma'}</span>
+					<span class="event-card__arrow" aria-hidden="true">↗</span>
+				</a>
+
+				{
+					event.photosUrl && (
+						<a
+							class="event-card__action event-card__action--gallery meta"
+							href={event.photosUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<span>Photos</span>
+							<span class="event-card__arrow" aria-hidden="true">↗</span>
+						</a>
+					)
+				}
+			</div>
+
+			{
+				upcoming && event.guestCount ? (
+					<span class="event-card__guests meta">
+						{event.guestCount.toLocaleString('en-IN')} going
+					</span>
+				) : null
+			}
+		</div>
+	</div>
+</article>
+
+<style>
+	.event-card {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		background-color: var(--color-bg);
+		overflow: hidden;
+		transition: border-color var(--duration-fast) var(--ease-editorial);
+	}
+
+	.event-card:hover {
+		border-color: var(--color-text);
+	}
+
+	.event-card__media {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		background-color: var(--color-well);
+	}
+
+	.event-card__cover-backdrop {
+		position: absolute;
+		inset: -15%;
+		width: 130%;
+		height: 130%;
+		object-fit: cover;
+		filter: blur(20px) brightness(0.7);
+		opacity: 0.35;
+		pointer-events: none;
+		transform: scale(1.1);
+		transition:
+			opacity var(--duration-shift) var(--ease-editorial),
+			transform var(--duration-shift) var(--ease-editorial);
+	}
+
+	.event-card:hover .event-card__cover-backdrop {
+		opacity: 0.5;
+		transform: scale(1.15);
+	}
+
+	.event-card__cover {
+		position: relative;
+		z-index: 1;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	.event-card__placeholder {
+		display: grid;
+		place-items: center;
+		width: 100%;
+		height: 100%;
+		color: var(--color-text-muted);
+		background-color: var(--color-well);
+	}
+
+	.event-card__body {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		padding: 0.875rem 1rem 0.75rem;
+		gap: 0.5rem;
+	}
+
+	.event-card__meta-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem var(--space-2);
+		color: var(--color-text-muted);
+	}
+
+	.event-card__when {
+		color: var(--color-accent);
+		font-weight: var(--weight-medium);
+	}
+
+	.event-card__where {
+		color: var(--color-text-muted);
+	}
+
+	.event-card__pill {
+		margin-inline-start: auto;
+		padding: 0.125rem 0.4rem;
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		font-size: 0.6875rem;
+		line-height: 1;
+		color: var(--color-text-muted);
+		white-space: nowrap;
+		max-width: 12ch;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.event-card__pill--hosted {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+		font-weight: var(--weight-medium);
+	}
+
+	.event-card__title {
+		font-size: 1.125rem;
+		font-weight: var(--weight-bold);
+		line-height: 1.25;
+		letter-spacing: -0.015em;
+		text-wrap: balance;
+		margin: 0;
+	}
+
+	.event-card__title-link {
+		color: var(--color-text);
+		transition: color var(--duration-fast) var(--ease-editorial);
+	}
+
+	.event-card__title-link:hover {
+		color: var(--color-accent);
+	}
+
+	.event-card__footer {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		margin-top: auto;
+		padding-top: 0.5rem;
+		border-top: 1px solid var(--color-rule);
+	}
+
+	.event-card__links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4);
+	}
+
+	.event-card__action {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		color: var(--color-text);
+		text-decoration: none;
+		transition: color var(--duration-fast) var(--ease-editorial);
+	}
+
+	.event-card__action span:first-child {
+		background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% 1px;
+		transition: background-size var(--duration-base) var(--ease-editorial);
+		padding-bottom: 2px;
+	}
+
+	.event-card__action:hover span:first-child {
+		background-size: 100% 1px;
+	}
+
+	.event-card__arrow {
+		font-size: 0.85em;
+		transition: transform var(--duration-fast) var(--ease-editorial);
+	}
+
+	.event-card__action:hover .event-card__arrow {
+		transform: translate(2px, -2px);
+	}
+
+	.event-card__guests {
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+	}
+</style>

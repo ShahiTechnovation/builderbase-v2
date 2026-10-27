@@ -57,3 +57,23 @@ export interface ContentSnapshot {
 	activations: Activation[];
 	projects: Project[];
 }
+
+/** An event, sourced from Luma or Builder Base activations. */
+export interface Event {
+	id: string;
+	title: string;
+	startsAt: string;
+	endsAt: string | null;
+	timezone: string;
+	url: string;
+	coverUrl?: string;
+	city?: string;
+	country?: string;
+	online: boolean;
+	source: 'luma' | 'baserow' | 'local';
+	hostedByBuilderBase: boolean;
+	hostName?: string;
+	guestCount?: number;
+	photosUrl?: string;
+}
+

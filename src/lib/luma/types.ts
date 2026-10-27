@@ -30,3 +30,45 @@ export interface LumaListEventsResponse {
 	has_more: boolean;
 	next_cursor?: string;
 }
+
+export interface LumaCalendarItem {
+	api_id: string;
+	event: {
+		api_id: string;
+		name: string;
+		url: string;
+		start_at: string;
+		end_at?: string | null;
+		timezone?: string;
+		cover_url?: string | null;
+		location_type?: string | null;
+		geo_address_info?: {
+			city?: string | null;
+			city_state?: string | null;
+			country?: string | null;
+			region?: string | null;
+		} | null;
+		visibility?: string;
+		calendar_api_id?: string;
+	};
+	calendar?: {
+		api_id?: string;
+		name?: string;
+		slug?: string | null;
+	} | null;
+	calendar_api_id?: string;
+	is_manager?: boolean;
+	hosts?: Array<{
+		name?: string;
+		api_id?: string;
+	}>;
+	guest_count?: number;
+	ticket_count?: number;
+}
+
+export interface LumaCalendarGetItemsResponse {
+	entries: LumaCalendarItem[];
+	has_more: boolean;
+	next_cursor?: string;
+}
+

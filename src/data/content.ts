@@ -1,18 +1,26 @@
 import { loadBaserowContent } from '../lib/baserow/repository';
 import { baserowConfig, contentSource, contentStrict, lumaConfig } from '../lib/env';
-import { fetchUpcomingEvents, type UpcomingEvents } from '../lib/luma/events';
+import {
+	fetchUpcomingEvents,
+	getLumaCalendarEvents,
+	localDay,
+	type UpcomingEvents,
+} from '../lib/luma/events';
 import { loadLocalContent } from './local';
 import type {
 	Activation,
 	ContentSnapshot,
+	Event,
+	Partner as PartnerModel,
 	Project as ProjectModel,
-    Partner as PartnerModel
 } from './model';
 import {
 	isPublicActivation,
 	isPublicProject,
 } from './public';
+import { destinations } from './site';
 import { resolveSnapshot } from './snapshot';
+
 
 export function getContent(): Promise<ContentSnapshot> {
     // In SSR mode, we fetch fresh data on every page request so admin panel changes show instantly
@@ -128,3 +136,123 @@ export async function getEcosystemContent(): Promise<EcosystemContent> {
 export function getUpcomingEvents(limit = 3): Promise<UpcomingEvents> {
 	return fetchUpcomingEvents(lumaConfig(), { limit });
 }
+
+export interface EventsPageContent {
+	status: 'live' | 'fallback' | 'unavailable';
+	upcoming: Event[];
+	past: Event[];
+	years: Map<string, Event[]>;
+}
+
+function matchesActivation(event: Event, activation: Activation): boolean {
+	if (activation.externalUrl) {
+		const cleanExt = activation.externalUrl.trim().toLowerCase();
+		const cleanEvUrl = event.url.toLowerCase();
+		if (cleanExt === cleanEvUrl) return true;
+		const evSlug = cleanEvUrl.split('/').pop();
+		if (evSlug && cleanExt.includes(evSlug)) return true;
+	}
+
+	const evDay = localDay(event);
+	if (activation.date && activation.date.slice(0, 10) === evDay) {
+		const words = activation.title
+			.toLowerCase()
+			.split(/[^a-z0-9]+/)
+			.filter((w) => w.length > 3);
+		if (words.some((w) => event.title.toLowerCase().includes(w))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+export async function getEventsContent(): Promise<EventsPageContent> {
+	const [lumaResult, snapshot] = await Promise.all([
+		getLumaCalendarEvents(),
+		getContent().catch(() => null),
+	]);
+
+	const publicActivations = (snapshot?.activations ?? []).filter(isPublicActivation);
+	const matchedActivationIds = new Set<string>();
+
+	let upcoming: Event[] = [];
+	let past: Event[] = [];
+	let status: EventsPageContent['status'] = 'live';
+
+	if (lumaResult) {
+		// Attach any Baserow gallery photo URLs to matched Luma events
+		upcoming = lumaResult.upcoming.map((ev) => {
+			const matched = publicActivations.find((act) => matchesActivation(ev, act));
+			if (matched) {
+				matchedActivationIds.add(matched.id);
+				const photo = matched.photoUrls?.[0] || matched.coverPhotoUrl;
+				return photo ? { ...ev, photosUrl: photo } : ev;
+			}
+			return ev;
+		});
+
+		past = lumaResult.past.map((ev) => {
+			const matched = publicActivations.find((act) => matchesActivation(ev, act));
+			if (matched) {
+				matchedActivationIds.add(matched.id);
+				const photo = matched.photoUrls?.[0] || matched.coverPhotoUrl;
+				return photo ? { ...ev, photosUrl: photo } : ev;
+			}
+			return ev;
+		});
+	} else {
+		status = publicActivations.length > 0 ? 'fallback' : 'unavailable';
+	}
+
+	// Add any unmatched Baserow activations as supplementary past events to avoid losing local records
+	const now = Date.now();
+	for (const act of publicActivations) {
+		if (!matchedActivationIds.has(act.id)) {
+			const startsAt = act.date ? `${act.date.slice(0, 10)}T10:00:00.000Z` : new Date().toISOString();
+			const isPast = Date.parse(startsAt) <= now;
+			const ev: Event = {
+				id: act.id,
+				title: act.title,
+				startsAt,
+				endsAt: null,
+				timezone: 'Asia/Kolkata',
+				url: act.externalUrl || destinations.lumaCalendar,
+				coverUrl: act.coverPhotoUrl,
+				city: undefined,
+				online: false,
+				source: 'baserow',
+				hostedByBuilderBase: true,
+				photosUrl: act.photoUrls?.[0],
+			};
+
+			if (isPast) {
+				past.push(ev);
+			} else {
+				upcoming.push(ev);
+			}
+		}
+	}
+
+	// Sort upcoming chronologically (soonest first)
+	upcoming.sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+
+	// Sort past newest first
+	past.sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt));
+
+	// Group past events by year
+	const years = new Map<string, Event[]>();
+	for (const e of past) {
+		const y = localDay(e).slice(0, 4) || '2026';
+		const list = years.get(y) ?? [];
+		list.push(e);
+		years.set(y, list);
+	}
+
+	return {
+		status,
+		upcoming,
+		past,
+		years,
+	};
+}
+
