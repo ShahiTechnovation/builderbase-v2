@@ -1,0 +1,156 @@
+---
+/**
+ * /contact — Clean editorial Contact page for Builder Base.
+ *
+ * Requirements:
+ * - Headline: "LET'S TALK."
+ * - Supporting copy: "Have something in mind? We'd love to hear it."
+ * - Embed: https://tally.so/r/Z99GA0
+ * - Minimal, fast, focused.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TallyEmbed from '../components/TallyEmbed.astro';
+
+const seoTitle = 'Contact — Builder Base';
+const seoDescription =
+	"Get in touch with Builder Base. Have something in mind? We'd love to hear it.";
+---
+
+<BaseLayout title={seoTitle} description={seoDescription}>
+	<div class="contact-page">
+		<section class="contact-section" aria-labelledby="contact-title">
+			<div class="page-width">
+				<div class="contact__topbar meta">
+					<span>01 /// GET IN TOUCH</span>
+					<span>DIRECT INBOX</span>
+				</div>
+
+				<div class="contact__layout">
+					<header class="contact__header">
+						<h1 class="contact__title" id="contact-title">LET'S TALK.</h1>
+						<p class="contact__subhead">Have something in mind? We'd love to hear it.</p>
+
+						<div class="contact__meta meta">
+							<span class="contact-badge">BUILDER BASE</span>
+							<span>RESPONSES WITHIN 24–48 HOURS</span>
+						</div>
+					</header>
+
+					<div class="contact__embed-wrapper">
+						<TallyEmbed
+							formId="Z99GA0"
+							title="Builder Base — Contact Form"
+							source="builderbase_contact"
+							utmCampaign="contact_page"
+							loading="eager"
+							minHeight={460}
+						/>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.contact-page {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--color-bg);
+		min-height: 70vh;
+	}
+
+	.contact-section {
+		padding-top: var(--space-6);
+		padding-bottom: clamp(4rem, 6vw, 8rem);
+	}
+
+	.contact__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-7);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.contact__layout {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-8);
+		align-items: start;
+	}
+
+	@media (min-width: 56rem) {
+		.contact__layout {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+			gap: clamp(3rem, 6vw, 6rem);
+		}
+	}
+
+	.contact__header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	@media (min-width: 56rem) {
+		.contact__header {
+			position: sticky;
+			top: calc(var(--space-8));
+		}
+	}
+
+	.contact__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-anchor);
+		line-height: 0.95;
+		text-transform: uppercase;
+		color: var(--color-text);
+		margin: 0;
+	}
+
+	.contact__subhead {
+		color: var(--color-text-muted);
+		font-size: clamp(1.125rem, 1rem + 0.35vw, 1.35rem);
+		line-height: 1.5;
+		max-width: 32ch;
+		margin: 0;
+	}
+
+	.contact__meta {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		margin-top: var(--space-3);
+	}
+
+	.contact-badge {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+	}
+
+	.contact__embed-wrapper {
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		padding: clamp(1.25rem, 3vw, 2.5rem);
+	}
+
+	@media (max-width: 639px) {
+		.contact__topbar {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+	}
+</style>

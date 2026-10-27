@@ -1,5 +1,397 @@
 ---
-import PlaceholderPage from '../layouts/PlaceholderPage.astro';
+/**
+ * /partners — Builder Base Partnership Inquiries & Ecosystem Collaboration.
+ *
+ * An editorial introduction to partnering with Builder Base:
+ * - Highlights genuine collaboration avenues (developer activation, workshops, hackathons, distribution, sponsorships)
+ * - Smooth anchor to the official Partnership Inquiry Tally embed
+ * - Uses Builder Base design tokens, typography, and responsive grid layout
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TallyEmbed from '../components/TallyEmbed.astro';
+import { site } from '../data/site';
+
+const seoTitle = 'Partners — Builder Base';
+const seoDescription =
+	'Partner with Builder Base. Connect your protocol, developer platform, or AI ecosystem with active builders in India through developer activations, workshops, hackathons, and distribution.';
 ---
 
-<PlaceholderPage title="Partners" />
+<BaseLayout title={seoTitle} description={seoDescription}>
+	<div class="partners-page">
+		<!-- HERO SECTION -->
+		<section class="partners-hero" aria-labelledby="partners-hero-title">
+			<div class="page-width">
+				<div class="partners-hero__topbar meta">
+					<span>01 /// PARTNERSHIP PROGRAM</span>
+					<span>THE DISTRIBUTION LAYER</span>
+				</div>
+
+				<div class="partners-hero__content">
+					<h1 class="partners-hero__title" id="partners-hero-title">
+						Scale your distribution in India.
+					</h1>
+					<p class="partners-hero__lead">
+						Builder Base connects leading protocols, developer platforms, and foundational AI ecosystems with ambitious builders. We turn technology announcements into real rooms, real code, and sustained developer adoption.
+					</p>
+
+					<div class="partners-hero__actions">
+						<a href="#partner-form" class="action action--primary">
+							<span class="action__label">Partner with Builder Base</span>
+							<span class="action__arrow" aria-hidden="true">↓</span>
+						</a>
+						<a href="/ecosystem" class="action action--quiet">
+							<span class="action__label">Explore Ecosystem</span>
+							<span class="action__arrow" aria-hidden="true">↗</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- OPPORTUNITIES SECTION -->
+		<section class="opportunities-section" aria-labelledby="opportunities-title">
+			<div class="page-width">
+				<div class="opportunities__top meta">
+					<span>02 /// HOW WE COLLABORATE</span>
+					<span>OPPORTUNITIES</span>
+				</div>
+
+				<header class="opportunities__header">
+					<h2 class="opportunities__title" id="opportunities-title">
+						Ways to work together.
+					</h2>
+					<p class="opportunities__subhead">
+						Every partnership is structured around direct builder impact. We align with your engineering goals to create high-velocity engagement.
+					</p>
+				</header>
+
+				<div class="opportunities__grid">
+					<article class="opp-card">
+						<span class="opp-card__num meta">01</span>
+						<h3 class="opp-card__title">Developer Activation</h3>
+						<p class="opp-card__desc">
+							Hands-on IRL build days, developer meetups, and dedicated code sessions that onboard developers directly to your stack and tooling.
+						</p>
+					</article>
+
+					<article class="opp-card">
+						<span class="opp-card__num meta">02</span>
+						<h3 class="opp-card__title">Workshops & Technical Demos</h3>
+						<p class="opp-card__desc">
+							Deep-dive technical sessions, architecture walkthroughs, and code-along workshops led with engineers and ecosystem specialists.
+						</p>
+					</article>
+
+					<article class="opp-card">
+						<span class="opp-card__num meta">03</span>
+						<h3 class="opp-card__title">Hackathons & Build Sprints</h3>
+						<p class="opp-card__desc">
+							High-velocity hackathon tracks, localized bounties, and rapid prototyping sprints that yield production-grade projects.
+						</p>
+					</article>
+
+					<article class="opp-card">
+						<span class="opp-card__num meta">04</span>
+						<h3 class="opp-card__title">Ecosystem Distribution</h3>
+						<p class="opp-card__desc">
+							Direct distribution of developer grants, API credits, testnet campaigns, and product feedback through our national network of builders.
+						</p>
+					</article>
+
+					<article class="opp-card">
+						<span class="opp-card__num meta">05</span>
+						<h3 class="opp-card__title">Strategic Sponsorships</h3>
+						<p class="opp-card__desc">
+							Co-host flagship developer gatherings, sponsor focused builder residencies, and support grassroots engineering chapters across key cities.
+						</p>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<!-- INQUIRY FORM SECTION -->
+		<section class="form-section" id="partner-form" aria-labelledby="form-section-title">
+			<div class="page-width">
+				<div class="form-section__top meta">
+					<span>03 /// DIRECT INQUIRY</span>
+					<span>PARTNERSHIP PROPOSAL</span>
+				</div>
+
+				<div class="form-section__layout">
+					<div class="form-section__intro">
+						<h2 class="form-section__title" id="form-section-title">
+							Let's build together.
+						</h2>
+						<p class="form-section__desc">
+							Tell us about your organization, technology, and what you would like to accomplish. We'll review your inquiry and get in touch directly.
+						</p>
+						<div class="form-section__meta meta">
+							<span class="form-meta-tag">DIRECT CHANNEL</span>
+							<span>REVIEWED PROMPTLY</span>
+						</div>
+					</div>
+
+					<div class="form-section__embed">
+						<TallyEmbed
+							formId="rDD0QM"
+							title="Builder Base — Partnership Inquiry Form"
+							source="builderbase_partners"
+							utmCampaign="partners_page"
+							loading="eager"
+							minHeight={600}
+						/>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.partners-page {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--color-bg);
+	}
+
+	/* Hero */
+	.partners-hero {
+		padding-top: var(--space-6);
+		padding-bottom: clamp(3.5rem, 5vw, 5.5rem);
+		border-bottom: 1px solid var(--color-rule);
+	}
+
+	.partners-hero__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.partners-hero__content {
+		max-width: 60rem;
+	}
+
+	.partners-hero__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.35rem, 1.2rem + 4.8vw, 5.25rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-anchor);
+		line-height: 0.95;
+		text-transform: uppercase;
+		color: var(--color-text);
+		margin-bottom: var(--space-5);
+	}
+
+	.partners-hero__lead {
+		font-family: var(--font-sans);
+		color: var(--color-text-muted);
+		font-size: clamp(1.125rem, 1rem + 0.4vw, 1.35rem);
+		line-height: 1.5;
+		max-width: 48ch;
+		margin-bottom: var(--space-7);
+	}
+
+	.partners-hero__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+		flex-wrap: wrap;
+	}
+
+	/* Opportunities */
+	.opportunities-section {
+		padding-block: var(--section-space);
+		border-bottom: 1px solid var(--color-rule);
+	}
+
+	.opportunities__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.opportunities__header {
+		max-width: 52rem;
+		margin-bottom: var(--space-8);
+	}
+
+	.opportunities__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2rem, 1.25rem + 3.5vw, 4rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		text-transform: uppercase;
+		line-height: 1;
+		color: var(--color-text);
+		margin-bottom: var(--space-3);
+	}
+
+	.opportunities__subhead {
+		color: var(--color-text-muted);
+		font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.25rem);
+		line-height: 1.55;
+		max-width: 48ch;
+	}
+
+	.opportunities__grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-5);
+		border-top: 1px solid var(--color-rule);
+		padding-top: var(--space-6);
+	}
+
+	@media (min-width: 48rem) {
+		.opportunities__grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: var(--space-6);
+		}
+	}
+
+	@media (min-width: 68rem) {
+		.opportunities__grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	.opp-card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+		padding: var(--space-5);
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		transition: border-color var(--duration-fast) var(--ease-standard);
+	}
+
+	.opp-card:hover {
+		border-color: var(--builder-indigo);
+	}
+
+	.opp-card__num {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+	}
+
+	.opp-card__title {
+		font-family: var(--font-sans);
+		font-size: clamp(1.25rem, 1.1rem + 0.4vw, 1.5rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		line-height: 1.2;
+	}
+
+	.opp-card__desc {
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
+		line-height: 1.55;
+		margin: 0;
+	}
+
+	/* Form Section */
+	.form-section {
+		padding-block: var(--section-space);
+		scroll-margin-top: 2rem;
+	}
+
+	.form-section__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.form-section__layout {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-8);
+		align-items: start;
+	}
+
+	.form-section__intro {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	@media (min-width: 60rem) {
+		.form-section__layout {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+			gap: clamp(3rem, 5vw, 6rem);
+		}
+
+		.form-section__intro {
+			position: sticky;
+			top: calc(var(--space-8));
+		}
+	}
+
+	.form-section__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2rem, 1.25rem + 3vw, 3.5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		text-transform: uppercase;
+		color: var(--color-text);
+		line-height: 1;
+	}
+
+	.form-section__desc {
+		color: var(--color-text-muted);
+		font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.2rem);
+		line-height: 1.55;
+		max-width: 36ch;
+		margin: 0;
+	}
+
+	.form-section__meta {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+	}
+
+	.form-meta-tag {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+	}
+
+	.form-section__embed {
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		padding: clamp(1.25rem, 3vw, 2.5rem);
+	}
+
+	@media (max-width: 639px) {
+		.partners-hero__topbar,
+		.opportunities__top,
+		.form-section__top {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+	}
+</style>

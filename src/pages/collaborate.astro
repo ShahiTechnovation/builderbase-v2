@@ -1,0 +1,158 @@
+---
+/**
+ * /collaborate — Focused Event Collaboration page for communities & organizers.
+ *
+ * Requirements:
+ * - Headline: "LET'S BUILD A ROOM TOGETHER."
+ * - Short description: "Hosting a developer event, workshop, or hackathon? Tell us what you're planning."
+ * - Embed: https://tally.so/r/xVV07G
+ * - Keep the page intentionally short.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TallyEmbed from '../components/TallyEmbed.astro';
+
+const seoTitle = 'Collaborate — Builder Base';
+const seoDescription =
+	"Hosting a developer event, workshop, or hackathon? Tell us what you're planning. Let's build a room together.";
+---
+
+<BaseLayout title={seoTitle} description={seoDescription}>
+	<div class="collaborate-page">
+		<section class="collaborate-section" aria-labelledby="collaborate-title">
+			<div class="page-width">
+				<div class="collaborate__topbar meta">
+					<span>01 /// EVENT COLLABORATION</span>
+					<span>COMMUNITY & ORGANIZERS</span>
+				</div>
+
+				<div class="collaborate__layout">
+					<header class="collaborate__header">
+						<h1 class="collaborate__title" id="collaborate-title">LET'S BUILD A ROOM TOGETHER.</h1>
+						<p class="collaborate__subhead">
+							Hosting a developer event, workshop, or hackathon? Tell us what you're planning.
+						</p>
+
+						<div class="collaborate__meta meta">
+							<span class="collaborate-badge">BUILDER BASE</span>
+							<span>CO-HOSTS &bull; VENUES &bull; TRACKS</span>
+						</div>
+					</header>
+
+					<div class="collaborate__embed-wrapper">
+						<TallyEmbed
+							formId="xVV07G"
+							title="Builder Base — Event Collaboration Form"
+							source="builderbase_collaborate"
+							utmCampaign="collaborate_page"
+							loading="eager"
+							minHeight={480}
+						/>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.collaborate-page {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--color-bg);
+		min-height: 70vh;
+	}
+
+	.collaborate-section {
+		padding-top: var(--space-6);
+		padding-bottom: clamp(4rem, 6vw, 8rem);
+	}
+
+	.collaborate__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-7);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.collaborate__layout {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-8);
+		align-items: start;
+	}
+
+	@media (min-width: 56rem) {
+		.collaborate__layout {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+			gap: clamp(3rem, 6vw, 6rem);
+		}
+	}
+
+	.collaborate__header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	@media (min-width: 56rem) {
+		.collaborate__header {
+			position: sticky;
+			top: calc(var(--space-8));
+		}
+	}
+
+	.collaborate__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.25rem, 1.5rem + 4.5vw, 5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-anchor);
+		line-height: 0.95;
+		text-transform: uppercase;
+		color: var(--color-text);
+		margin: 0;
+	}
+
+	.collaborate__subhead {
+		color: var(--color-text-muted);
+		font-size: clamp(1.125rem, 1rem + 0.35vw, 1.35rem);
+		line-height: 1.5;
+		max-width: 34ch;
+		margin: 0;
+	}
+
+	.collaborate__meta {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		margin-top: var(--space-3);
+	}
+
+	.collaborate-badge {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+	}
+
+	.collaborate__embed-wrapper {
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		padding: clamp(1.25rem, 3vw, 2.5rem);
+	}
+
+	@media (max-width: 639px) {
+		.collaborate__topbar {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+	}
+</style>

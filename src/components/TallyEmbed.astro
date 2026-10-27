@@ -1,0 +1,205 @@
+---
+/**
+ * TallyEmbed.astro — Lightweight, robust, responsive Tally form embed.
+ *
+ * Implements the official Tally embed standard:
+ * - Dynamic height auto-resizing via postMessage (eliminates inner scrollbars)
+ * - Transparent background blending with Builder Base paper surface
+ * - Attribution forwarding (utm_source, utm_medium, utm_campaign, source)
+ * - Accessible iframe title and fallback link
+ * - Script-free and ad-blocker fallback: sets src directly if widget script fails
+ */
+
+interface Props {
+	/** Tally form ID (e.g. "rDD0QM") or full URL */
+	formId: string;
+	/** Accessible title for screen readers */
+	title: string;
+	/** Source identifier (passed to hidden field) */
+	source?: string;
+	/** Default UTM Source */
+	utmSource?: string;
+	/** Default UTM Medium */
+	utmMedium?: string;
+	/** Default UTM Campaign */
+	utmCampaign?: string;
+	/** Loading strategy */
+	loading?: 'lazy' | 'eager';
+	/** Initial estimated height */
+	minHeight?: number;
+	/** Optional container class */
+	class?: string;
+}
+
+const {
+	formId,
+	title,
+	source = 'builderbase_website',
+	utmSource = 'builderbase.xyz',
+	utmMedium = 'website',
+	utmCampaign,
+	loading = 'lazy',
+	minHeight = 500,
+	class: className,
+} = Astro.props;
+
+// Clean ID
+const cleanId = formId.replace(/^https?:\/\/tally\.so\/(r|embed)\//, '').split('?')[0];
+const directUrl = `https://tally.so/r/${cleanId}`;
+
+// Base embed parameters
+const params = new URLSearchParams({
+	alignLeft: '1',
+	hideTitle: '1',
+	transparentBackground: '1',
+	dynamicHeight: '1',
+	source,
+	utm_source: utmSource,
+	utm_medium: utmMedium,
+});
+
+if (utmCampaign) {
+	params.set('utm_campaign', utmCampaign);
+}
+
+const embedSrc = `https://tally.so/embed/${cleanId}?${params.toString()}`;
+---
+
+<div class:list={['tally-embed-wrap', className]}>
+	<iframe
+		data-tally-src={embedSrc}
+		loading={loading}
+		width="100%"
+		height={minHeight}
+		title={title}
+		class="tally-frame"
+	></iframe>
+
+	<noscript>
+		<iframe
+			src={embedSrc}
+			loading={loading}
+			width="100%"
+			height={minHeight}
+			title={title}
+			class="tally-frame"
+		></iframe>
+	</noscript>
+
+	<!-- Direct Fallback Link -->
+	<div class="tally-fallback meta">
+		<span>Having trouble loading the form?</span>
+		<a
+			href={directUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="tally-fallback__link"
+		>
+			Open directly on Tally <span aria-hidden="true">↗</span>
+			<span class="visually-hidden"> (opens in new tab)</span>
+		</a>
+	</div>
+</div>
+
+<script is:inline>
+	(function () {
+		var d = document;
+		var w = 'https://tally.so/widgets/embed.js';
+
+		function forwardParams(frame) {
+			var src = frame.getAttribute('data-tally-src');
+			if (!src) return;
+			try {
+				var url = new URL(src, window.location.origin);
+				var search = new URLSearchParams(window.location.search);
+				['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'source'].forEach(function (k) {
+					var val = search.get(k);
+					if (val) url.searchParams.set(k, val);
+				});
+				frame.setAttribute('data-tally-src', url.toString());
+			} catch (e) {}
+		}
+
+		function initFrames() {
+			d.querySelectorAll('iframe[data-tally-src]').forEach(forwardParams);
+
+			// For eager frames, promote data-tally-src to src immediately so Tally binds iframeResize
+			// without waiting for IntersectionObserver
+			d.querySelectorAll('iframe[data-tally-src][loading="eager"]').forEach(function (e) {
+				e.src = e.dataset.tallySrc;
+				delete e.dataset.tallySrc;
+			});
+
+			if (typeof Tally !== 'undefined') {
+				Tally.loadEmbeds();
+			} else {
+				// Fallback if widget script is blocked or delayed: set src directly
+				d.querySelectorAll('iframe[data-tally-src]:not([src])').forEach(function (e) {
+					e.src = e.dataset.tallySrc;
+				});
+			}
+		}
+
+		if (typeof Tally !== 'undefined') {
+			initFrames();
+		} else if (d.querySelector('script[src="' + w + '"]') == null) {
+			var s = d.createElement('script');
+			s.src = w;
+			s.async = true;
+			s.onload = initFrames;
+			s.onerror = initFrames;
+			d.body.appendChild(s);
+		} else {
+			initFrames();
+		}
+
+		document.addEventListener('astro:after-swap', initFrames);
+	})();
+</script>
+
+<style>
+	.tally-embed-wrap {
+		width: 100%;
+		position: relative;
+	}
+
+	.tally-frame {
+		width: 100%;
+		border: 0;
+		margin: 0;
+		padding: 0;
+		background: transparent;
+		display: block;
+		min-height: 380px;
+	}
+
+	.tally-fallback {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.tally-fallback__link {
+		color: var(--color-text);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.tally-fallback__link:hover {
+		color: var(--builder-indigo);
+	}
+
+	@media (max-width: 639px) {
+		.tally-fallback {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+	}
+</style>
