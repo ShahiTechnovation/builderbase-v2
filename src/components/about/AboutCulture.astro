@@ -1,0 +1,245 @@
+---
+/**
+ * Chapter 03 — The Culture
+ *
+ * The visual centerpiece of the page. Large-format editorial photography
+ * capturing real builders, genuine collaboration, and the offline energy of the rooms.
+ */
+import { aboutData } from '../../data/about';
+
+const { culture } = aboutData;
+const [leadPhoto, ...otherPhotos] = culture.photographs;
+---
+
+<section class="culture-section" id="culture" aria-labelledby="culture-title">
+	<div class="page-width">
+		<!-- Section Marker -->
+		<div class="culture__top meta" data-reveal="meta">
+			<span class="culture__marker">{culture.marker}</span>
+			<span class="culture__tag">OFFLINE ACTIVATIONS</span>
+		</div>
+
+		<!-- Section Header -->
+		<header class="culture__header">
+			<h2 class="culture__title" id="culture-title">
+				<span class="reveal-mask" data-reveal="mask">
+					<span class="reveal-mask__line">{culture.headline}</span>
+				</span>
+			</h2>
+			<p class="culture__subhead" data-reveal="meta">
+				{culture.subhead}
+			</p>
+		</header>
+
+		<!-- Visual Photo Centerpiece -->
+		<div class="culture__gallery">
+			<!-- Lead Large-Format Image -->
+			{
+				leadPhoto && (
+					<figure class="culture__lead-figure" data-reveal="photo">
+						<div class="culture__frame culture__frame--lead" style={`aspect-ratio: ${leadPhoto.aspect};`}>
+							<img
+								src={leadPhoto.src}
+								alt={leadPhoto.alt}
+								class="culture__img"
+								loading="lazy"
+								decoding="async"
+								width="1400"
+								height="875"
+							/>
+							<div class="culture__vignette" aria-hidden="true" />
+						</div>
+						<figcaption class="culture__caption meta">
+							<span>{leadPhoto.caption}</span>
+						</figcaption>
+					</figure>
+				)
+			}
+
+			<!-- Secondary Image Pair -->
+			<div class="culture__pair">
+				{
+					otherPhotos.map((photo, idx) => (
+						<figure class="culture__pair-figure" data-reveal="photo" style={`--i: ${idx + 1}`}>
+							<div class="culture__frame" style={`aspect-ratio: ${photo.aspect};`}>
+								<img
+									src={photo.src}
+									alt={photo.alt}
+									class="culture__img"
+									loading="lazy"
+									decoding="async"
+									width="900"
+									height="675"
+								/>
+								<div class="culture__vignette" aria-hidden="true" />
+							</div>
+							<figcaption class="culture__caption meta">
+								<span>{photo.caption}</span>
+							</figcaption>
+						</figure>
+					))
+				}
+			</div>
+		</div>
+
+		<!-- Subtle Link to Events Archive -->
+		<div class="culture__footer meta" data-reveal="meta">
+			<a href={culture.archiveLink.href} class="archive-link">
+				<span>{culture.archiveLink.label}</span>
+				<span class="archive-arrow" aria-hidden="true">↗</span>
+			</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.culture-section {
+		padding-block: var(--section-space);
+		border-bottom: 1px solid var(--color-rule);
+		background-color: var(--color-bg);
+		position: relative;
+	}
+
+	.culture__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.culture__header {
+		max-width: 54rem;
+		margin-bottom: var(--space-7);
+	}
+
+	.culture__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.25rem, 1.25rem + 4.2vw, 4.5rem);
+		font-weight: var(--weight-display);
+		line-height: 0.95;
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		text-transform: uppercase;
+		margin-bottom: var(--space-4);
+	}
+
+	.culture__subhead {
+		font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.25rem);
+		line-height: 1.55;
+		color: var(--color-text-muted);
+	}
+
+	/* Photo Gallery */
+	.culture__gallery {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+		margin-bottom: var(--space-6);
+	}
+
+	.culture__lead-figure {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		margin: 0;
+	}
+
+	.culture__pair {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-6);
+	}
+
+	@media (min-width: 768px) {
+		.culture__pair {
+			grid-template-columns: 1fr 1fr;
+			gap: var(--space-6);
+		}
+	}
+
+	.culture__pair-figure {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		margin: 0;
+	}
+
+	.culture__frame {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+	}
+
+	.culture__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform var(--duration-slow) var(--ease-editorial);
+	}
+
+	.culture__frame:hover .culture__img {
+		transform: scale(1.025);
+	}
+
+	.culture__vignette {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(14, 15, 19, 0) 70%, rgba(14, 15, 19, 0.35) 100%);
+		pointer-events: none;
+	}
+
+	.culture__caption {
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		padding-left: var(--space-1);
+	}
+
+	/* Footer Archive Link */
+	.culture__footer {
+		display: flex;
+		justify-content: flex-end;
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-rule);
+	}
+
+	.archive-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: var(--color-text);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		font-weight: var(--weight-medium);
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.archive-link:hover {
+		color: var(--builder-indigo);
+	}
+
+	.archive-arrow {
+		transition: transform var(--duration-fast) var(--ease-standard);
+	}
+
+	.archive-link:hover .archive-arrow {
+		transform: translate(2px, -2px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.culture__frame:hover .culture__img {
+			transform: none;
+		}
+		.archive-link:hover .archive-arrow {
+			transform: none;
+		}
+	}
+</style>

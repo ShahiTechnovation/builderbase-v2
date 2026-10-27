@@ -1,5 +1,72 @@
 ---
-import PlaceholderPage from '../layouts/PlaceholderPage.astro';
+/**
+ * /about — The Refined Editorial About Page for Builder Base V2.
+ *
+ * A minimal, premium, and focused digital experience in five distinct chapters:
+ *
+ * 01 — THE STATEMENT: "We don't just connect builders. We create momentum."
+ * 02 — WHAT WE DO: "Connect. Activate. Amplify."
+ * 03 — THE CULTURE: "You had to be there."
+ * 04 — BUILT ACROSS INDIA: "The next room could be anywhere."
+ * 05 — THE INVITATION: "The next big thing starts in a room. Find yours."
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AboutHero from '../components/about/AboutHero.astro';
+import AboutWhatWeDo from '../components/about/AboutWhatWeDo.astro';
+import AboutCulture from '../components/about/AboutCulture.astro';
+import AboutFootprint from '../components/about/AboutFootprint.astro';
+import AboutInvitation from '../components/about/AboutInvitation.astro';
+import { aboutData } from '../data/about';
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'Organization',
+	name: 'Builder Base',
+	url: 'https://builderbase.xyz',
+	description: aboutData.seo.description,
+	areaServed: {
+		'@type': 'Country',
+		name: 'India',
+	},
+	knowsAbout: [
+		'Developer Community',
+		'Agentic AI',
+		'Hackathons',
+		'Ecosystem Distribution',
+		'Software Engineering',
+	],
+};
 ---
 
-<PlaceholderPage title="About" />
+<BaseLayout
+	title={aboutData.seo.title}
+	description={aboutData.seo.description}
+>
+	<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+
+	<div class="about-page">
+		<!-- CHAPTER 01: THE STATEMENT -->
+		<AboutHero />
+
+		<!-- CHAPTER 02: WHAT WE DO -->
+		<AboutWhatWeDo />
+
+		<!-- CHAPTER 03: THE CULTURE -->
+		<AboutCulture />
+
+		<!-- CHAPTER 04: BUILT ACROSS INDIA -->
+		<AboutFootprint />
+
+		<!-- CHAPTER 05: THE INVITATION -->
+		<AboutInvitation />
+	</div>
+</BaseLayout>
+
+<style>
+	.about-page {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--color-bg);
+	}
+</style>

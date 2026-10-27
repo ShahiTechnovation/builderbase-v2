@@ -34,6 +34,10 @@ export const destinations = {
 	lumaCalendar: 'https://luma.com/Builderbase',
 	// Official Luma calendar embed (supplied by Builder Base). No extra parameters.
 	lumaCalendarEmbed: 'https://luma.com/embed/calendar/cal-Rmfu84P0S7JWiHl/events',
+	// Official Builder Base X / Twitter profile
+	x: 'https://x.com/theBuilder_base',
+	// Official Builder Base LinkedIn company profile
+	linkedIn: 'https://www.linkedin.com/company/builder-base',
 } as const;
 
 export const primaryNav: NavLink[] = [
@@ -50,3 +54,41 @@ export const actions = {
 	lumaCalendar: { label: 'See the calendar on Luma', href: destinations.lumaCalendar, arrow: true },
 	fullCalendar: { label: 'View full calendar', href: destinations.lumaCalendar, arrow: true, hint: 'on Luma' },
 } satisfies Record<string, NavLink>;
+
+export interface FooterNavGroup {
+	title: string;
+	links: Array<{
+		label: string;
+		href: string;
+		external?: boolean;
+		hint?: string;
+	}>;
+}
+
+export const footerNav: FooterNavGroup[] = [
+	{
+		title: 'EXPLORE',
+		links: [
+			{ label: 'Home', href: '/' },
+			{ label: 'Events', href: '/events' },
+			{ label: 'Ecosystem', href: '/ecosystem' },
+			{ label: 'About', href: '/about' },
+		],
+	},
+	{
+		title: 'GET INVOLVED',
+		links: [
+			{ label: 'Join the Base', href: destinations.join },
+			{ label: 'For Partners', href: destinations.partner },
+			{ label: 'Contact', href: site.contact },
+		],
+	},
+	{
+		title: 'CONNECT',
+		links: [
+			{ label: 'X / Twitter', href: destinations.x, external: true, hint: 'opens in new tab' },
+			{ label: 'LinkedIn', href: destinations.linkedIn, external: true, hint: 'opens in new tab' },
+			{ label: 'Luma Calendar', href: destinations.lumaCalendar, external: true, hint: 'opens in new tab' },
+		],
+	},
+];

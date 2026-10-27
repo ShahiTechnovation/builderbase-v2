@@ -1,0 +1,191 @@
+---
+/**
+ * Chapter 04 — Built Across India
+ *
+ * An expressive, minimal typographic city composition communicating Builder Base's
+ * real geographic presence without complex UI widgets or inflated claims.
+ */
+import { aboutData } from '../../data/about';
+
+const { footprint } = aboutData;
+---
+
+<section class="footprint-section" id="footprint" aria-labelledby="footprint-title">
+	<div class="page-width">
+		<!-- Section Marker -->
+		<div class="footprint__top meta" data-reveal="meta">
+			<span class="footprint__marker">{footprint.marker}</span>
+			<span class="footprint__tag">GEOGRAPHIC PRESENCE</span>
+		</div>
+
+		<!-- Section Header -->
+		<header class="footprint__header">
+			<h2 class="footprint__title" id="footprint-title">
+				<span class="reveal-mask" data-reveal="mask">
+					<span class="reveal-mask__line">{footprint.headline}</span>
+				</span>
+			</h2>
+			<p class="footprint__subhead" data-reveal="meta">
+				{footprint.subhead}
+			</p>
+		</header>
+
+		<!-- Minimal Typographic City Composition -->
+		<div class="footprint__nodes" role="list">
+			{
+				footprint.nodes.map((node, idx) => (
+					<div class="node-row" role="listitem" data-reveal="meta" style={`--i: ${idx}`}>
+						<div class="node-row__index meta">{String(idx + 1).padStart(2, '0')}</div>
+						<div class="node-row__main">
+							<h3 class="node-row__city">{node.name}</h3>
+							<p class="node-row__note meta">{node.note}</p>
+						</div>
+					</div>
+				))
+			}
+		</div>
+
+		<!-- Verified Boundary Annotation -->
+		<div class="footprint__coverage meta" data-reveal="meta">
+			<span class="coverage-bullet" aria-hidden="true">•</span>
+			<p class="coverage-text">{footprint.coverageNote}</p>
+		</div>
+	</div>
+</section>
+
+<style>
+	.footprint-section {
+		padding-block: var(--section-space);
+		border-bottom: 1px solid var(--color-rule);
+		background-color: var(--color-bg);
+		position: relative;
+	}
+
+	.footprint__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.footprint__header {
+		max-width: 54rem;
+		margin-bottom: var(--space-7);
+	}
+
+	.footprint__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.25rem, 1.25rem + 4.2vw, 4.5rem);
+		font-weight: var(--weight-display);
+		line-height: 0.95;
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		text-transform: uppercase;
+		margin-bottom: var(--space-4);
+	}
+
+	.footprint__subhead {
+		font-size: clamp(1.0625rem, 0.95rem + 0.35vw, 1.25rem);
+		line-height: 1.55;
+		color: var(--color-text-muted);
+	}
+
+	/* Typographic City Nodes Grid */
+	.footprint__nodes {
+		display: grid;
+		grid-template-columns: 1fr;
+		border-top: 1px solid var(--color-rule);
+		margin-bottom: var(--space-6);
+	}
+
+	@media (min-width: 768px) {
+		.footprint__nodes {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.node-row {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-4);
+		padding: var(--space-5) var(--space-3);
+		border-bottom: 1px solid var(--color-rule);
+		transition: background-color var(--duration-fast) var(--ease-standard), padding-left var(--duration-fast) var(--ease-editorial);
+	}
+
+	@media (min-width: 768px) {
+		.node-row:nth-child(odd) {
+			border-right: 1px solid var(--color-rule);
+			padding-right: var(--space-6);
+		}
+		.node-row:nth-child(even) {
+			padding-left: var(--space-6);
+		}
+	}
+
+	.node-row:hover {
+		background-color: var(--color-well);
+		padding-left: var(--space-4);
+	}
+
+	@media (min-width: 768px) {
+		.node-row:nth-child(even):hover {
+			padding-left: calc(var(--space-6) + var(--space-2));
+		}
+	}
+
+	.node-row__index {
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-meta);
+		opacity: 0.8;
+	}
+
+	.node-row__main {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.node-row__city {
+		font-family: var(--font-sans);
+		font-size: clamp(1.35rem, 1.1rem + 1vw, 2.15rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		line-height: 1.1;
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.node-row:hover .node-row__city {
+		color: var(--builder-indigo);
+	}
+
+	.node-row__note {
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	/* Verified Coverage Note */
+	.footprint__coverage {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		padding-top: var(--space-3);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.coverage-bullet {
+		color: var(--builder-indigo);
+	}
+</style>

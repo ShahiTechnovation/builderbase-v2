@@ -1,0 +1,288 @@
+---
+/**
+ * Chapter 01 — The Statement
+ *
+ * Refined, high-impact hero composition establishing Builder Base's
+ * identity with confidence, disciplined typography, and real photography.
+ */
+import { aboutData } from '../../data/about';
+import ActionLink from '../ActionLink.astro';
+
+const { hero } = aboutData;
+---
+
+<section class="about-hero" aria-labelledby="about-hero-title">
+	<!-- Top Editorial Bar -->
+	<div class="page-width">
+		<div class="about-hero__topbar meta" data-reveal="meta">
+			<span class="about-hero__marker">{hero.marker}</span>
+			<span class="about-hero__tag">{hero.anchorTag}</span>
+		</div>
+	</div>
+
+	<!-- Main Statement -->
+	<div class="page-width about-hero__content">
+		<header class="about-hero__header">
+			<h1 class="about-hero__title" id="about-hero-title">
+				<span class="reveal-mask" data-reveal="mask" style="--i: 0">
+					<span class="reveal-mask__line">{hero.statementTop}</span>
+				</span>
+				<span class="reveal-mask about-hero__title--accent" data-reveal="mask" style="--i: 1">
+					<span class="reveal-mask__line">{hero.statementBottom}</span>
+				</span>
+			</h1>
+
+			<div class="about-hero__bridge" data-reveal="meta">
+				<p class="about-hero__lead">
+					{hero.supportingCopy}
+				</p>
+				<div class="about-hero__actions">
+					<ActionLink link={{ label: 'Explore What We Do', href: '#what-we-do' }} variant="primary" />
+					<ActionLink link={{ label: 'The Culture', href: '#culture', arrow: true }} />
+				</div>
+			</div>
+		</header>
+
+		<!-- Hero Visual Canvas -->
+		<div class="about-hero__canvas" data-reveal="photo">
+			<div class="about-hero__canvas-frame">
+				<img
+					src={hero.featuredPhoto.src}
+					alt={hero.featuredPhoto.alt}
+					class="about-hero__img"
+					loading="eager"
+					fetchpriority="high"
+					decoding="async"
+					width="1600"
+					height="900"
+				/>
+				<div class="about-hero__overlay" aria-hidden="true"></div>
+				<div class="about-hero__canvas-badge meta">
+					<span class="badge-tag">BUILDER BASE</span>
+					<span class="badge-caption">{hero.featuredPhoto.caption}</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bottom Scroll Indicator -->
+		<div class="about-hero__footer meta" data-reveal="meta">
+			<span class="about-hero__anchor-tag">ESTABLISHED ACROSS INDIA</span>
+			<a href="#what-we-do" class="about-hero__scroll-link">
+				<span>{hero.scrollPrompt}</span>
+				<span class="scroll-arrow" aria-hidden="true">↓</span>
+			</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.about-hero {
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-7);
+		border-bottom: 1px solid var(--color-rule);
+		background-color: var(--color-bg);
+		position: relative;
+	}
+
+	.about-hero__topbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-bottom: var(--space-4);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.about-hero__content {
+		padding-top: var(--space-5);
+	}
+
+	.about-hero__header {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-5);
+		margin-bottom: var(--space-6);
+	}
+
+	@media (min-width: 960px) {
+		.about-hero__header {
+			grid-template-columns: 1.35fr 0.85fr;
+			align-items: flex-end;
+			gap: var(--space-8);
+		}
+	}
+
+	.about-hero__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.35rem, 1.2rem + 4.8vw, 5.25rem);
+		font-weight: var(--weight-display);
+		line-height: 0.92;
+		letter-spacing: var(--tracking-anchor);
+		color: var(--color-text);
+		text-transform: uppercase;
+	}
+
+	.about-hero__title--accent {
+		color: var(--builder-indigo);
+	}
+
+	.about-hero__bridge {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.about-hero__lead {
+		font-family: var(--font-sans);
+		font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3rem);
+		line-height: 1.45;
+		color: var(--color-text-muted);
+		max-width: 40ch;
+	}
+
+	.about-hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4);
+	}
+
+	/* Hero Canvas */
+	.about-hero__canvas {
+		position: relative;
+		margin-bottom: var(--space-4);
+	}
+
+	.about-hero__canvas-frame {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		max-height: 560px;
+		background-color: var(--color-well);
+		overflow: hidden;
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+	}
+
+	@media (min-width: 768px) {
+		.about-hero__canvas-frame {
+			aspect-ratio: 21 / 9;
+		}
+	}
+
+	.about-hero__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center 55%;
+		filter: contrast(1.04) brightness(0.96);
+		transition: transform var(--duration-shift) var(--ease-editorial), filter var(--duration-shift) var(--ease-editorial);
+	}
+
+	.about-hero__canvas-frame:hover .about-hero__img {
+		transform: scale(1.02);
+		filter: contrast(1.08) brightness(1);
+	}
+
+	.about-hero__overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(14, 15, 19, 0) 65%, rgba(14, 15, 19, 0.4) 100%);
+		pointer-events: none;
+	}
+
+	.about-hero__canvas-badge {
+		position: absolute;
+		bottom: var(--space-3);
+		left: var(--space-4);
+		right: var(--space-4);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: var(--paper);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		z-index: 2;
+	}
+
+	.badge-tag {
+		background-color: var(--ink);
+		padding: 0.2rem 0.5rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.badge-caption {
+		opacity: 0.9;
+		display: none;
+	}
+
+	@media (min-width: 640px) {
+		.badge-caption {
+			display: inline-block;
+		}
+	}
+
+	.about-hero__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: var(--space-3);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.about-hero__anchor-tag {
+		font-weight: var(--weight-medium);
+	}
+
+	.about-hero__scroll-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		color: var(--color-text);
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.about-hero__scroll-link:hover {
+		color: var(--builder-indigo);
+	}
+
+	.scroll-arrow {
+		animation: scrollBob 2s infinite ease-in-out;
+	}
+
+	@keyframes scrollBob {
+		0%, 100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(3px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scroll-arrow {
+			animation: none;
+		}
+		.about-hero__canvas-frame:hover .about-hero__img {
+			transform: none;
+		}
+	}
+
+	@media (max-width: 639px) {
+		.about-hero__topbar {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+		.about-hero__footer {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-2);
+		}
+	}
+</style>

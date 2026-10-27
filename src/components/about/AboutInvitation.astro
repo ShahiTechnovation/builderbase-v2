@@ -1,0 +1,226 @@
+---
+/**
+ * Chapter 05 — The Invitation
+ *
+ * An elegant, concise closing chapter offering two clear pathways:
+ * one for Builders and one for Ecosystems / Partners.
+ */
+import { aboutData } from '../../data/about';
+import ActionLink from '../ActionLink.astro';
+
+const { invitation } = aboutData;
+---
+
+<section class="invitation-section" id="invitation" aria-labelledby="invitation-title">
+	<div class="page-width">
+		<!-- Section Marker -->
+		<div class="invitation__top meta" data-reveal="meta">
+			<span class="invitation__marker">{invitation.marker}</span>
+			<span class="invitation__tag">THE ROOM IS OPEN</span>
+		</div>
+
+		<!-- Section Headline -->
+		<header class="invitation__header">
+			<h2 class="invitation__title" id="invitation-title">
+				<span class="reveal-mask" data-reveal="mask">
+					<span class="reveal-mask__line">{invitation.headline}</span>
+				</span>
+			</h2>
+			<p class="invitation__subhead meta" data-reveal="meta">
+				“{invitation.subhead}”
+			</p>
+		</header>
+
+		<!-- Two Concise Pathways -->
+		<div class="invitation__paths">
+			<!-- Pathway 1: For Builders -->
+			<div class="path-card path-card--builders" data-reveal="meta" style="--i: 0">
+				<div class="path-card__badge meta">{invitation.builders.badge}</div>
+				<h3 class="path-card__headline">{invitation.builders.headline}</h3>
+				<p class="path-card__desc">{invitation.builders.description}</p>
+				<div class="path-card__action">
+					<ActionLink
+						link={{
+							label: invitation.builders.action.label,
+							href: invitation.builders.action.href,
+							arrow: true,
+						}}
+						variant="primary"
+					/>
+				</div>
+			</div>
+
+			<!-- Pathway 2: For Ecosystems -->
+			<div class="path-card path-card--ecosystems" data-reveal="meta" style="--i: 1">
+				<div class="path-card__badge meta">{invitation.ecosystems.badge}</div>
+				<h3 class="path-card__headline">{invitation.ecosystems.headline}</h3>
+				<p class="path-card__desc">{invitation.ecosystems.description}</p>
+				<div class="path-card__action">
+					<ActionLink
+						link={{
+							label: invitation.ecosystems.action.label,
+							href: invitation.ecosystems.action.href,
+							arrow: true,
+						}}
+					/>
+				</div>
+			</div>
+		</div>
+
+		<!-- Monolithic Closing Signature -->
+		<div class="invitation__signature" data-reveal="meta">
+			<div class="signature-line" aria-hidden="true" />
+			<p class="signature-text meta">{invitation.closingStatement}</p>
+			<div class="signature-line" aria-hidden="true" />
+		</div>
+	</div>
+</section>
+
+<style>
+	.invitation-section {
+		padding-block: var(--section-space);
+		background-color: var(--color-bg);
+		position: relative;
+	}
+
+	.invitation__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.invitation__header {
+		text-align: center;
+		max-width: 54rem;
+		margin-inline: auto;
+		margin-bottom: var(--space-7);
+	}
+
+	.invitation__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.25rem, 1.25rem + 4.2vw, 4.5rem);
+		font-weight: var(--weight-display);
+		line-height: 0.95;
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		text-transform: uppercase;
+		margin-bottom: var(--space-3);
+	}
+
+	.invitation__subhead {
+		font-size: clamp(1.125rem, 1rem + 0.4vw, 1.35rem);
+		color: var(--builder-indigo);
+		font-weight: var(--weight-medium);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	/* Two Pathways Grid */
+	.invitation__paths {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-6);
+		margin-bottom: var(--space-8);
+	}
+
+	@media (min-width: 768px) {
+		.invitation__paths {
+			grid-template-columns: repeat(2, 1fr);
+			gap: var(--space-7);
+		}
+	}
+
+	.path-card {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: var(--space-6);
+		background-color: var(--color-well);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-sm);
+		transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-base) var(--ease-editorial);
+	}
+
+	.path-card:hover {
+		border-color: var(--builder-indigo);
+		box-shadow: 0 8px 24px -8px rgba(43, 47, 124, 0.12);
+	}
+
+	.path-card--builders {
+		border-top: 2px solid var(--builder-indigo);
+	}
+
+	.path-card--ecosystems {
+		border-top: 2px solid var(--ink);
+	}
+
+	.path-card__badge {
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+		margin-bottom: var(--space-3);
+	}
+
+	.path-card--ecosystems .path-card__badge {
+		color: var(--color-text-muted);
+	}
+
+	.path-card__headline {
+		font-family: var(--font-sans);
+		font-size: clamp(1.35rem, 1.15rem + 0.6vw, 1.75rem);
+		font-weight: var(--weight-bold);
+		line-height: 1.2;
+		color: var(--color-text);
+		margin-bottom: var(--space-3);
+	}
+
+	.path-card__desc {
+		font-size: 1rem;
+		line-height: 1.55;
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-5);
+		flex-grow: 1;
+	}
+
+	.path-card__action {
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-rule);
+	}
+
+	/* Signature Line */
+	.invitation__signature {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-5);
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		padding-top: var(--space-4);
+	}
+
+	.signature-line {
+		flex-grow: 1;
+		height: 1px;
+		background-color: var(--color-rule);
+		max-width: 160px;
+	}
+
+	.signature-text {
+		font-weight: var(--weight-semibold);
+		color: var(--color-text);
+	}
+
+	@media (max-width: 639px) {
+		.signature-line {
+			display: none;
+		}
+	}
+</style>

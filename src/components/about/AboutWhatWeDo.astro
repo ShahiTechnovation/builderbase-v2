@@ -1,0 +1,134 @@
+---
+/**
+ * Chapter 02 — What We Do
+ *
+ * Streamlined, high-impact editorial overview combining the mission
+ * and distribution engine into three crisp concepts: CONNECT, ACTIVATE, AMPLIFY.
+ */
+import { aboutData } from '../../data/about';
+
+const { whatWeDo } = aboutData;
+---
+
+<section class="what-we-do" id="what-we-do" aria-labelledby="what-we-do-title">
+	<div class="page-width">
+		<!-- Section Marker -->
+		<div class="what-we-do__top meta" data-reveal="meta">
+			<span class="what-we-do__marker">{whatWeDo.marker}</span>
+			<span class="what-we-do__tag">DISTRIBUTION LAYER</span>
+		</div>
+
+		<!-- Section Headline & Subhead -->
+		<header class="what-we-do__header">
+			<h2 class="what-we-do__title" id="what-we-do-title">
+				<span class="reveal-mask" data-reveal="mask">
+					<span class="reveal-mask__line">{whatWeDo.headline}</span>
+				</span>
+			</h2>
+			<p class="what-we-do__subhead" data-reveal="meta">
+				{whatWeDo.subhead}
+			</p>
+		</header>
+
+		<!-- Three Pure Editorial Pillars -->
+		<div class="what-we-do__pillars" role="list">
+			{
+				whatWeDo.pillars.map((pillar, idx) => (
+					<article class="pillar-block" role="listitem" data-reveal="meta" style={`--i: ${idx}`}>
+						<div class="pillar-block__num meta">{pillar.step}</div>
+						<h3 class="pillar-block__name">{pillar.name}</h3>
+						<p class="pillar-block__summary">{pillar.summary}</p>
+					</article>
+				))
+			}
+		</div>
+	</div>
+</section>
+
+<style>
+	.what-we-do {
+		padding-block: var(--section-space);
+		border-bottom: 1px solid var(--color-rule);
+		background-color: var(--color-bg);
+		position: relative;
+	}
+
+	.what-we-do__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-6);
+		border-bottom: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.what-we-do__header {
+		max-width: 58rem;
+		margin-bottom: var(--space-8);
+	}
+
+	.what-we-do__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.25rem, 1.25rem + 4.2vw, 4.5rem);
+		font-weight: var(--weight-display);
+		line-height: 0.95;
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		text-transform: uppercase;
+		margin-bottom: var(--space-4);
+	}
+
+	.what-we-do__subhead {
+		font-size: clamp(1.125rem, 1rem + 0.4vw, 1.35rem);
+		line-height: 1.5;
+		color: var(--color-text-muted);
+		max-width: 48ch;
+	}
+
+	/* Three Editorial Pillars */
+	.what-we-do__pillars {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-6);
+		border-top: 1px solid var(--color-rule);
+		padding-top: var(--space-6);
+	}
+
+	@media (min-width: 768px) {
+		.what-we-do__pillars {
+			grid-template-columns: repeat(3, 1fr);
+			gap: var(--space-7);
+		}
+	}
+
+	.pillar-block {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.pillar-block__num {
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		color: var(--builder-indigo);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.pillar-block__name {
+		font-family: var(--font-sans);
+		font-size: clamp(1.5rem, 1.25rem + 0.8vw, 2rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+	}
+
+	.pillar-block__summary {
+		font-size: 1rem;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+</style>

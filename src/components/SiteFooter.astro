@@ -1,122 +1,361 @@
 ---
-import { site } from '../data/site';
+/**
+ * SiteFooter — The Refined Premium Editorial Footer for Builder Base V2.
+ *
+ * A clean, confident closing section with clear information hierarchy:
+ * - Brand identity with official monogram and tagline
+ * - Three organized navigation columns: EXPLORE, GET INVOLVED, CONNECT
+ * - Subtle divider and bottom bar with copyright and accessible Back to Top
+ */
+import { monogram } from '../data/brand';
+import { footerNav, site } from '../data/site';
 ---
 
-<footer class="site-footer surface-dark" aria-labelledby="footer-title">
+<footer class="site-footer surface-dark" aria-labelledby="footer-brand-title">
 	<div class="footer__inner page-width">
-		<div class="footer__left">
-			<h2 class="visually-hidden" id="footer-title">Site footer</h2>
-			<div class="footer__brand">
-				<span class="footer__logomark">Builder Base</span>
+		<!-- Top Section: Brand Identity & Navigation Columns -->
+		<div class="footer__top">
+			<!-- Brand Identity (Left) -->
+			<div class="footer__brand-block">
+				<h2 class="visually-hidden" id="footer-title">Site footer</h2>
+				<a href="/" class="footer__brand" aria-label={`${site.name} — home`}>
+					<svg class="footer__brand-mark" viewBox={monogram.viewBox} aria-hidden="true" focusable="false">
+						<use href={`#${monogram.id}`}></use>
+					</svg>
+					<span class="footer__brand-name" id="footer-brand-title">BUILDER BASE</span>
+				</a>
+				<p class="footer__tagline meta">{site.statement}</p>
 			</div>
-			<p class="footer__tagline meta">The distribution layer for builders.</p>
-		</div>
-		
-		<div class="footer__right">
+
+			<!-- Navigation Columns (Right) -->
 			<nav class="footer__nav" aria-label="Footer navigation">
-				<ul class="footer__list" role="list">
-					<li><a href="/" class="footer__link">Home</a></li>
-					<li><a href="/events" class="footer__link">Events</a></li>
-					<li><a href="/about" class="footer__link">About</a></li>
-				</ul>
-				<ul class="footer__list" role="list">
-					<li><a href="/partners" class="footer__link">Partners</a></li>
-					<li><a href={site.contact} class="footer__link">Contact</a></li>
-				</ul>
+				{
+					footerNav.map((group) => (
+						<div class="footer__col">
+							<h3 class="footer__heading meta">{group.title}</h3>
+							<ul class="footer__list" role="list">
+								{group.links.map((link) => (
+									<li class="footer__item">
+										<a
+											href={link.href}
+											class="footer__link"
+											target={link.external ? '_blank' : undefined}
+											rel={link.external ? 'noopener noreferrer' : undefined}
+										>
+											<span class="footer__link-text">{link.label}</span>
+											{link.external && <span class="footer__link-arrow" aria-hidden="true">↗</span>}
+											{link.hint && <span class="visually-hidden"> ({link.hint})</span>}
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))
+				}
 			</nav>
-			<p class="footer__copyright meta">&copy; {new Date().getFullYear()} Builder Base. All rights reserved.</p>
+		</div>
+
+		<!-- Bottom Bar -->
+		<div class="footer__bottom">
+			<p class="footer__copyright meta">
+				&copy; 2026 {site.name}. All rights reserved.
+			</p>
+			<button
+				type="button"
+				class="footer__back-to-top meta"
+				id="footer-back-to-top"
+				aria-label="Back to top of page"
+			>
+				<span class="footer__back-to-top-label">BACK TO TOP</span>
+				<span class="footer__back-to-top-arrow" aria-hidden="true">↑</span>
+			</button>
 		</div>
 	</div>
 </footer>
 
+<script>
+	function initBackToTop() {
+		const btn = document.getElementById('footer-back-to-top');
+		if (!btn || btn.hasAttribute('data-initialized')) return;
+		btn.setAttribute('data-initialized', 'true');
+
+		btn.addEventListener('click', () => {
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			window.scrollTo({
+				top: 0,
+				behavior: prefersReducedMotion ? 'auto' : 'smooth',
+			});
+
+			const main = document.getElementById('main') || document.querySelector('h1');
+			if (main instanceof HTMLElement) {
+				main.focus({ preventScroll: true });
+			}
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initBackToTop);
+	} else {
+		initBackToTop();
+	}
+	document.addEventListener('astro:after-swap', initBackToTop);
+</script>
+
 <style>
 	.site-footer {
-		padding-block: clamp(4rem, 6vw, 8rem);
-		padding-inline: var(--gutter);
 		background-color: var(--near-black);
 		color: var(--paper);
+		border-top: 1px solid var(--color-rule);
+		padding-block: clamp(3.5rem, 5vw, 5.5rem) clamp(2.5rem, 4vw, 4rem);
+		padding-inline: var(--gutter);
 	}
 
 	.footer__inner {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-8);
-		border-top: 2px solid var(--color-rule);
-		padding-top: var(--space-8);
+		gap: clamp(3rem, 5vw, 4.5rem);
 	}
 
-	.footer__left {
+	/* Top Section: Brand left, Nav columns right */
+	.footer__top {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-8);
+		align-items: start;
+	}
+
+	@media (min-width: 64rem) {
+		.footer__top {
+			grid-template-columns: minmax(0, 1.25fr) minmax(0, 2fr);
+			gap: clamp(3rem, 6vw, 7rem);
+		}
+	}
+
+	/* Brand Identity */
+	.footer__brand-block {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		align-items: flex-start;
+	}
+
+	.footer__brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		color: var(--paper);
+		text-decoration: none;
+		line-height: 1;
+		transition: opacity var(--duration-fast) var(--ease-standard);
+	}
+
+	.footer__brand:hover {
+		opacity: 0.88;
+	}
+
+	.footer__brand:focus-visible {
+		outline: 2px solid var(--builder-indigo-tint);
+		outline-offset: 4px;
+		border-radius: var(--radius-sm);
+	}
+
+	.footer__brand-mark {
+		width: auto;
+		height: 1.125rem;
+		aspect-ratio: 210.5 / 233.3;
+		color: var(--paper);
+		flex-shrink: 0;
+		display: block;
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
+
+	.footer__brand:hover .footer__brand-mark {
+		color: var(--builder-indigo-tint);
+	}
+
+	.footer__brand-name {
+		font-family: var(--font-sans);
+		font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		text-transform: uppercase;
+		color: var(--paper);
+	}
+
+	.footer__tagline {
+		color: var(--color-text-muted);
+		max-width: 28ch;
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	/* Nav Grid */
+	.footer__nav {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-7) var(--space-5);
+	}
+
+	@media (min-width: 44rem) {
+		.footer__nav {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: clamp(1.5rem, 3vw, 4rem);
+		}
+	}
+
+	@media (max-width: 43.99rem) {
+		/* On 2-col mobile layout, make CONNECT span across cleanly */
+		.footer__col:last-child {
+			grid-column: 1 / -1;
+		}
+	}
+
+	.footer__col {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-4);
 	}
 
-	.footer__brand {
-		font-size: var(--text-menu);
-		font-weight: var(--weight-display);
-		text-transform: uppercase;
-		letter-spacing: var(--tracking-display);
-	}
-
-	.footer__tagline {
+	.footer__heading {
 		color: var(--color-text-muted);
-		max-width: 30ch;
-	}
-
-	.footer__right {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-6);
-	}
-
-	.footer__nav {
-		display: flex;
-		gap: clamp(2rem, 5vw, 6rem);
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		font-weight: var(--weight-medium);
+		letter-spacing: var(--tracking-meta);
+		text-transform: uppercase;
+		margin: 0;
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--color-rule);
 	}
 
 	.footer__list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-3);
+		gap: var(--space-1);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.footer__item {
+		display: flex;
 	}
 
 	.footer__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-family: var(--font-sans);
+		font-size: var(--text-ui);
 		font-weight: var(--weight-medium);
+		letter-spacing: var(--tracking-ui);
 		color: var(--paper);
 		text-decoration: none;
-		text-transform: uppercase;
-		font-size: var(--text-ui);
-		letter-spacing: var(--tracking-ui);
+		padding-block: var(--space-1);
+		min-height: 2.25rem;
 		transition: color var(--duration-fast) var(--ease-standard);
 	}
 
-	.footer__link:hover,
+	.footer__link:hover {
+		color: var(--builder-indigo-tint);
+	}
+
 	.footer__link:focus-visible {
+		outline: 2px solid var(--builder-indigo-tint);
+		outline-offset: 4px;
+		border-radius: var(--radius-sm);
+		color: var(--builder-indigo-tint);
+	}
+
+	.footer__link-arrow {
+		font-size: 0.875em;
 		color: var(--color-text-muted);
+		line-height: 1;
+		transition:
+			transform var(--duration-fast) var(--ease-standard),
+			color var(--duration-fast) var(--ease-standard);
+	}
+
+	.footer__link:hover .footer__link-arrow {
+		color: var(--builder-indigo-tint);
+		transform: translate(2px, -2px);
+	}
+
+	/* Bottom Bar */
+	.footer__bottom {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--color-rule);
+	}
+
+	@media (min-width: 40rem) {
+		.footer__bottom {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			gap: var(--space-6);
+		}
 	}
 
 	.footer__copyright {
 		color: var(--color-text-muted);
-		margin-top: auto;
+		margin: 0;
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
 	}
 
-	@media (min-width: 64rem) {
-		.footer__inner {
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: flex-start;
-		}
+	.footer__back-to-top {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--color-text-muted);
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		font-weight: var(--weight-regular);
+		letter-spacing: var(--tracking-meta);
+		text-transform: uppercase;
+		background: none;
+		border: none;
+		padding: var(--space-2) 0;
+		cursor: pointer;
+		align-self: flex-start;
+		transition: color var(--duration-fast) var(--ease-standard);
+	}
 
-		.footer__right {
-			align-items: flex-end;
-			text-align: right;
+	@media (min-width: 40rem) {
+		.footer__back-to-top {
+			align-self: auto;
+			padding-inline: var(--space-2);
+			margin-inline-end: calc(-1 * var(--space-2));
 		}
+	}
 
-		.footer__list {
-			align-items: flex-end;
+	.footer__back-to-top:hover {
+		color: var(--paper);
+	}
+
+	.footer__back-to-top:focus-visible {
+		outline: 2px solid var(--builder-indigo-tint);
+		outline-offset: 4px;
+		border-radius: var(--radius-sm);
+		color: var(--paper);
+	}
+
+	.footer__back-to-top-arrow {
+		line-height: 1;
+		transition: transform var(--duration-fast) var(--ease-standard);
+	}
+
+	.footer__back-to-top:hover .footer__back-to-top-arrow {
+		transform: translateY(-2px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.footer__link:hover .footer__link-arrow,
+		.footer__back-to-top:hover .footer__back-to-top-arrow {
+			transform: none;
 		}
 	}
 </style>
