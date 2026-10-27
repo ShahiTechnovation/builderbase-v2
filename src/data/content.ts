@@ -47,10 +47,10 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 	return { 
         heroPhotoUrl: 'https://builderbase.xyz/hero.jpg', 
         culturePhotos: [
-            { photoUrl: 'https://k0zc4ww8smbcswkz.public.blob.vercel-storage.com/20260405_185344.jpg', caption: ['Builder Base', 'Event'] },
-            { photoUrl: 'https://k0zc4ww8smbcswkz.public.blob.vercel-storage.com/room-restaurant.jpg', caption: ['Builder Base', 'Room'] },
-            { photoUrl: 'https://k0zc4ww8smbcswkz.public.blob.vercel-storage.com/video6210907281387694049.mp4', caption: ['Builder Base', 'Video'] },
-            { photoUrl: 'https://k0zc4ww8smbcswkz.public.blob.vercel-storage.com/DJI_20260920171605_0361_D.MP4', caption: ['Builder Base', 'Video'] }
+            { photoUrl: 'https://res.cloudinary.com/yic4m8kq/image/upload/v1793103970/20260405_185344.jpg', caption: ['Builder Base', 'Event'] },
+            { photoUrl: 'https://res.cloudinary.com/yic4m8kq/image/upload/v1793104868/6161153281179194441.jpg', caption: ['Builder Base', 'Community'] },
+            { photoUrl: 'https://res.cloudinary.com/yic4m8kq/video/upload/v1793103983/video6210907281387694049.mp4', caption: ['Builder Base', 'Session'] },
+            { photoUrl: 'https://res.cloudinary.com/yic4m8kq/video/upload/v1793103980/video6210907281387694051.mp4', caption: ['Builder Base', 'Highlights'] }
         ] 
     };
 }
