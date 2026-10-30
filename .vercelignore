@@ -1,10 +1,12 @@
-The_origin_guild-main/
-the_origin_guild-main/
+/The_origin_guild-main/
+/the_origin_guild-main/
 node_modules/
 dist/
 .astro/
 .git/
 test-results/
 playwright-report/
-docs/
-scripts/
+/docs/
+/scripts/
+/experiments-main/
+

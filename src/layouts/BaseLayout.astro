@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import Analytics from '@vercel/analytics/astro';
 import SeoHead from '../components/SeoHead.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -51,6 +52,7 @@ const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 			<slot />
 		</main>
 		<SiteFooter />
+		<Analytics />
 	</body>
 </html>
 
