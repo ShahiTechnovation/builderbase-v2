@@ -1,0 +1,179 @@
+---
+/**
+ * "THE CULTURE" — Builder Base signature interactive brand flag.
+ *
+ * Dedicated editorial brand identity section between "Scale your distribution."
+ * and "Build something worth distributing."
+ *
+ * Reuses the original custom Verlet cloth physics, WebGL2 satin lighting,
+ * iridescence and pointer interactions from the experiments codebase.
+ *
+ * Lazy-loaded: heavier rendering scripts and WebGL initialization run only when
+ * within scroll proximity (300px). When offscreen or backgrounded, the render
+ * loop automatically pauses to eliminate idle GPU/CPU overhead.
+ */
+interface Props {
+	eyebrow?: string;
+	headline?: readonly string[];
+	supporting?: string;
+}
+
+const {
+	eyebrow = 'BUILDER BASE / THE CULTURE',
+	headline = ['Not just a community.', 'A flag worth carrying.'],
+	supporting = 'Built by builders. Carried everywhere.',
+} = Astro.props;
+---
+
+<section class="culture-flag" aria-labelledby="culture-flag-title">
+	<div class="culture-flag__inner page-width">
+		<header class="culture-flag__header">
+			<p class="culture-flag__eyebrow meta" data-reveal="meta" style="--i: 0">{eyebrow}</p>
+			<h2 class="culture-flag__headline" id="culture-flag-title" data-reveal="mask">
+				{
+					headline.map((line, index) => (
+						<>
+							{index > 0 && ' '}
+							<span class="culture-flag__headline-line reveal-mask" style={`--i: ${index + 1}`}>
+								<span class="reveal-mask__line">{line}</span>
+							</span>
+						</>
+					))
+				}
+			</h2>
+			<p class="culture-flag__supporting meta" data-reveal="meta" style={`--i: ${headline.length + 1}`}>{supporting}</p>
+		</header>
+
+		<div class="culture-flag__stage" data-flag-stage>
+			<canvas
+				class="culture-flag__canvas"
+				data-flag-canvas
+				role="img"
+				aria-label="Interactive Builder Base satin flag waving in the wind. Click or touch and drag to ripple the fabric."
+			></canvas>
+		</div>
+	</div>
+</section>
+
+<script>
+	// Lazy-load the WebGL flag simulation only when approaching the viewport
+	const stages = document.querySelectorAll<HTMLElement>('[data-flag-stage]');
+	if ('IntersectionObserver' in window) {
+		const stageObserver = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						stageObserver.unobserve(entry.target);
+						const stage = entry.target as HTMLElement;
+						import('../scripts/culture-flag').then(({ initCultureFlag }) => {
+							initCultureFlag(stage);
+						});
+					}
+				}
+			},
+			{ rootMargin: '300px 0px' }
+		);
+
+		stages.forEach((stage) => stageObserver.observe(stage));
+	} else {
+		// Fallback for browsers without IntersectionObserver
+		stages.forEach((stage) => {
+			import('../scripts/culture-flag').then(({ initCultureFlag }) => {
+				initCultureFlag(stage);
+			});
+		});
+	}
+</script>
+
+<style>
+	.culture-flag {
+		position: relative;
+		padding-block: clamp(4.5rem, 6vw, 7.5rem) clamp(4rem, 5vw, 6.5rem);
+		padding-inline: var(--gutter);
+		overflow: hidden;
+		background-color: var(--color-bg);
+		border-top: 1px solid var(--color-rule);
+	}
+
+	.culture-flag__inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: clamp(var(--space-5), 3vw, var(--space-8));
+	}
+
+	.culture-flag__header {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-3);
+		max-width: 38ch;
+	}
+
+	.culture-flag__eyebrow {
+		color: var(--color-text-muted);
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		letter-spacing: var(--tracking-meta);
+		text-transform: uppercase;
+	}
+
+	.culture-flag__headline {
+		font-family: var(--font-sans);
+		font-size: clamp(2rem, 1.4rem + 1.8vw, 3.25rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		line-height: 1.1;
+		text-transform: uppercase;
+		text-wrap: balance;
+		color: var(--color-text);
+		max-width: 24ch;
+	}
+
+	.culture-flag__headline-line {
+		display: block;
+	}
+
+	.culture-flag__supporting {
+		color: var(--color-text-muted);
+		font-family: var(--font-mono);
+		font-size: var(--text-meta);
+		letter-spacing: 0.04em;
+		line-height: var(--leading-body);
+		text-transform: uppercase;
+		text-wrap: balance;
+	}
+
+	.culture-flag__stage {
+		position: relative;
+		width: 100%;
+		max-width: 1120px;
+		height: clamp(380px, 58vh, 600px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: var(--radius-frame);
+		background-color: var(--near-black);
+		border: 1px solid var(--paper-300);
+		box-shadow: 0 20px 48px -16px rgba(18, 19, 23, 0.12);
+	}
+
+	.culture-flag__canvas {
+		display: block;
+		width: 100%;
+		height: 100%;
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
+		-webkit-user-select: none;
+		outline: none;
+	}
+
+	@media (max-width: 48rem) {
+		.culture-flag__stage {
+			height: clamp(320px, 50vh, 460px);
+		}
+	}
+</style>

@@ -10,7 +10,7 @@ interface Props {
 const { title, marqueeText } = Astro.props;
 ---
 
-<section class="builder-closing" aria-labelledby="closing-title">
+<section class="builder-closing surface-dark" aria-labelledby="closing-title">
 	<div class="closing__marquee-wrapper" aria-hidden="true" data-scroll="start through">
 		<div class="closing__marquee">
 			<span class="closing__marquee-text">{marqueeText}</span>
@@ -42,6 +42,7 @@ const { title, marqueeText } = Astro.props;
 		padding-block: var(--section-space) clamp(6rem, 8vw, 12rem);
 		overflow: hidden;
 		min-height: 70vh;
+		background-color: var(--color-bg);
 	}
 
 	.closing__marquee-wrapper {

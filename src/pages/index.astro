@@ -7,6 +7,7 @@ import OpeningSequence from '../components/OpeningSequence.astro';
 import Proof from '../components/Proof.astro';
 import EcosystemBridge from '../components/EcosystemBridge.astro';
 import PartnerConversion from '../components/PartnerConversion.astro';
+import CultureFlag from '../components/CultureFlag.astro';
 import BuilderClosing from '../components/BuilderClosing.astro';
 import { getHomepageContent } from '../data/content';
 import { home } from '../data/home';
@@ -52,5 +53,10 @@ const hasCulture = content.culturePhotos.length > 0;
 		}}
 	/>
 	<PartnerConversion title={home.partnerConversion.title} />
+	<CultureFlag
+		eyebrow={home.cultureFlag.eyebrow}
+		headline={home.cultureFlag.headline}
+		supporting={home.cultureFlag.supporting}
+	/>
 	<BuilderClosing title={home.builderClosing.title} marqueeText={home.builderClosing.marquee} />
 </BaseLayout>

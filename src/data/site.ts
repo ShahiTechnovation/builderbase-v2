@@ -27,8 +27,9 @@ export const site = {
  * requires editing a component.
  */
 export const destinations = {
-	// TEMPORARY: there is no join/community flow yet. Replace with the real one.
-	join: '/events',
+
+	// Official Builder Base join / community profile on Link3
+	join: 'https://link3.to/builderbase',
 	partner: '/partners',
 	collaborate: '/collaborate',
 	contact: '/contact',
@@ -57,7 +58,7 @@ export const primaryNav: NavLink[] = [
 export const partnersNav: NavLink = { label: 'For partners', href: destinations.partner, arrow: true };
 
 export const actions = {
-	join: { label: 'Join the base', href: destinations.join },
+	join: { label: 'Join the base', href: destinations.join, arrow: true },
 	partner: { label: 'Partner with us', href: destinations.partner, arrow: true },
 	collaborate: { label: 'Host an event', href: destinations.collaborate, arrow: true },
 	contact: { label: 'Contact us', href: destinations.contact, arrow: true },
@@ -88,7 +89,7 @@ export const footerNav: FooterNavGroup[] = [
 	{
 		title: 'GET INVOLVED',
 		links: [
-			{ label: 'Join the Base', href: destinations.join },
+			{ label: 'Join the Base', href: destinations.join, external: true, hint: 'opens in new tab' },
 			{ label: 'For Partners', href: destinations.partner },
 			{ label: 'Host an Event', href: destinations.collaborate },
 			{ label: 'Contact', href: destinations.contact },

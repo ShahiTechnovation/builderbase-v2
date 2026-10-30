@@ -26,11 +26,25 @@ export const home = {
 	proof: {
 		title: ['Proof,', 'not promises.'],
 		items: [
-			{ stat: '100+', label: 'Builders hosted across regions' },
-			{ stat: '12+', label: 'Deep engineering sessions' },
-			{ stat: '8', label: 'Ecosystem partnerships' },
-			{ stat: '∞', label: 'Ideas shipped' }
-		]
+			{
+				stat: '10K+',
+				label: 'Builders activated through our ecosystem',
+			},
+			{
+				stat: '1M+',
+				label: 'Reach across builder campaigns',
+			},
+			{
+				stat: '25',
+				label: 'Organizations across our ecosystem',
+				link: { text: 'Organizations', href: '/ecosystem' },
+			},
+			{
+				stat: '100+',
+				label: 'Past events across our network',
+				link: { text: 'Past events', href: '/events' },
+			},
+		],
 	},
 	ecosystemBridge: {
 		title: 'Connected to the ecosystem',
@@ -49,6 +63,11 @@ export const home = {
 	},
 	partnerConversion: {
 		title: 'Scale your distribution.',
+	},
+	cultureFlag: {
+		eyebrow: 'BUILDER BASE / THE CULTURE',
+		headline: ['Not just a community.', 'A flag worth carrying.'],
+		supporting: 'Built by builders. Carried everywhere.',
 	},
 	builderClosing: {
 		title: 'Build something worth distributing.',
