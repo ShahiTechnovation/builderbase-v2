@@ -1,8 +1,44 @@
+import type { ImageMetadata } from 'astro';
+
 export interface Publishable {
 	public: boolean;
 }
 
 export type PublicationStatus = 'draft' | 'published' | 'archived';
+
+export interface FocalPoint {
+	x: number;
+	y: number;
+}
+
+export type PhotoAssetRef =
+	| { kind: 'local'; key: string }
+	| { kind: 'remote'; url: string; width: number; height: number };
+
+export type PhotoImage = ImageMetadata | { src: string; width: number; height: number };
+
+export type PhotoUsage = 'approved' | 'pending' | 'restricted';
+
+export interface Photo {
+	id: string;
+	asset: PhotoAssetRef;
+	alt: string;
+	focal: FocalPoint;
+	focalPortrait?: FocalPoint;
+	usage?: PhotoUsage;
+	heroRank?: number;
+	cultureRank?: number;
+	featured?: boolean;
+	tags?: string[];
+	activationId?: string;
+	cityId?: string;
+	credit?: string;
+	internalNote?: string;
+}
+
+export interface ResolvedPhoto extends Photo {
+	image: PhotoImage;
+}
 
 export interface Partner {
 	id: string;

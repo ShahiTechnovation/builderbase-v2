@@ -17,9 +17,11 @@ interface Props {
 	ogPhoto?: ResolvedPhoto;
 	/** Page-wide surface. `dark` puts the header and page on near-black (e.g. /ecosystem). */
 	surface?: 'dark';
+	/** Optional structured data (JSON-LD schema object or array) */
+	jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
-const { title, description, noindex, surface } = Astro.props;
+const { title, description, noindex, surface, jsonLd } = Astro.props;
 const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 ---
 
@@ -39,7 +41,7 @@ const ogPhoto = Astro.props.ogPhoto ?? (await getHomepageContent()).heroPhoto;
 		<slot name="head" />
 		<Font cssVariable="--font-schibsted-grotesk" preload />
 		<Font cssVariable="--font-fragment-mono" />
-		<SeoHead title={title} description={description} noindex={noindex} ogPhoto={ogPhoto} />
+		<SeoHead title={title} description={description} noindex={noindex} ogPhoto={ogPhoto} jsonLd={jsonLd} />
 		<meta name="theme-color" content={surface === 'dark' ? site.themeColorDark : site.themeColor} />
 		<meta name="color-scheme" content="light" />
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />

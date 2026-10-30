@@ -2,6 +2,7 @@ import type {
 	Activation,
 	ContentSnapshot,
 	Partner,
+	Photo,
 	Project,
 	Publishable,
 } from './model';
@@ -18,6 +19,8 @@ export const isPublicActivation = (activation: Activation): boolean =>
 export const isPublicProject = (project: Project): boolean => isPublished(project) && project.status === 'published';
 
 export const isPublicPartner = (partner: Partner): boolean => true;
+
+export const isPhotoPublishable = (photo: Photo): boolean => true;
 
 function publicActivation(facts: Facts, id: string | undefined): Activation | undefined {
 	const activation = id ? facts.activations.find((entry) => entry.id === id) : undefined;

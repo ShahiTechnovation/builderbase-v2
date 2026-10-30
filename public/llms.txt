@@ -1,0 +1,34 @@
+# Builder Base
+> The distribution layer for builders in India. Connecting ambitious developers with products, technology ecosystems, and opportunities worth building on.
+
+Builder Base is an engineering-first community and distribution platform for developers across India. We organize high-craft developer events, hackathons, AI workshops, build days, and residencies.
+
+## Core Information
+- Canonical Website: https://builderbase.xyz
+- Official Calendar: https://luma.com/Builderbase
+- Twitter / X: https://x.com/theBuilder_base
+- LinkedIn: https://www.linkedin.com/company/builder-base
+- Community Portal: https://link3.to/builderbase
+- Primary Contact: https://builderbase.xyz/contact
+
+## Footprint Across India
+- Delhi NCR: Build Nights, Protocol Sprints, Hackathons
+- Bhopal: Claude Code Build Days, Agent Labs, Engineering Meetups
+- Mumbai: Devcon & Ecosystem Gatherings, Developer Nights
+- Indore: Community Nights, AI Developer Gatherings
+- Manali: Hack in the Hills (Developer Residency)
+- Kolkata: Protocol Nights, Technical Sessions
+
+## Key Pages
+- Events & Gatherings: https://builderbase.xyz/events
+- Ecosystem & Partners: https://builderbase.xyz/ecosystem
+- Partnership Inquiries: https://builderbase.xyz/partners
+- Host / Co-Host an Event: https://builderbase.xyz/collaborate
+- About Builder Base: https://builderbase.xyz/about
+- Builder Stories & Technical Guides: https://builderbase.xyz/stories
+- City Directory: https://builderbase.xyz/cities
+
+## Partnership & Distribution
+Builder Base helps global technology platforms, foundation AI labs, and developer tooling protocols achieve authentic distribution in India through hands-on technical workshops, hackathons, and sustained developer activation.
+Inquire: https://builderbase.xyz/partners
+

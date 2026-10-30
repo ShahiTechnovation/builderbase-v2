@@ -83,9 +83,27 @@ export async function getPublicProjects(): Promise<ProjectModel[]> {
 
 // ── Ecosystem ──────────────────────────────────────────────────────────
 
+export interface ResolvedEcosystemOrganization extends PartnerModel {
+	number: number;
+	roles: string[];
+	typeName: string;
+	activationCount: number;
+	identityLines: string[];
+	logoImage?: { src: string; width: number; height: number };
+	urlLabel?: string;
+}
+
+export interface ResolvedEcosystemArtifact {
+	kind: 'identity' | 'image';
+	organizationSlug: string;
+	position: { x: number; y: number; z: number };
+	lean: { x: number; y: number; z: number };
+	picture?: { src: string; width: number; height: number };
+}
+
 export interface EcosystemContent {
-	organizations: PartnerModel[];
-	artifacts: any[];
+	organizations: ResolvedEcosystemOrganization[];
+	artifacts: ResolvedEcosystemArtifact[];
 	years?: { from: number; to: number };
 	fixture: boolean;
 }
@@ -255,4 +273,34 @@ export async function getEventsContent(): Promise<EventsPageContent> {
 		years,
 	};
 }
+
+export async function getAllEvents(): Promise<Event[]> {
+	const { upcoming, past } = await getEventsContent();
+	const map = new Map<string, Event>();
+	for (const e of [...upcoming, ...past]) {
+		if (!map.has(e.id)) {
+			map.set(e.id, e);
+		}
+	}
+	return Array.from(map.values());
+}
+
+export async function getEventBySlug(slug: string): Promise<Event | undefined> {
+	const events = await getAllEvents();
+	const { eventToSlug } = await import('../lib/seo/slug');
+	const cleanSlug = (slug || '').toLowerCase();
+	return events.find((e) => {
+		if (!e) return false;
+		const evSlug = eventToSlug(e).toLowerCase();
+		const eId = (e.id != null ? String(e.id) : '').toLowerCase();
+		const urlPart = e.url ? String(e.url).split('/').pop()?.toLowerCase() : undefined;
+		return (
+			evSlug === cleanSlug ||
+			(eId && eId === cleanSlug) ||
+			(urlPart && urlPart === cleanSlug) ||
+			(urlPart && cleanSlug.endsWith(urlPart))
+		);
+	});
+}
+
 

@@ -11,8 +11,22 @@ import tailwindcss from '@tailwindcss/vite';
 // Production origin. Taken from the previous site; confirm before launch.
 const SITE = 'https://builderbase.xyz';
 
-// Phase 1 placeholder routes are kept out of the sitemap until they ship.
-const UNPUBLISHED_ROUTES = ['/projects/', '/stories/', '/about/', '/partners/', '/ecosystem/'];
+// Routes excluded from search indexing and sitemap (e.g. admin or in-dev placeholders).
+const EXCLUDED_ROUTES = ['/projects/', '/admin/'];
+
+// Dedicated verified city and story pages included in the sitemap.
+const SITEMAP_CUSTOM_PAGES = [
+    'https://builderbase.xyz/cities/delhi-ncr',
+    'https://builderbase.xyz/cities/bhopal',
+    'https://builderbase.xyz/cities/mumbai',
+    'https://builderbase.xyz/cities/indore',
+    'https://builderbase.xyz/cities/manali',
+    'https://builderbase.xyz/cities/kolkata',
+    'https://builderbase.xyz/stories/claude-code-build-day-bhopal',
+    'https://builderbase.xyz/stories/hack-in-the-hills-manali-residency',
+    'https://builderbase.xyz/stories/ai-hackathon-preparation-guide',
+    'https://builderbase.xyz/stories/delhi-ncr-developer-meetup-guide',
+];
 
 // Hosts that serve remote photo masters (e.g. object storage / CDN) and may be
 // optimised at build time. Comma-separated hostnames.
@@ -70,7 +84,8 @@ export default defineConfig({
   },
 
   integrations: [sitemap({
-      filter: (page) => !UNPUBLISHED_ROUTES.some((route) => page.endsWith(route)),
+      filter: (page) => !EXCLUDED_ROUTES.some((route) => page.endsWith(route) || page.includes('/admin')),
+      customPages: SITEMAP_CUSTOM_PAGES,
       }), react()],
 
   fonts: [

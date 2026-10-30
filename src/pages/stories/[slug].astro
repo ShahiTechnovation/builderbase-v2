@@ -1,0 +1,423 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { STORIES } from '../../data/stories';
+import { buildArticleSchema, buildBreadcrumbSchema } from '../../lib/seo/schema';
+
+const { slug } = Astro.params;
+if (!slug) {
+	return Astro.redirect('/stories');
+}
+
+const story = STORIES[slug];
+if (!story) {
+	Astro.response.status = 404;
+	Astro.response.statusText = 'Not Found';
+}
+
+// Find related stories
+const relatedStories = story
+	? story.relatedSlugs
+			.map((s) => STORIES[s])
+			.filter(Boolean)
+	: [];
+
+const pageTitle = story ? `${story.title} — Builder Base Stories` : 'Dispatch Not Found — Builder Base';
+const pageDescription = story ? story.summary : 'The requested dispatch or guide could not be found on Builder Base.';
+
+const articleSchema = story
+	? buildArticleSchema({
+			slug: story.slug,
+			title: story.title,
+			description: story.summary,
+			datePublished: story.datePublished,
+			dateModified: story.dateModified,
+			authorName: story.author.name,
+			coverImage: story.coverImage,
+		})
+	: undefined;
+
+const breadcrumbSchema = story
+	? buildBreadcrumbSchema([
+			{ name: 'Home', url: '/' },
+			{ name: 'Stories', url: '/stories' },
+			{ name: story.title, url: `/stories/${story.slug}` },
+		])
+	: undefined;
+
+const jsonLd = story && articleSchema && breadcrumbSchema ? [articleSchema, breadcrumbSchema] : undefined;
+---
+
+{
+	!story ? (
+		<BaseLayout title={pageTitle} description={pageDescription} noindex={true}>
+			<article class="story-detail page-width" style="padding-top: var(--space-8); padding-bottom: var(--space-10);">
+				<nav class="breadcrumb meta" aria-label="Breadcrumb">
+					<ol class="breadcrumb__list">
+						<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item"><a href="/stories" class="breadcrumb__link">Stories</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">Not Found</li>
+					</ol>
+				</nav>
+				<header class="story-detail__header" style="border-bottom: none;">
+					<div class="story-detail__topbar meta">
+						<span class="story-detail__category">404 /// DISPATCH NOT FOUND</span>
+					</div>
+					<h1 class="story-detail__title">This field note could not be found.</h1>
+					<p style="font-size: var(--text-body); color: var(--color-text-muted); margin-bottom: var(--space-6); max-width: 60ch;">
+						The article may have been archived or updated. Explore all original technical guides and event recaps from Builder Base rooms.
+					</p>
+					<a href="/stories" class="action action--primary">
+						<span class="action__label">Browse All Stories</span>
+						<span class="action__arrow" aria-hidden="true">→</span>
+					</a>
+				</header>
+			</article>
+		</BaseLayout>
+	) : (
+		<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+			<article class="story-detail page-width">
+				{/* BREADCRUMBS */}
+				<nav class="breadcrumb meta" aria-label="Breadcrumb">
+					<ol class="breadcrumb__list">
+						<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item"><a href="/stories" class="breadcrumb__link">Stories</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">{story.category}</li>
+					</ol>
+				</nav>
+
+				{/* HEADER */}
+				<header class="story-detail__header">
+					<div class="story-detail__topbar meta">
+						<span class="story-detail__category">{story.category}</span>
+						<span>{story.readTimeMinutes} MIN READ</span>
+					</div>
+
+					<h1 class="story-detail__title">{story.title}</h1>
+					<p class="story-detail__headline">{story.headline}</p>
+
+					<div class="story-detail__meta-bar meta">
+						<div class="meta-author">
+							<span>BY {story.author.name.toUpperCase()}</span>
+							<span class="meta-author__role">({story.author.role})</span>
+						</div>
+						<div class="meta-dates">
+							<span>PUBLISHED: </span>
+							<time datetime={story.datePublished}>
+								{new Date(story.datePublished).toLocaleDateString('en-GB', {
+									day: 'numeric',
+									month: 'long',
+									year: 'numeric',
+								})}
+							</time>
+						</div>
+					</div>
+				</header>
+
+				{/* COVER IMAGE */}
+				<div class="story-detail__cover-frame">
+					<img
+						src={story.coverImage}
+						alt={story.coverAlt}
+						class="story-detail__cover"
+						loading="eager"
+						decoding="async"
+					/>
+				</div>
+
+				{/* ARTICLE BODY */}
+				<div class="story-detail__body">
+					{
+						story.contentParagraphs.map((para) => (
+							<div class="story-section">
+								{para.heading && <h2 class="story-section__heading">{para.heading}</h2>}
+								<p class="story-section__p">{para.text}</p>
+							</div>
+						))
+					}
+				</div>
+
+				{/* TAGS & FOOTER */}
+				<footer class="story-detail__footer">
+					<div class="story-tags">
+						<span class="meta">TOPICS:</span>
+						<div class="story-tags__list">
+							{story.tags.map((t) => (
+								<span class="tag-pill meta">{t}</span>
+							))}
+						</div>
+					</div>
+
+					<div class="story-share meta">
+						<span>BUILDER BASE FIELD DISPATCH · THE DISTRIBUTION LAYER FOR BUILDERS</span>
+					</div>
+				</footer>
+
+				{/* RELATED STORIES */}
+				{
+					relatedStories.length > 0 && (
+						<section class="story-related" aria-labelledby="related-stories-heading">
+							<div class="related-topbar meta">
+								<span id="related-stories-heading">RELATED FIELD NOTES & GUIDES</span>
+								<a href="/stories" class="related-all-link">All stories →</a>
+							</div>
+
+							<div class="related-grid">
+								{relatedStories.map((rel) => (
+									<article class="related-card">
+										<span class="meta" style="color: var(--builder-indigo);">{rel.category}</span>
+										<h3 class="related-card__title">
+											<a href={`/stories/${rel.slug}`}>{rel.title}</a>
+										</h3>
+										<p class="related-card__summary">{rel.summary}</p>
+									</article>
+								))}
+							</div>
+						</section>
+					)
+				}
+			</article>
+		</BaseLayout>
+	)
+}
+
+<style>
+	.story-detail {
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-10);
+	}
+
+	.breadcrumb {
+		margin-bottom: var(--space-6);
+	}
+
+	.breadcrumb__list {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.breadcrumb__link {
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+
+	.breadcrumb__link:hover {
+		color: var(--color-text);
+	}
+
+	.breadcrumb__separator {
+		color: var(--color-rule);
+	}
+
+	.breadcrumb__item--current {
+		color: var(--color-text);
+	}
+
+	/* Header */
+	.story-detail__header {
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-6);
+		margin-bottom: var(--space-6);
+		max-width: 80ch;
+	}
+
+	.story-detail__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-3);
+		color: var(--color-text-muted);
+	}
+
+	.story-detail__category {
+		background: var(--paper-200);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		color: var(--color-text);
+	}
+
+	.story-detail__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.2rem, 1.4rem + 2.8vw, 4rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.story-detail__headline {
+		font-family: var(--font-sans);
+		font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.5rem);
+		font-weight: var(--weight-medium);
+		color: var(--color-text-muted);
+		line-height: 1.4;
+		margin: 0 0 var(--space-5) 0;
+	}
+
+	.story-detail__meta-bar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+		padding-top: var(--space-4);
+		border-top: 1px dashed var(--color-rule);
+		color: var(--color-text-muted);
+	}
+
+	.meta-author__role {
+		color: var(--color-text-muted);
+	}
+
+	/* Cover */
+	.story-detail__cover-frame {
+		border-radius: var(--radius-frame);
+		overflow: hidden;
+		border: 1px solid var(--color-rule);
+		background: var(--paper-200);
+		margin-bottom: var(--space-8);
+		max-height: 520px;
+	}
+
+	.story-detail__cover {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		aspect-ratio: 16 / 9;
+	}
+
+	/* Body */
+	.story-detail__body {
+		max-width: 72ch;
+		margin-bottom: var(--space-10);
+	}
+
+	.story-section {
+		margin-bottom: var(--space-6);
+	}
+
+	.story-section__heading {
+		font-family: var(--font-sans);
+		font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		margin: var(--space-6) 0 var(--space-3) 0;
+	}
+
+	.story-section__p {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text);
+		margin-bottom: var(--space-4);
+	}
+
+	/* Footer */
+	.story-detail__footer {
+		border-top: 1px solid var(--color-rule);
+		border-bottom: 1px solid var(--color-rule);
+		padding: var(--space-6) 0;
+		margin-bottom: var(--space-10);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.story-tags {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+	}
+
+	.story-tags__list {
+		display: flex;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+	}
+
+	.tag-pill {
+		background: var(--paper-200);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		color: var(--color-text-muted);
+	}
+
+	.story-share {
+		color: var(--color-text-muted);
+		font-size: 0.8rem;
+	}
+
+	/* Related */
+	.story-related {
+		padding-top: var(--space-4);
+	}
+
+	.related-topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-6);
+		color: var(--color-text-muted);
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-3);
+	}
+
+	.related-all-link {
+		color: var(--builder-indigo);
+		text-decoration: none;
+	}
+
+	.related-all-link:hover {
+		text-decoration: underline;
+	}
+
+	.related-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: var(--space-6);
+	}
+
+	.related-card {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-frame);
+		padding: var(--space-5);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.related-card__title {
+		font-family: var(--font-sans);
+		font-size: 1.15rem;
+		font-weight: var(--weight-bold);
+		line-height: 1.3;
+		margin: 0;
+	}
+
+	.related-card__title a {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.related-card__title a:hover {
+		color: var(--builder-indigo);
+	}
+
+	.related-card__summary {
+		font-size: 0.9rem;
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin: 0;
+	}
+</style>

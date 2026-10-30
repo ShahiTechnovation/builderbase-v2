@@ -1,0 +1,289 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { STORIES } from '../../data/stories';
+import { buildBreadcrumbSchema } from '../../lib/seo/schema';
+
+const storiesList = Object.values(STORIES);
+
+const pageTitle = 'Builder Base Stories | Technical Guides, Recaps & Field Notes';
+const pageDescription =
+	'Original stories, hackathon guides, and technical recaps from Builder Base rooms across India. Real engineering insights from developers shipping AI agents and protocols.';
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+	{ name: 'Home', url: '/' },
+	{ name: 'Stories', url: '/stories' },
+]);
+
+const jsonLd = [breadcrumbSchema];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+	<div class="stories-index page-width">
+		<!-- BREADCRUMBS -->
+		<nav class="breadcrumb meta" aria-label="Breadcrumb">
+			<ol class="breadcrumb__list">
+				<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+				<li class="breadcrumb__separator" aria-hidden="true">/</li>
+				<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">Stories</li>
+			</ol>
+		</nav>
+
+		<!-- HEADER -->
+		<header class="stories-index__header">
+			<div class="stories-index__topbar meta">
+				<span>01 /// FIELD NOTES & GUIDES</span>
+				<span>WRITTEN BY BUILDERS</span>
+			</div>
+			<h1 class="stories-index__title">Dispatches from the Room.</h1>
+			<p class="stories-index__lead">
+				Original engineering recaps, hackathon blueprints, and field notes from Builder Base activations across India. Real software, real rooms, zero fluff.
+			</p>
+		</header>
+
+		<!-- STORIES GRID -->
+		<div class="stories-grid">
+			{
+				storiesList.map((story) => (
+					<article class="story-card">
+						<a href={`/stories/${story.slug}`} class="story-card__media-link" tabindex="-1" aria-hidden="true">
+							<img
+								src={story.coverImage}
+								alt={story.coverAlt}
+								class="story-card__img"
+								loading="lazy"
+								decoding="async"
+							/>
+						</a>
+
+						<div class="story-card__body">
+							<div class="story-card__meta-bar meta">
+								<span class="story-card__category">{story.category}</span>
+								<span class="story-card__read-time">{story.readTimeMinutes} min read</span>
+							</div>
+
+							<h2 class="story-card__title">
+								<a href={`/stories/${story.slug}`} class="story-card__title-link">
+									{story.title}
+								</a>
+							</h2>
+
+							<p class="story-card__summary">{story.summary}</p>
+
+							<div class="story-card__footer">
+								<div class="story-card__author meta">
+									<span>{story.author.name}</span>
+									<span>·</span>
+									<time datetime={story.datePublished}>
+										{new Date(story.datePublished).toLocaleDateString('en-GB', {
+											day: 'numeric',
+											month: 'short',
+											year: 'numeric',
+										})}
+									</time>
+								</div>
+
+								<a href={`/stories/${story.slug}`} class="story-card__action meta">
+									<span>Read dispatch</span>
+									<span class="story-card__arrow" aria-hidden="true">→</span>
+								</a>
+							</div>
+						</div>
+					</article>
+				))
+			}
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.stories-index {
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-10);
+	}
+
+	.breadcrumb {
+		margin-bottom: var(--space-6);
+	}
+
+	.breadcrumb__list {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.breadcrumb__link {
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+
+	.breadcrumb__link:hover {
+		color: var(--color-text);
+	}
+
+	.breadcrumb__separator {
+		color: var(--color-rule);
+	}
+
+	.breadcrumb__item--current {
+		color: var(--color-text);
+	}
+
+	/* Header */
+	.stories-index__header {
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-8);
+		margin-bottom: var(--space-8);
+	}
+
+	.stories-index__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-3);
+		color: var(--color-text-muted);
+	}
+
+	.stories-index__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.5rem, 1.5rem + 3.5vw, 4.5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.stories-index__lead {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		max-width: 65ch;
+		margin: 0;
+	}
+
+	/* Grid */
+	.stories-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+		gap: var(--space-6);
+	}
+
+	.story-card {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-frame);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.story-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+	}
+
+	.story-card__media-link {
+		display: block;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: var(--paper-300);
+	}
+
+	.story-card__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+
+	.story-card:hover .story-card__img {
+		transform: scale(1.03);
+	}
+
+	.story-card__body {
+		padding: var(--space-5);
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
+	.story-card__meta-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-3);
+	}
+
+	.story-card__category {
+		background: var(--color-bg);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+	}
+
+	.story-card__read-time {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-medium);
+	}
+
+	.story-card__title {
+		font-family: var(--font-sans);
+		font-size: 1.35rem;
+		font-weight: var(--weight-bold);
+		margin: 0 0 var(--space-3) 0;
+		line-height: 1.25;
+	}
+
+	.story-card__title-link {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.story-card__title-link:hover {
+		color: var(--builder-indigo);
+	}
+
+	.story-card__summary {
+		font-size: 0.95rem;
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin: 0 0 var(--space-5) 0;
+		flex: 1;
+	}
+
+	.story-card__footer {
+		border-top: 1px solid var(--color-rule);
+		padding-top: var(--space-4);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.story-card__author {
+		display: flex;
+		gap: var(--space-1);
+		color: var(--color-text-muted);
+		font-size: 0.8rem;
+	}
+
+	.story-card__action {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		color: var(--builder-indigo);
+		text-decoration: none;
+		font-weight: var(--weight-medium);
+	}
+
+	.story-card__action:hover {
+		text-decoration: underline;
+	}
+</style>
+

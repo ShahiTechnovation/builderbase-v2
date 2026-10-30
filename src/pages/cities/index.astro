@@ -1,0 +1,320 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CITIES } from '../../data/cities';
+import { buildBreadcrumbSchema } from '../../lib/seo/schema';
+
+const citiesList = Object.values(CITIES);
+
+const pageTitle = 'Builder Base Cities | Developer Communities Across India';
+const pageDescription =
+	'Explore Builder Base hubs and physical activations across Delhi NCR, Bhopal, Mumbai, Indore, Manali, and Kolkata. Meetups, hackathons, and developer rooms in your city.';
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+	{ name: 'Home', url: '/' },
+	{ name: 'Cities', url: '/cities' },
+]);
+
+const jsonLd = [breadcrumbSchema];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+	<div class="cities-index page-width">
+		<!-- BREADCRUMBS -->
+		<nav class="breadcrumb meta" aria-label="Breadcrumb">
+			<ol class="breadcrumb__list">
+				<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+				<li class="breadcrumb__separator" aria-hidden="true">/</li>
+				<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">Cities</li>
+			</ol>
+		</nav>
+
+		<!-- HEADER -->
+		<header class="cities-index__header">
+			<div class="cities-index__topbar meta">
+				<span>01 /// PHYSICAL FOOTPRINT</span>
+				<span>NATIONAL NETWORK</span>
+			</div>
+			<h1 class="cities-index__title">The Next Room Could Be Anywhere.</h1>
+			<p class="cities-index__lead">
+				From central engineering nodes to mountain residencies and metro protocol sprints, Builder Base operates physical activations where builders build.
+			</p>
+		</header>
+
+		<!-- CITY GRID -->
+		<div class="cities-grid">
+			{
+				citiesList.map((city) => (
+					<article class="city-card">
+						<a href={`/cities/${city.slug}`} class="city-card__media-link" tabindex="-1" aria-hidden="true">
+							<img
+								src={city.photo.src}
+								alt={city.photo.alt}
+								class="city-card__img"
+								loading="lazy"
+								decoding="async"
+							/>
+						</a>
+
+						<div class="city-card__body">
+							<div class="city-card__meta-bar meta">
+								<span class="city-card__badge">{city.state}</span>
+								<span class="city-card__stat">{city.verifiedStats.eventsHosted}</span>
+							</div>
+
+							<h2 class="city-card__title">
+								<a href={`/cities/${city.slug}`} class="city-card__title-link">
+									{city.displayName}
+								</a>
+							</h2>
+
+							<p class="city-card__summary">{city.summary}</p>
+
+							<div class="city-card__footer">
+								<a href={`/cities/${city.slug}`} class="city-card__action meta">
+									<span>Explore {city.name} Rooms</span>
+									<span class="city-card__arrow" aria-hidden="true">→</span>
+								</a>
+							</div>
+						</div>
+					</article>
+				))
+			}
+		</div>
+
+		<!-- FOOTPRINT INVITATION -->
+		<section class="footprint-invite">
+			<div class="footprint-invite__inner">
+				<p class="meta">EXTEND THE FOOTPRINT</p>
+				<h2 class="footprint-invite__title">Don't see your city listed?</h2>
+				<p class="footprint-invite__lead">
+					We actively partner with campus clubs, hackathon organizers, and developer leaders across India. Propose a room in your city and build with us.
+				</p>
+				<div class="footprint-invite__actions">
+					<a href="/collaborate" class="action action--primary">
+						<span class="action__label">Propose an Event</span>
+						<span class="action__arrow" aria-hidden="true">↗</span>
+					</a>
+				</div>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.cities-index {
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-10);
+	}
+
+	.breadcrumb {
+		margin-bottom: var(--space-6);
+	}
+
+	.breadcrumb__list {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.breadcrumb__link {
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+
+	.breadcrumb__link:hover {
+		color: var(--color-text);
+	}
+
+	.breadcrumb__separator {
+		color: var(--color-rule);
+	}
+
+	.breadcrumb__item--current {
+		color: var(--color-text);
+	}
+
+	/* Header */
+	.cities-index__header {
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-8);
+		margin-bottom: var(--space-8);
+	}
+
+	.cities-index__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-3);
+		color: var(--color-text-muted);
+	}
+
+	.cities-index__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.5rem, 1.5rem + 3.5vw, 4.5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.cities-index__lead {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		max-width: 65ch;
+		margin: 0;
+	}
+
+	/* Grid */
+	.cities-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: var(--space-6);
+		margin-bottom: var(--space-10);
+	}
+
+	.city-card {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-frame);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.city-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+	}
+
+	.city-card__media-link {
+		display: block;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: var(--paper-300);
+	}
+
+	.city-card__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+
+	.city-card:hover .city-card__img {
+		transform: scale(1.03);
+	}
+
+	.city-card__body {
+		padding: var(--space-5);
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
+
+	.city-card__meta-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-3);
+	}
+
+	.city-card__badge {
+		background: var(--color-bg);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-rule);
+		color: var(--color-text-muted);
+	}
+
+	.city-card__stat {
+		color: var(--builder-indigo);
+		font-weight: var(--weight-medium);
+	}
+
+	.city-card__title {
+		font-family: var(--font-sans);
+		font-size: 1.5rem;
+		font-weight: var(--weight-bold);
+		margin: 0 0 var(--space-3) 0;
+		line-height: 1.2;
+	}
+
+	.city-card__title-link {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.city-card__title-link:hover {
+		color: var(--builder-indigo);
+	}
+
+	.city-card__summary {
+		font-size: 0.95rem;
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin: 0 0 var(--space-5) 0;
+		flex: 1;
+	}
+
+	.city-card__footer {
+		border-top: 1px solid var(--color-rule);
+		padding-top: var(--space-4);
+	}
+
+	.city-card__action {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		color: var(--color-text);
+		text-decoration: none;
+		font-weight: var(--weight-medium);
+		transition: gap 0.2s ease, color 0.2s ease;
+	}
+
+	.city-card__action:hover {
+		color: var(--builder-indigo);
+		gap: var(--space-3);
+	}
+
+	/* Invite */
+	.footprint-invite {
+		background: var(--color-bg);
+		border: 1px dashed var(--color-rule);
+		border-radius: var(--radius-frame);
+		padding: var(--space-8);
+	}
+
+	.footprint-invite__inner {
+		max-width: 65ch;
+	}
+
+	.footprint-invite__inner > p:first-child {
+		color: var(--builder-indigo);
+		margin-bottom: var(--space-2);
+	}
+
+	.footprint-invite__title {
+		font-family: var(--font-sans);
+		font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-3) 0;
+	}
+
+	.footprint-invite__lead {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-6);
+	}
+</style>
+

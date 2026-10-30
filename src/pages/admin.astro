@@ -6,6 +6,6 @@ import AdminDashboard from '../components/admin/AdminDashboard';
 const config = baserowConfig() || { token: '', apiUrl: 'https://api.baserow.io', tables: { events: '', partners: '', projects: '' } };
 ---
 
-<BaseLayout title="Command Center" surface="dark">
+<BaseLayout title="Command Center" surface="dark" noindex={true}>
   <AdminDashboard client:load config={config} />
 </BaseLayout>

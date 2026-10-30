@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /projects
+Disallow: /projects/
 
 Sitemap: https://builderbase.xyz/sitemap-index.xml
+
+# LLM and AI Agent Discovery
+# More details: https://builderbase.xyz/llms.txt

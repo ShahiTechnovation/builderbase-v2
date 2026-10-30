@@ -126,7 +126,7 @@ const weight = (organization: ResolvedEcosystemOrganization) => 1 + 0.07 * Math.
 								<>
 									<span class="eco-plane__number meta">{pad(organization.number)}</span>
 									<span class="eco-plane__name">
-										{organization.identityLines.map((line) => (
+										{organization.identityLines.map((line: string) => (
 											<span>{line}</span>
 										))}
 									</span>

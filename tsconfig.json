@@ -5,7 +5,9 @@
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "The_origin_guild-main",
+    "experiments-main"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",

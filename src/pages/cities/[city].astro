@@ -1,0 +1,529 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CITIES, type CityData } from '../../data/cities';
+import { getAllEvents } from '../../data/content';
+import EventCard from '../../components/events/EventCard.astro';
+import { buildBreadcrumbSchema } from '../../lib/seo/schema';
+
+const { city: cityParam } = Astro.params;
+if (!cityParam) {
+	return Astro.redirect('/cities');
+}
+
+const paramLower = cityParam.toLowerCase();
+
+// Find direct match or alias match
+let cityData: CityData | undefined = CITIES[paramLower];
+if (!cityData) {
+	cityData = Object.values(CITIES).find((c) => c.aliases?.includes(paramLower));
+}
+
+if (!cityData) {
+	Astro.response.status = 404;
+	Astro.response.statusText = 'Not Found';
+}
+
+// Fetch events matching this city
+const allEvents = cityData ? await getAllEvents() : [];
+const cityTokens = cityData ? [cityData.name.toLowerCase(), ...(cityData.aliases ?? [])] : [];
+
+const cityEvents = cityData
+	? allEvents.filter((e) => {
+			if (!e.city) return false;
+			const evCity = e.city.toLowerCase();
+			return cityTokens.some((token) => evCity.includes(token) || token.includes(evCity));
+		})
+	: [];
+
+const upcomingEvents = cityEvents.filter((e) => Date.parse(e.startsAt) > Date.now());
+const pastEvents = cityEvents.filter((e) => Date.parse(e.startsAt) <= Date.now());
+
+const pageTitle = cityData
+	? `${cityData.name} Developer Community, Meetups & Hackathons | Builder Base`
+	: 'City Hub Not Found — Builder Base';
+const pageDescription = cityData
+	? `Join developer meetups, AI hackathons, and technical build days in ${cityData.name}. ${cityData.summary}`
+	: 'The requested city hub could not be found on Builder Base.';
+
+const breadcrumbSchema = cityData
+	? buildBreadcrumbSchema([
+			{ name: 'Home', url: '/' },
+			{ name: 'Cities', url: '/cities' },
+			{ name: cityData.name, url: `/cities/${cityData.slug}` },
+		])
+	: undefined;
+
+const placeSchema = cityData
+	? {
+			'@type': 'Place',
+			name: `${cityData.name} Builder Base Hub`,
+			description: cityData.summary,
+			address: {
+				'@type': 'PostalAddress',
+				addressLocality: cityData.name,
+				addressRegion: cityData.state,
+				addressCountry: 'IN',
+			},
+		}
+	: undefined;
+
+const jsonLd = cityData && placeSchema && breadcrumbSchema ? [placeSchema, breadcrumbSchema] : undefined;
+---
+
+{
+	!cityData ? (
+		<BaseLayout title={pageTitle} description={pageDescription} noindex={true}>
+			<div class="city-page page-width" style="padding-top: var(--space-8); padding-bottom: var(--space-10);">
+				<nav class="breadcrumb meta" aria-label="Breadcrumb">
+					<ol class="breadcrumb__list">
+						<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item"><a href="/cities" class="breadcrumb__link">Cities</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">Not Found</li>
+					</ol>
+				</nav>
+				<header class="city-hero" style="border-bottom: none;">
+					<div class="city-hero__topbar meta">
+						<span class="city-hero__badge">404 /// CITY NOT FOUND</span>
+					</div>
+					<h1 class="city-hero__title">City node not found.</h1>
+					<p class="city-hero__lead">
+						We currently operate verified hubs in Delhi NCR, Bhopal, Mumbai, Indore, Manali, and Kolkata. Explore all active nodes or propose a room in your city.
+					</p>
+					<div class="city-hero__actions">
+						<a href="/cities" class="action action--primary">
+							<span class="action__label">View All Cities</span>
+							<span class="action__arrow" aria-hidden="true">→</span>
+						</a>
+						<a href="/collaborate" class="action action--quiet">
+							<span class="action__label">Propose an Event</span>
+							<span class="action__arrow" aria-hidden="true">↗</span>
+						</a>
+					</div>
+				</header>
+			</div>
+		</BaseLayout>
+	) : (
+		<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+			<div class="city-page page-width">
+				{/* BREADCRUMBS */}
+				<nav class="breadcrumb meta" aria-label="Breadcrumb">
+					<ol class="breadcrumb__list">
+						<li class="breadcrumb__item"><a href="/" class="breadcrumb__link">Home</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item"><a href="/cities" class="breadcrumb__link">Cities</a></li>
+						<li class="breadcrumb__separator" aria-hidden="true">/</li>
+						<li class="breadcrumb__item breadcrumb__item--current" aria-current="page">{cityData.name}</li>
+					</ol>
+				</nav>
+
+				{/* HERO */}
+				<header class="city-hero">
+					<div class="city-hero__topbar meta">
+						<span class="city-hero__badge">{cityData.eyebrow}</span>
+						<span class="city-hero__region">{cityData.state} · {cityData.region}</span>
+					</div>
+
+					<h1 class="city-hero__title">{cityData.displayName}</h1>
+					<p class="city-hero__headline">{cityData.headline}</p>
+					<p class="city-hero__lead">{cityData.summary}</p>
+
+					<div class="city-hero__actions">
+						<a href="/collaborate" class="action action--primary">
+							<span class="action__label">Host an Event in {cityData.name}</span>
+							<span class="action__arrow" aria-hidden="true">↗</span>
+						</a>
+						<a href="/events" class="action action--quiet">
+							<span class="action__label">All National Events</span>
+							<span class="action__arrow" aria-hidden="true">→</span>
+						</a>
+					</div>
+				</header>
+
+				{/* KEY METRICS & TECH FOCUS */}
+				<section class="city-metrics" aria-label="City Highlights">
+					<div class="metric-card">
+						<span class="metric-card__label meta">ACTIVATION SCALE</span>
+						<span class="metric-card__value">{cityData.verifiedStats.eventsHosted}</span>
+						<span class="metric-card__sub meta">Verified Builder Base events</span>
+					</div>
+
+					<div class="metric-card">
+						<span class="metric-card__label meta">CORE THEME</span>
+						<span class="metric-card__value">{cityData.verifiedStats.coreTheme}</span>
+						<span class="metric-card__sub meta">Primary technical focus</span>
+					</div>
+
+					<div class="metric-card">
+						<span class="metric-card__label meta">ROOM CULTURE</span>
+						<span class="metric-card__value">{cityData.verifiedStats.vibe}</span>
+						<span class="metric-card__sub meta">Atmosphere & execution</span>
+					</div>
+				</section>
+
+				{/* EDITORIAL BODY & PHOTOGRAPHY */}
+				<section class="city-narrative" aria-label="Local Builder Culture">
+					<div class="city-narrative__content">
+						<h2 class="city-narrative__heading">The Developer Culture in {cityData.name}</h2>
+						{cityData.authenticNarrative.map((paragraph) => (
+							<p class="city-narrative__p">{paragraph}</p>
+						))}
+
+						<div class="city-narrative__tags">
+							<span class="tags__label meta">TECHNICAL FOCUS:</span>
+							<div class="tags__list">
+								{cityData.technicalFocus.map((tag) => (
+									<span class="tag-badge meta">{tag}</span>
+								))}
+							</div>
+						</div>
+					</div>
+
+					<div class="city-narrative__photo-frame">
+						<img
+							src={cityData.photo.src}
+							alt={cityData.photo.alt}
+							class="city-narrative__img"
+							loading="lazy"
+							decoding="async"
+						/>
+						<p class="city-narrative__caption meta">{cityData.photo.caption}</p>
+					</div>
+				</section>
+
+				{/* UPCOMING EVENTS IN THIS CITY */}
+				{
+					upcomingEvents.length > 0 && (
+						<section class="city-events" aria-labelledby="city-upcoming-heading">
+							<div class="section-topbar meta">
+								<h2 id="city-upcoming-heading" class="section-title">UPCOMING ROOMS IN {cityData.name.toUpperCase()}</h2>
+								<span>{upcomingEvents.length} upcoming gathering{upcomingEvents.length > 1 ? 's' : ''}</span>
+							</div>
+							<div class="events-grid">
+								{upcomingEvents.map((e) => (
+									<EventCard event={e} upcoming={true} />
+								))}
+							</div>
+						</section>
+					)
+				}
+
+				{/* PAST EVENTS IN THIS CITY */}
+				{
+					pastEvents.length > 0 && (
+						<section class="city-events" aria-labelledby="city-past-heading">
+							<div class="section-topbar meta">
+								<h2 id="city-past-heading" class="section-title">PAST ROOMS & ACTIVATIONS IN {cityData.name.toUpperCase()}</h2>
+								<span>{pastEvents.length} historical room{pastEvents.length > 1 ? 's' : ''}</span>
+							</div>
+							<div class="events-grid">
+								{pastEvents.map((e) => (
+									<EventCard event={e} upcoming={false} />
+								))}
+							</div>
+						</section>
+					)
+				}
+
+				{/* CALL TO ACTION FOR THIS CITY */}
+				<section class="city-cta">
+					<div class="city-cta__inner">
+						<p class="city-cta__meta meta">BUILD WITH US</p>
+						<h2 class="city-cta__title">Want to bring a room to {cityData.name}?</h2>
+						<p class="city-cta__lead">
+							We partner with university clubs, tech communities, and engineering teams to organize high-craft meetups, workshops, and hackathon tracks.
+						</p>
+						<div class="city-cta__actions">
+							<a href="/collaborate" class="action action--primary">
+								<span class="action__label">Propose an Event in {cityData.name}</span>
+								<span class="action__arrow" aria-hidden="true">↗</span>
+							</a>
+							<a href="/partners" class="action action--quiet">
+								<span class="action__label">Partner as a Company</span>
+								<span class="action__arrow" aria-hidden="true">→</span>
+							</a>
+						</div>
+					</div>
+				</section>
+			</div>
+		</BaseLayout>
+	)
+}
+
+<style>
+	.city-page {
+		padding-top: var(--space-6);
+		padding-bottom: var(--space-10);
+	}
+
+	.breadcrumb {
+		margin-bottom: var(--space-6);
+	}
+
+	.breadcrumb__list {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.breadcrumb__link {
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+
+	.breadcrumb__link:hover {
+		color: var(--color-text);
+	}
+
+	.breadcrumb__separator {
+		color: var(--color-rule);
+	}
+
+	.breadcrumb__item--current {
+		color: var(--color-text);
+	}
+
+	/* Hero */
+	.city-hero {
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-8);
+		margin-bottom: var(--space-8);
+	}
+
+	.city-hero__topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-4);
+	}
+
+	.city-hero__badge {
+		background: var(--paper-200);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		letter-spacing: var(--tracking-meta);
+	}
+
+	.city-hero__region {
+		color: var(--color-text-muted);
+	}
+
+	.city-hero__title {
+		font-family: var(--font-sans);
+		font-size: clamp(2.5rem, 1.5rem + 3.5vw, 5rem);
+		font-weight: var(--weight-display);
+		letter-spacing: var(--tracking-display);
+		line-height: var(--leading-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.city-hero__headline {
+		font-family: var(--font-sans);
+		font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.75rem);
+		font-weight: var(--weight-semibold);
+		color: var(--color-text);
+		line-height: 1.3;
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.city-hero__lead {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		max-width: 65ch;
+		margin: 0 0 var(--space-6) 0;
+	}
+
+	.city-hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+	}
+
+	/* Metrics */
+	.city-metrics {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: var(--space-5);
+		margin-bottom: var(--space-10);
+	}
+
+	.metric-card {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-frame);
+		padding: var(--space-5);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.metric-card__label {
+		color: var(--color-text-muted);
+	}
+
+	.metric-card__value {
+		font-family: var(--font-sans);
+		font-size: 1.5rem;
+		font-weight: var(--weight-display);
+		color: var(--color-text);
+		letter-spacing: var(--tracking-tight);
+	}
+
+	.metric-card__sub {
+		color: var(--color-text-muted);
+	}
+
+	/* Narrative */
+	.city-narrative {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-8);
+		border-top: 1px solid var(--color-rule);
+		border-bottom: 1px solid var(--color-rule);
+		padding: var(--space-8) 0;
+		margin-bottom: var(--space-10);
+	}
+
+	@media (min-width: 900px) {
+		.city-narrative {
+			grid-template-columns: 1.2fr 1fr;
+			align-items: center;
+		}
+	}
+
+	.city-narrative__heading {
+		font-family: var(--font-sans);
+		font-size: clamp(1.75rem, 1.3rem + 1.2vw, 2.5rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-4) 0;
+	}
+
+	.city-narrative__p {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-4);
+	}
+
+	.city-narrative__tags {
+		margin-top: var(--space-6);
+	}
+
+	.tags__label {
+		display: block;
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-2);
+	}
+
+	.tags__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.tag-badge {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		padding: var(--space-1) var(--space-3);
+		border-radius: var(--radius-sm);
+		color: var(--color-text);
+	}
+
+	.city-narrative__photo-frame {
+		border-radius: var(--radius-frame);
+		overflow: hidden;
+		border: 1px solid var(--color-rule);
+		background: var(--paper-200);
+	}
+
+	.city-narrative__img {
+		width: 100%;
+		height: auto;
+		display: block;
+		aspect-ratio: 16 / 10;
+		object-fit: cover;
+	}
+
+	.city-narrative__caption {
+		padding: var(--space-3) var(--space-4);
+		color: var(--color-text-muted);
+		border-top: 1px solid var(--color-rule);
+		background: var(--color-bg);
+	}
+
+	/* Events */
+	.city-events {
+		margin-bottom: var(--space-10);
+	}
+
+	.section-topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1px solid var(--color-rule);
+		padding-bottom: var(--space-3);
+		margin-bottom: var(--space-6);
+		color: var(--color-text-muted);
+	}
+
+	.section-title {
+		font-size: inherit;
+		font-weight: inherit;
+		margin: 0;
+	}
+
+	.events-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: var(--space-6);
+	}
+
+	/* CTA */
+	.city-cta {
+		background: var(--paper-200);
+		border: 1px solid var(--color-rule);
+		border-radius: var(--radius-frame);
+		padding: var(--space-8);
+	}
+
+	.city-cta__inner {
+		max-width: 65ch;
+	}
+
+	.city-cta__meta {
+		color: var(--builder-indigo);
+		margin-bottom: var(--space-2);
+	}
+
+	.city-cta__title {
+		font-family: var(--font-sans);
+		font-size: clamp(1.75rem, 1.4rem + 1vw, 2.5rem);
+		font-weight: var(--weight-bold);
+		letter-spacing: var(--tracking-display);
+		color: var(--color-text);
+		margin: 0 0 var(--space-3) 0;
+	}
+
+	.city-cta__lead {
+		font-size: var(--text-body);
+		line-height: var(--leading-body);
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-6);
+	}
+
+	.city-cta__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+	}
+</style>

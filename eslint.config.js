@@ -4,7 +4,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-	{ ignores: ['dist/', '.astro/', '.vercel/', 'node_modules/', 'test-results/', 'playwright-report/'] },
+	{ ignores: ['dist/', '.astro/', '.vercel/', 'node_modules/', 'test-results/', 'playwright-report/', 'The_origin_guild-main/', 'experiments-main/', 'scratch/'] },
 	tseslint.configs.recommended,
 	eslintPluginAstro.configs.recommended,
 	eslintPluginAstro.configs['jsx-a11y-strict'],

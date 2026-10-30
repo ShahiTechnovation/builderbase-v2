@@ -3,6 +3,12 @@
 import { getImage } from 'astro:assets';
 import type { ResolvedPhoto } from '../data/model';
 import { site } from '../data/site';
+import {
+	buildOrganizationSchema,
+	buildWebSiteSchema,
+	DEFAULT_OG_IMAGE,
+	SITE_URL,
+} from '../lib/seo/schema';
 
 interface Props {
 	/** Page title; omitted on the homepage. */
@@ -11,12 +17,25 @@ interface Props {
 	noindex?: boolean;
 	/** Photo for the social card; omitted when there is none. */
 	ogPhoto?: ResolvedPhoto;
+	/** Optional additional JSON-LD entity or array of entities to include in the @graph */
+	jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
-const { title, description = site.description, noindex = false, ogPhoto } = Astro.props;
+const { title, description = site.description, noindex = false, ogPhoto, jsonLd } = Astro.props;
 
-const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.statement.replace(/\.$/, '')}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+let fullTitle: string;
+if (!title) {
+	fullTitle = `${site.name} | Developer Community, Hackathons & Events in India`;
+} else if (title.includes(site.name)) {
+	fullTitle = title;
+} else {
+	fullTitle = `${title} — ${site.name}`;
+}
+
+const siteOrigin = Astro.site?.href?.replace(/\/$/, '') || SITE_URL;
+let cleanPath = Astro.url.pathname.replace(/\/+$/, '');
+if (cleanPath === '') cleanPath = '/';
+const canonical = new URL(cleanPath, siteOrigin).href;
 
 const ogSource = ogPhoto?.image;
 const ogImage =
@@ -25,18 +44,23 @@ const ogImage =
 		src: 'format' in ogSource ? ogSource : ogSource.src,
 		width: 1200,
 		height: 630,
-		fit: 'cover', // centre crop; sharp's position does not accept CSS percentages
+		fit: 'cover',
 		format: 'jpg',
 		quality: 80,
 	}));
-const ogImageUrl = ogImage && new URL(ogImage.src, Astro.site);
+const socialImageUrl = ogImage ? new URL(ogImage.src, Astro.site).href : DEFAULT_OG_IMAGE;
+
+const baseSchemas = [
+	buildOrganizationSchema(),
+	buildWebSiteSchema(),
+];
+
+const pageSchemas = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const graph = [...baseSchemas, ...pageSchemas];
 
 const structuredData = {
 	'@context': 'https://schema.org',
-	'@type': 'Organization',
-	name: site.name,
-	url: Astro.site?.href,
-	description: site.description,
+	'@graph': graph,
 };
 ---
 
@@ -51,20 +75,16 @@ const structuredData = {
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
-{
-	ogImageUrl && (
-		<>
-			<meta property="og:image" content={ogImageUrl} />
-			<meta property="og:image:width" content="1200" />
-			<meta property="og:image:height" content="630" />
-			<meta property="og:image:alt" content={ogPhoto?.alt} />
-		</>
-	)
-}
+<meta property="og:image" content={socialImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={ogPhoto?.alt || 'Builder Base — The distribution layer for builders'} />
 
-<meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@theBuilder_base" />
+<meta name="twitter:creator" content="@theBuilder_base" />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
-{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+<meta name="twitter:image" content={socialImageUrl} />
 
 <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
